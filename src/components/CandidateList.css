@@ -1,0 +1,52 @@
+.candidate-list-container {
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.candidate-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.candidate-table th {
+  text-align: left;
+  color: #64748B;
+  font-weight: 500;
+  padding-bottom: 0.5rem;
+}
+
+.candidate-table td {
+  padding: 0.75rem 0;
+  border-top: 1px solid #e2e8f0;
+  vertical-align: middle;
+}
+
+.candidate-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  color: white;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+}
+
+.role {
+  font-size: 0.85rem;
+  color: #64748B;
+}

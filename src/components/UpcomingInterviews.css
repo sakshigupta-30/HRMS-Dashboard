@@ -1,0 +1,58 @@
+.interview-container {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.chart-table-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chart-wrapper {
+  flex: 1;
+  min-width: 220px;
+}
+
+.table-wrapper {
+  flex: 1;
+  min-width: 220px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  color: #64748B;
+  padding-bottom: 0.5rem;
+}
+
+td {
+  padding: 0.5rem 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.badge.pending {
+  background-color: #fcd34d;
+  color: #92400e;
+}
+
+.badge.confirmed {
+  background-color: #34d399;
+  color: #065f46;
+}

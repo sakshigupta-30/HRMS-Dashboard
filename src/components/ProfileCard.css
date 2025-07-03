@@ -1,0 +1,57 @@
+.profile-card {
+  background-color: #10B981; /* green tone */
+  color: #ffffff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 220px;
+  text-align: center;
+  gap: 1rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+.avatar-circle {
+  background-color: #ffffff;
+  color: #10B981;
+  border-radius: 50%;
+  width: 64px;
+  height: 64px;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.month-info h3 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.month-info p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #D1FAE5;
+}
+
+.salary {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.view-btn {
+  background-color: #ffffff;
+  color: #10B981;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.view-btn:hover {
+  background-color: #d1fae5;
+}

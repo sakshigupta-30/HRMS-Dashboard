@@ -1,0 +1,16 @@
+/* Optional: make scroll smooth and hide scrollbar on Chrome */
+::-webkit-scrollbar {
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* Important */
+  font-family: 'Inter', sans-serif;
+}
