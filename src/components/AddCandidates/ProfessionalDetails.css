@@ -1,0 +1,187 @@
+.form-section {
+  background-color: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  margin: 20px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.form-title {
+  font-size: 18px;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 40px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.full-width {
+  grid-column: span 2;
+}
+
+label {
+  font-weight: 500;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+input, select, textarea {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.upload-box {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 14px;
+  background: #fafafa;
+}
+
+.upload-box a {
+  color: #0066cc;
+  text-decoration: none;
+  margin: 0 4px;
+}
+
+.upload-box a:hover {
+  text-decoration: underline;
+}
+
+.file-info {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.radio-clean {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.radio-clean label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 400;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  position: relative;
+  line-height: 1;
+}
+
+.radio-clean input[type="radio"] {
+  /* Use default appearance for native look */
+  appearance: radio;
+  -webkit-appearance: radio;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+  vertical-align: middle;
+  accent-color: #0066cc; /* Optional: matches your theme */
+}
+
+.radio-clean input[type="radio"]:checked {
+  border: 2px solid #0066cc;
+}
+
+.radio-clean input[type="radio"]:focus {
+  box-shadow: 0 0 0 2px #b3d4fc;
+}
+
+/* Education & Experience Section Styles */
+.education-section, .experience-section {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  padding: 18px 16px 24px 16px;
+  margin: 24px 0;
+}
+
+.education-section .section-title, .experience-section .section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.education-section table, .experience-section table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: transparent;
+}
+
+.education-section th, .experience-section th {
+  background: #f5f6fa;
+  font-weight: 500;
+  font-size: 14px;
+  color: #555;
+  padding: 8px 8px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.education-section td, .experience-section td {
+  padding: 10px 8px;
+  background: #fff;
+}
+
+.education-section input, .education-section textarea,
+.experience-section input, .experience-section textarea,
+.experience-section select {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.education-section textarea, .experience-section textarea {
+  min-height: 32px;
+  resize: vertical;
+}
+
+.education-section .add-row-btn, .experience-section .add-row-btn {
+  float: right;
+  margin-top: 0;
+  margin-bottom: 8px;
+  background: #f5f6fa;
+  color: #0066cc;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.education-section .add-row-btn:hover, .experience-section .add-row-btn:hover {
+  background: #e6eaf3;
+}
+
+
+

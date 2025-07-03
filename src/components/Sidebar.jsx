@@ -1,25 +1,28 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import './Sidebar.css';
-import { FaTachometerAlt, FaUserTie, FaChartBar, FaCog } from 'react-icons/fa';
+import { FaTachometerAlt, FaUserTie, FaChartBar, FaCog, FaUserPlus } from 'react-icons/fa';
 
 const Sidebar = () => {
   return (
     <div className="sidebar">
       <h2 className="sidebar-title">HRMS</h2>
-      {/* <p className="agency-name"></p> */}
       <nav className="nav-links">
-        <a href="#" className="nav-link">
+        <NavLink to="/" className="nav-link">
           <FaTachometerAlt /> Dashboard
-        </a>
-        <a href="#" className="nav-link">
+        </NavLink>
+        <NavLink to="/placements" className="nav-link">
           <FaUserTie /> Placements
-        </a>
-        <a href="#" className="nav-link">
+        </NavLink>
+        <NavLink to="/reports" className="nav-link">
           <FaChartBar /> Reports
-        </a>
-        <a href="#" className="nav-link">
+        </NavLink>
+        <NavLink to="/add-candidate" className="nav-link">
+          <FaUserPlus /> Add Candidate
+        </NavLink>
+        <NavLink to="/settings" className="nav-link">
           <FaCog /> Settings
-        </a>
+        </NavLink>
       </nav>
     </div>
   );

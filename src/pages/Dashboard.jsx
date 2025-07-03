@@ -10,11 +10,11 @@ const Dashboard = () => {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100vh',
+        height: '100%',
         gap: '0.8rem',
-        overflow: 'hidden',
+        padding: '0.1em',
         boxSizing: 'border-box',
-          padding: '1rem',
+        overflow: 'hidden',
       }}
     >
       {/* Top Summary Cards */}
@@ -34,13 +34,14 @@ const Dashboard = () => {
         <DashboardCard title="Talent Acquisition" bgColor="#EF4444" textColor="#ffffff" />
       </div>
 
-      {/* Bottom Row */}
+      {/* Bottom Row (slightly reduced height) */}
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: '2fr 1.5fr 1.2fr',
           gap: '0.8rem',
           flexGrow: 1,
+          maxHeight: 'calc(100vh - 180px)', // 👈 Adjust this to fit better (~180px for top + padding)
           overflow: 'hidden',
         }}
       >
@@ -51,9 +52,9 @@ const Dashboard = () => {
             borderRadius: '12px',
             padding: '1rem',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-            overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
+            overflow: 'hidden',
           }}
         >
           <div style={{ overflowY: 'auto' }}>
@@ -68,9 +69,9 @@ const Dashboard = () => {
             borderRadius: '12px',
             padding: '1rem',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-            overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
+            overflow: 'hidden',
           }}
         >
           <div style={{ overflowY: 'auto' }}>
