@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './AddCandidate.css';
 import CandidateDetails from '../components/AddCandidates/CandidateDetails';
 import AddressSection from '../components/AddCandidates/AddressSection';
@@ -7,15 +8,15 @@ import EducationSection from '../components/AddCandidates/EducationSection';
 import ExperienceSection from '../components/AddCandidates/ExperienceSection';
 
 const AddCandidate = () => {
+  const navigate = useNavigate();
   return (
     <div className="add-candidate-page">
       <div className="form-section form-header-section">
-      <div className="form-header">
-      <h2>Add Candidate</h2>
-      <button className="close-button" onClick={() => window.history.back()}>&times;</button>
-    </div>
-  </div>
-
+        <div className="form-header">
+          <h2>Add Candidate</h2>
+          <button className="close-button" onClick={() => navigate('/')}>&times;</button>
+        </div>
+      </div>
 
       <CandidateDetails />
       <AddressSection />
