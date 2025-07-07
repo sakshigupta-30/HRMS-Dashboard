@@ -1,31 +1,17 @@
+// src/pages/Dashboard.jsx
+
 import React from 'react';
 import DashboardCard from '../components/DashboardCard';
 import CandidateList from '../components/CandidateList';
 import UpcomingInterviews from '../components/UpcomingInterviews';
 import ProfileCard from '../components/ProfileCard';
+import './Dashboard.css';
 
 const Dashboard = () => {
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        gap: '0.8rem',
-        padding: '0.1em',
-        boxSizing: 'border-box',
-        overflow: 'hidden',
-      }}
-    >
+    <div className="dashboard-container">
       {/* Top Summary Cards */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-          gap: '0.8rem',
-          flexShrink: 0,
-        }}
-      >
+      <div className="dashboard-cards">
         <DashboardCard title="Total Candidates" value="0" bgColor="#F97316" textColor="#ffffff" />
         <DashboardCard title="Placement Today" value="0" bgColor="#FACC15" textColor="#1E293B" />
         <DashboardCard title="Salary Slip" bgColor="#3B82F6" textColor="#ffffff" />
@@ -34,65 +20,21 @@ const Dashboard = () => {
         <DashboardCard title="Talent Acquisition" bgColor="#EF4444" textColor="#ffffff" />
       </div>
 
-      {/* Bottom Row (slightly reduced height) */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '2fr 1.5fr 1.2fr',
-          gap: '0.8rem',
-          flexGrow: 1,
-          maxHeight: 'calc(100vh - 180px)', // 👈 Adjust this to fit better (~180px for top + padding)
-          overflow: 'hidden',
-        }}
-      >
-        {/* Candidate List */}
-        <div
-          style={{
-            background: '#ffffff',
-            borderRadius: '12px',
-            padding: '1rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          }}
-        >
-          <div style={{ overflowY: 'auto' }}>
+      {/* Bottom Row */}
+      <div className="dashboard-bottom">
+        <div className="dashboard-box white">
+          <div className="scroll-area">
             <CandidateList />
           </div>
         </div>
 
-        {/* Upcoming Interviews */}
-        <div
-          style={{
-            background: '#ffffff',
-            borderRadius: '12px',
-            padding: '1rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          }}
-        >
-          <div style={{ overflowY: 'auto' }}>
+        <div className="dashboard-box white">
+          <div className="scroll-area">
             <UpcomingInterviews />
           </div>
         </div>
 
-        {/* Profile Card */}
-        <div
-          style={{
-            background: '#10B981',
-            borderRadius: '12px',
-            padding: '1rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-            color: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
-          }}
-        >
+        <div className="dashboard-box green">
           <ProfileCard />
         </div>
       </div>
