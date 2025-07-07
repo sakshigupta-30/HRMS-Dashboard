@@ -44,3 +44,25 @@
 * {
   box-sizing: border-box;
 }
+
+:root {
+  --bg: #ffffff;
+  --text: #1e293b;
+  --card-bg: #f9fafb;
+  --input-bg: #ffffff;
+  --border: #cbd5e1;
+}
+
+.dark-mode {
+  --bg: #0f172a;
+  --text: #f8fafc;
+  --card-bg: #1e293b;
+  --input-bg: #1e293b;
+  --border: #334155;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+

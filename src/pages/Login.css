@@ -1,21 +1,45 @@
-/* Ensure full-screen centering */
+/* Root variables for light & dark themes */
+:root {
+  --bg: #f5f5f5;
+  --text: #1e293b;
+  --card-bg: #ffffff;
+  --input-bg: #ffffff;
+  --border-color: #ccc;
+  --button-bg: #2563eb;
+  --button-text: #ffffff;
+  --input-placeholder: #64748b;
+}
+
+.dark-mode {
+  --bg: #0f172a;
+  --text: #f8fafc;
+  --card-bg: #1e293b;
+  --input-bg: #1e293b;
+  --border-color: #475569;
+  --button-bg: #3b82f6;
+  --button-text: #ffffff;
+  --input-placeholder: #94a3b8;
+}
+
+/* Full-screen center layout */
 .login-container {
   height: 100vh;
   width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f5f5f5;
+  background-color: var(--bg);
   padding: 20px;
   box-sizing: border-box;
 }
 
-/* The card itself */
+/* Login/Signup card */
 .login-card {
-  background: white;
+  background-color: var(--card-bg);
+  color: var(--text);
   padding: 40px 30px;
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   width: 100%;
   max-width: 400px;
   text-align: center;
@@ -31,20 +55,30 @@
   padding: 12px;
   margin-bottom: 14px;
   border-radius: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   font-size: 15px;
   box-sizing: border-box;
+  background-color: var(--input-bg);
+  color: var(--text);
+}
+
+.login-form input::placeholder {
+  color: var(--input-placeholder);
 }
 
 .login-form button {
   width: 100%;
   padding: 12px;
   border: none;
-  background: #2563eb;
-  color: white;
+  background: var(--button-bg);
+  color: var(--button-text);
   font-size: 16px;
   border-radius: 8px;
   cursor: pointer;
+}
+
+.login-form button:hover {
+  background-color: #1d4ed8;
 }
 
 .error {
@@ -53,7 +87,7 @@
   font-size: 14px;
 }
 
-
+/* Password field with eye icon */
 .password-wrapper {
   position: relative;
   width: 100%;
