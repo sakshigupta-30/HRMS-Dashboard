@@ -18,7 +18,7 @@ const Login = () => {
     e.preventDefault();
 
     // Fake credentials
-    if (credentials.email === 'admin@example.com' && credentials.password === 'admin123') {
+    if (credentials.email === 'admin@gmail.com' && credentials.password === 'admin123') {
       sessionStorage.setItem('isLoggedIn', 'true');
       navigate('/');
     } else {
