@@ -6,8 +6,10 @@ import Placements from './pages/Placements';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import AddCandidate from './pages/AddCandidate';
+import CandidateDetail from './pages/CandidateDetail';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import { CandidateProvider } from './context/CandidateContext';
 
 
 const PrivateLayout = ({ children }) => {
@@ -17,26 +19,28 @@ const PrivateLayout = ({ children }) => {
   if (!isLoggedIn) return <Navigate to="/login" replace />;
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        height: '100vh',
-        width: '100vw',
-        overflow: 'hidden',
-      }}
-    >
-      <Sidebar />
-      <main
+    <CandidateProvider>
+      <div
         style={{
-          flex: 1,
-          backgroundColor: '#F1F5F9',
-          padding: '1rem',
-          overflow: 'auto',
+          display: 'flex',
+          height: '100vh',
+          width: '100vw',
+          overflow: 'hidden',
         }}
       >
-        {children}
-      </main>
-    </div>
+        <Sidebar />
+        <main
+          style={{
+            flex: 1,
+            backgroundColor: '#F1F5F9',
+            padding: '1rem',
+            overflow: 'auto',
+          }}
+        >
+          {children}
+        </main>
+      </div>
+    </CandidateProvider>
   );
 };
 
@@ -83,6 +87,14 @@ const App = () => {
     element={
       <PrivateLayout>
         <AddCandidate />
+      </PrivateLayout>
+    }
+  />
+  <Route
+    path="/candidate/:id"
+    element={
+      <PrivateLayout>
+        <CandidateDetail />
       </PrivateLayout>
     }
   />

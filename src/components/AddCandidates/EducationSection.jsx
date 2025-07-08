@@ -1,6 +1,21 @@
 import React from 'react';
 
-const EducationSection = () => {
+const EducationSection = ({ data, updateData }) => {
+  const handleChange = (index, field, value) => {
+    const newData = [...data];
+    newData[index] = { ...newData[index], [field]: value };
+    updateData(newData);
+  };
+
+  const addRow = () => {
+    updateData([...data, {
+      schoolName: '',
+      degree: '',
+      fieldOfStudy: '',
+      dateOfCompletion: '',
+      additionalNotes: ''
+    }]);
+  };
   return (
     <section className="education-section">
       <div className="section-title">Education</div>
@@ -15,16 +30,47 @@ const EducationSection = () => {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td><input type="text" /></td>
-            <td><input type="text" /></td>
-            <td><input type="text" /></td>
-            <td><input type="text" /></td>
-            <td><textarea /></td>
-          </tr>
+          {data.map((edu, index) => (
+            <tr key={index}>
+              <td>
+                <input 
+                  type="text" 
+                  value={edu.schoolName}
+                  onChange={(e) => handleChange(index, 'schoolName', e.target.value)}
+                />
+              </td>
+              <td>
+                <input 
+                  type="text" 
+                  value={edu.degree}
+                  onChange={(e) => handleChange(index, 'degree', e.target.value)}
+                />
+              </td>
+              <td>
+                <input 
+                  type="text" 
+                  value={edu.fieldOfStudy}
+                  onChange={(e) => handleChange(index, 'fieldOfStudy', e.target.value)}
+                />
+              </td>
+              <td>
+                <input 
+                  type="text" 
+                  value={edu.dateOfCompletion}
+                  onChange={(e) => handleChange(index, 'dateOfCompletion', e.target.value)}
+                />
+              </td>
+              <td>
+                <textarea 
+                  value={edu.additionalNotes}
+                  onChange={(e) => handleChange(index, 'additionalNotes', e.target.value)}
+                />
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
-      <button className="add-row-btn">Add Row</button>
+      <button className="add-row-btn" onClick={addRow}>Add Row</button>
     </section>
   );
 };
