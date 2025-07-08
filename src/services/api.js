@@ -5,9 +5,8 @@ const API_BASE_URL = 'https://hrms-backend-50gj.onrender.com/api';
 // Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
+  withCredentials: true // 👈 optional only if you're using cookies
 });
 
 // Add request interceptor to include token
