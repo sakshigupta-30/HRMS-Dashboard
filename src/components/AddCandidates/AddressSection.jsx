@@ -1,32 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { Country, State } from 'country-state-city';
 
-const AddressSection = () => {
+const AddressSection = ({ data, updateData }) => {
   const allCountries = Country.getAllCountries();
 
-  // Present address
-  const [present, setPresent] = useState({
-    address1: '',
-    address2: '',
-    city: '',
-    postalCode: '',
-    country: '',
-    state: '',
-  });
   const [presentStatesList, setPresentStatesList] = useState([]);
-
-  // Permanent address
-  const [permanent, setPermanent] = useState({
-    address1: '',
-    address2: '',
-    city: '',
-    postalCode: '',
-    country: '',
-    state: '',
-  });
   const [permanentStatesList, setPermanentStatesList] = useState([]);
 
-  const [sameAsPresent, setSameAsPresent] = useState(false);
+  // Get data from props
+  const present = data?.present || {
+    address1: '',
+    address2: '',
+    city: '',
+    postalCode: '',
+    country: '',
+    state: '',
+  };
+  
+  const permanent = data?.permanent || {
+    address1: '',
+    address2: '',
+    city: '',
+    postalCode: '',
+    country: '',
+    state: '',
+  };
+  
+  const sameAsPresent = data?.sameAsPresent || false;
 
   // Update state list when country changes
   useEffect(() => {
@@ -43,20 +43,48 @@ const AddressSection = () => {
 
   // Sync Permanent with Present when checkbox is checked
   useEffect(() => {
-    if (sameAsPresent) {
-      setPermanent({ ...present });
+    if (sameAsPresent && updateData) {
+      updateData({
+        ...data,
+        permanent: { ...present },
+        sameAsPresent: true
+      });
       setPermanentStatesList(State.getStatesOfCountry(present.country));
     }
-  }, [sameAsPresent, present]);
+  }, [sameAsPresent, present.country]); // Only depend on essential changes
 
   const handlePresentChange = (e) => {
     const { name, value } = e.target;
-    setPresent({ ...present, [name]: value });
+    const newPresent = { ...present, [name]: value };
+    updateData({
+      ...data,
+      present: newPresent
+    });
   };
 
   const handlePermanentChange = (e) => {
     const { name, value } = e.target;
-    setPermanent({ ...permanent, [name]: value });
+    const newPermanent = { ...permanent, [name]: value };
+    updateData({
+      ...data,
+      permanent: newPermanent
+    });
+  };
+  
+  const handleSameAsPresentChange = (e) => {
+    const checked = e.target.checked;
+    if (checked) {
+      updateData({
+        ...data,
+        permanent: { ...present },
+        sameAsPresent: true
+      });
+    } else {
+      updateData({
+        ...data,
+        sameAsPresent: false
+      });
+    }
   };
 
   return (
@@ -95,7 +123,7 @@ const AddressSection = () => {
     type="checkbox"
     id="sameAs"
     checked={sameAsPresent}
-    onChange={(e) => setSameAsPresent(e.target.checked)}
+    onChange={handleSameAsPresentChange}
   />
   <label htmlFor="sameAs">Same as Present address</label>
 </div>

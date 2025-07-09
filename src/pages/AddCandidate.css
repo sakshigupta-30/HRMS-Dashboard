@@ -297,6 +297,86 @@ button.secondary:hover {
   vertical-align: middle;
 }
 
+/* Education and Experience sections */
+.education-section,
+.experience-section {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.4rem;
+}
+
+.education-section table,
+.experience-section table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.education-section th,
+.experience-section th,
+.education-section td,
+.experience-section td {
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  text-align: left;
+  vertical-align: top;
+}
+
+.education-section th,
+.experience-section th {
+  background-color: #f8fafc;
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.875rem;
+}
+
+.education-section input,
+.experience-section input,
+.education-section textarea,
+.experience-section textarea,
+.education-section select,
+.experience-section select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  box-sizing: border-box;
+}
+
+.education-section textarea,
+.experience-section textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.add-row-btn {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-row-btn:hover {
+  background-color: #1e40af;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .add-candidate-page {
