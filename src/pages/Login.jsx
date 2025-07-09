@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import './Login.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import logo from '../assets/logo.png'; // adjust path as needed
-import { authAPI } from '../services/api';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
@@ -11,26 +10,30 @@ const Login = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  const hardcodedEmail = 'admin@gmail.com';
+  const hardcodedPassword = 'admin123';
+
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
   };
 
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
     setError('');
 
     console.log('Attempting login with:', credentials);
 
-    try {
-      const response = await authAPI.login(credentials);
-      console.log('Login successful:', response);
-      localStorage.setItem('token', response.token);
+    if (
+      credentials.email === hardcodedEmail &&
+      credentials.password === hardcodedPassword
+    ) {
+      console.log('Login successful (hardcoded)');
+      localStorage.setItem('token', 'dummy-token');
       sessionStorage.setItem('isLoggedIn', 'true');
       navigate('/');
-    } catch (error) {
-      console.error('Login error details:', error);
-      console.error('Error response:', error.response);
-      setError(error.response?.data?.error || 'Login failed. Please try again.');
+    } else {
+      console.error('Invalid credentials');
+      setError('Invalid email or password.');
     }
   };
 
