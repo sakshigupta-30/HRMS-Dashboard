@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import logo from '../assets/logo.png'; // adjust path as needed
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login, isAuthenticated } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const hardcodedEmail = 'admin@gmail.com';
   const hardcodedPassword = 'admin123';
@@ -28,8 +37,14 @@ const Login = () => {
       credentials.password === hardcodedPassword
     ) {
       console.log('Login successful (hardcoded)');
-      localStorage.setItem('token', 'dummy-token');
-      sessionStorage.setItem('isLoggedIn', 'true');
+      
+      // Use AuthContext login function
+      login({
+        email: credentials.email,
+        token: 'dummy-token',
+        name: 'Admin User'
+      });
+      
       navigate('/');
     } else {
       console.error('Invalid credentials');

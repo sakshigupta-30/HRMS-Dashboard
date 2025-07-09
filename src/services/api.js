@@ -41,13 +41,17 @@ api.interceptors.response.use(
       if (error.message.includes('CORS')) {
         console.error('CORS Error detected. Check if backend is running and CORS is configured.');
       }
+      // Don't auto-logout on network errors
+      return Promise.reject(error);
     }
     
-    // Handle authentication errors
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      sessionStorage.removeItem('isLoggedIn');
-      window.location.href = '/login';
+    // Handle authentication errors - but only for actual API calls, not login attempts
+    if (error.response?.status === 401 && !error.config.url.includes('/auth/login')) {
+      console.warn('Authentication error - token may be expired');
+      // Don't auto-logout immediately, let the auth context handle it
+      // localStorage.removeItem('token');
+      // sessionStorage.removeItem('isLoggedIn');
+      // window.location.href = '/login';
     }
     
     return Promise.reject(error);

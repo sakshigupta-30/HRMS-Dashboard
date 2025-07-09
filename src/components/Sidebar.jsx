@@ -11,13 +11,15 @@ import {
   FaUserPlus,
   FaSignOutAlt,
 } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
+  const { logout } = useAuth();
 
   const confirmLogout = () => {
-    sessionStorage.clear();
+    logout();
     navigate('/login');
   };
 

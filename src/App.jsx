@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Placements from './pages/Placements';
@@ -10,13 +10,28 @@ import CandidateDetail from './pages/CandidateDetail';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import { CandidateProvider } from './context/CandidateContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 
 const PrivateLayout = ({ children }) => {
-  const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+  const { isAuthenticated, loading } = useAuth();
 
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh' 
+      }}>
+        Loading...
+      </div>
+    );
+  }
 
-  if (!isLoggedIn) return <Navigate to="/login" replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <CandidateProvider>
@@ -44,62 +59,69 @@ const PrivateLayout = ({ children }) => {
   );
 };
 
-const App = () => {
+const AppContent = () => {
   return (
     <Routes>
-  <Route path="/login" element={<Login />} />
-  <Route path="/signup" element={<Signup />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
 
-  <Route
-    path="/"
-    element={
-      <PrivateLayout>
-        <Dashboard />
-      </PrivateLayout>
-    }
-  />
-  <Route
-    path="/placements"
-    element={
-      <PrivateLayout>
-        <Placements />
-      </PrivateLayout>
-    }
-  />
-  <Route
-    path="/reports"
-    element={
-      <PrivateLayout>
-        <Reports />
-      </PrivateLayout>
-    }
-  />
-  <Route
-    path="/settings"
-    element={
-      <PrivateLayout>
-        <Settings />
-      </PrivateLayout>
-    }
-  />
-  <Route
-    path="/add-candidate"
-    element={
-      <PrivateLayout>
-        <AddCandidate />
-      </PrivateLayout>
-    }
-  />
-  <Route
-    path="/candidate/:id"
-    element={
-      <PrivateLayout>
-        <CandidateDetail />
-      </PrivateLayout>
-    }
-  />
-</Routes>
+      <Route
+        path="/"
+        element={
+          <PrivateLayout>
+            <Dashboard />
+          </PrivateLayout>
+        }
+      />
+      <Route
+        path="/placements"
+        element={
+          <PrivateLayout>
+            <Placements />
+          </PrivateLayout>
+        }
+      />
+      <Route
+        path="/reports"
+        element={
+          <PrivateLayout>
+            <Placements />
+          </PrivateLayout>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <PrivateLayout>
+            <Settings />
+          </PrivateLayout>
+        }
+      />
+      <Route
+        path="/add-candidate"
+        element={
+          <PrivateLayout>
+            <AddCandidate />
+          </PrivateLayout>
+        }
+      />
+      <Route
+        path="/candidate/:id"
+        element={
+          <PrivateLayout>
+            <CandidateDetail />
+          </PrivateLayout>
+        }
+      />
+    </Routes>
+  );
+};
 
+const App = () => {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 };
 
