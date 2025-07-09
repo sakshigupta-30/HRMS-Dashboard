@@ -1,13 +1,21 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://hrms-backend-50gj.onrender.com/api';
+// Use environment variable if available, fallback to hardcoded URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://hrms-backend-50gj.onrender.com/api';
 
 // Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
-  withCredentials: true // 👈 optional only if you're using cookies
+  headers: { 
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  },
+  withCredentials: true, // Enable credentials for CORS
+  timeout: 10000 // 10 second timeout
 });
+
+// Log API base URL for debugging
+console.log('API Base URL:', API_BASE_URL);
 
 // Add request interceptor to include token
 api.interceptors.request.use(
@@ -23,15 +31,25 @@ api.interceptors.request.use(
   }
 );
 
-// Add response interceptor to handle token expiration
+// Add response interceptor to handle token expiration and CORS errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Handle network errors (including CORS)
+    if (!error.response) {
+      console.error('Network Error:', error.message);
+      if (error.message.includes('CORS')) {
+        console.error('CORS Error detected. Check if backend is running and CORS is configured.');
+      }
+    }
+    
+    // Handle authentication errors
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       sessionStorage.removeItem('isLoggedIn');
       window.location.href = '/login';
     }
+    
     return Promise.reject(error);
   }
 );
