@@ -19,12 +19,23 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem('token');
+      const savedUser = localStorage.getItem('user');
       const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
       
-      if (token && isLoggedIn) {
-        setIsAuthenticated(true);
-        // You can decode the token or fetch user data here
-        setUser({ email: 'admin@gmail.com' }); // For now, using hardcoded user
+      if (token && isLoggedIn && savedUser) {
+        try {
+          const userData = JSON.parse(savedUser);
+          setIsAuthenticated(true);
+          setUser(userData);
+        } catch (error) {
+          console.error('Error parsing saved user data:', error);
+          // Clear corrupted data
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          sessionStorage.removeItem('isLoggedIn');
+          setIsAuthenticated(false);
+          setUser(null);
+        }
       } else {
         setIsAuthenticated(false);
         setUser(null);
@@ -38,7 +49,8 @@ export const AuthProvider = ({ children }) => {
   const login = (userData) => {
     setIsAuthenticated(true);
     setUser(userData);
-    localStorage.setItem('token', userData.token || 'dummy-token');
+    localStorage.setItem('token', userData.token);
+    localStorage.setItem('user', JSON.stringify(userData));
     sessionStorage.setItem('isLoggedIn', 'true');
   };
 
@@ -46,6 +58,7 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     setUser(null);
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     sessionStorage.removeItem('isLoggedIn');
   };
 

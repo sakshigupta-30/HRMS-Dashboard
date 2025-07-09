@@ -10,7 +10,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   },
-  withCredentials: false, // Temporarily disable credentials for testing
+  withCredentials: true, // Enable credentials for authentication
   timeout: 10000 // 10 second timeout
 });
 
@@ -41,17 +41,17 @@ api.interceptors.response.use(
       if (error.message.includes('CORS')) {
         console.error('CORS Error detected. Check if backend is running and CORS is configured.');
       }
-      // Don't auto-logout on network errors
       return Promise.reject(error);
     }
     
-    // Handle authentication errors - but only for actual API calls, not login attempts
+    // Handle authentication errors - but only for protected routes, not login attempts
     if (error.response?.status === 401 && !error.config.url.includes('/auth/login')) {
       console.warn('Authentication error - token may be expired');
-      // Don't auto-logout immediately, let the auth context handle it
-      // localStorage.removeItem('token');
-      // sessionStorage.removeItem('isLoggedIn');
-      // window.location.href = '/login';
+      // Clear auth data and redirect to login
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('isLoggedIn');
+      window.location.href = '/login';
     }
     
     return Promise.reject(error);

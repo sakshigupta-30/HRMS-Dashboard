@@ -4,11 +4,13 @@ import './Login.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import logo from '../assets/logo.png'; // adjust path as needed
 import { useAuth } from '../context/AuthContext';
+import { authAPI } from '../services/api';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAuth();
 
@@ -19,36 +21,38 @@ const Login = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const hardcodedEmail = 'admin@gmail.com';
-  const hardcodedPassword = 'admin123';
-
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     console.log('Attempting login with:', credentials);
 
-    if (
-      credentials.email === hardcodedEmail &&
-      credentials.password === hardcodedPassword
-    ) {
-      console.log('Login successful (hardcoded)');
+    try {
+      // Use real backend authentication
+      const response = await authAPI.login(credentials);
       
-      // Use AuthContext login function
+      console.log('Login successful:', response);
+      
+      // Use AuthContext login function with real data
       login({
-        email: credentials.email,
-        token: 'dummy-token',
-        name: 'Admin User'
+        email: response.user.email,
+        token: response.token,
+        name: response.user.name,
+        id: response.user.id,
+        role: response.user.role
       });
       
       navigate('/');
-    } else {
-      console.error('Invalid credentials');
-      setError('Invalid email or password.');
+    } catch (error) {
+      console.error('Login failed:', error);
+      setError(error.response?.data?.error || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,7 +84,9 @@ const Login = () => {
             </span>
           </div>
           {error && <div className="error">{error}</div>}
-          <button type="submit">Login</button>
+          <button type="submit" disabled={loading}>
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
         </form>
         <p style={{ marginTop: '1rem' }}>
           Don’t have an account? <a href="/signup">Signup</a>
