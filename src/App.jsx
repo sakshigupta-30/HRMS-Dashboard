@@ -14,7 +14,6 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Payroll from './pages/Payroll'; // ✅ Add this with your other imports
 
 
-
 const PrivateLayout = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
@@ -123,6 +122,7 @@ const AppContent = () => {
           </PrivateLayout>
         }
       />
+
 
     </Routes>
   );

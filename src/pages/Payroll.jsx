@@ -1,58 +1,64 @@
-// src/pages/Payroll.jsx
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import EmployeePayrollCard from '../components/EmployeePayrollCard';
+import React from 'react';
+import './Payroll.css'; // Optional: for custom styling
 
 const Payroll = () => {
-  const [employees, setEmployees] = useState([]);
-
-  useEffect(() => {
-    const fetchCandidates = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/candidates', {
-          withCredentials: true // If you're using cookies/auth tokens
-        });
-        const data = response.data;
-
-        // Transform data into format expected by <EmployeePayrollCard />
-        const transformed = data.map(candidate => ({
-          name: `${candidate.personalDetails.firstName} ${candidate.personalDetails.lastName}`,
-          empId: candidate._id.slice(-6).toUpperCase(), // create short id
-          month: new Date(candidate.applicationDate).toLocaleString('default', { month: 'short', year: 'numeric' }),
-          netPay: candidate.professionalDetails?.expectedSalary || 0,
-          salaryComponents: [
-            { component: 'Basic', amount: candidate.professionalDetails?.currentSalary || 0 },
-            { component: 'HRA', amount: (candidate.professionalDetails?.currentSalary || 0) * 0.4 },
-            { component: 'Conveyance Allowance', amount: 2000 },
-            { component: 'Professional Tax', amount: 1000 },
-          ],
-          payrollSummary: [
-            { month: 'Apr 2023', totalEmployees: 25, totalPay: '12,50,000' },
-            { month: 'Mar 2023', totalEmployees: 25, totalPay: '12,40,000' },
-            { month: 'Feb 2023', totalEmployees: 25, totalPay: '12,45,000' },
-          ],
-          compliance: [
-            { type: 'Provident Fund (PF)', month: 'Apr 2023', status: 'Filed' },
-            { type: 'ESI', month: 'Apr 2023', status: 'Filed' },
-            { type: 'Professional Tax (PT)', month: 'Apr 2023', status: 'Pending' },
-          ],
-        }));
-
-        setEmployees(transformed);
-      } catch (error) {
-        console.error('Error fetching candidates:', error);
-      }
-    };
-
-    fetchCandidates();
-  }, []);
-
   return (
-    <div className="payroll-page">
-      <h2>Payroll & Expenses</h2>
-      {employees.map((employee, index) => (
-        <EmployeePayrollCard key={index} employee={employee} />
-      ))}
+    <div className="payroll-dashboard">
+      <h2>HR & Payroll Dashboard</h2>
+      <div className="dashboard-grid">
+
+        {/* Payslip Details */}
+        <div className="card">
+          <h3>🧾 Payslip Details</h3>
+          <p><strong>John Doe</strong></p>
+          <p>EMP001</p>
+          <p>Apr 2023</p>
+          <p>Net Pay: <strong>₹50,000</strong></p>
+        </div>
+
+        {/* Salary Components */}
+        <div className="card">
+          <h3>💰 Salary Components</h3>
+          <table>
+            <thead>
+              <tr><th>Component</th><th>Amount</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Basic</td><td>₹30,000</td></tr>
+              <tr><td>HRA</td><td>₹15,000</td></tr>
+              <tr><td>Conveyance</td><td>₹2,000</td></tr>
+              <tr><td>Professional Tax</td><td>₹1,000</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Payroll Summary */}
+        <div className="card">
+          <h3>📊 Payroll Summary</h3>
+          <table>
+            <thead>
+              <tr><th>Month</th><th>Total Employees</th><th>Total Pay</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Apr 2023</td><td>25</td><td>₹12,50,000</td></tr>
+              <tr><td>Mar 2023</td><td>25</td><td>₹12,40,000</td></tr>
+              <tr><td>Feb 2023</td><td>25</td><td>₹12,45,000</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Compliance Filing */}
+        <div className="card">
+          <h3>📂 Compliance Filing</h3>
+          <ul>
+            <li>Provident Fund (PF) - <span className="status filed">Filed</span></li>
+            <li>ESI - <span className="status filed">Filed</span></li>
+            <li>Professional Tax - <span className="status pending">Pending</span></li>
+            <li>Labour Welfare Fund - <span className="status pending">Pending</span></li>
+          </ul>
+        </div>
+
+      </div>
     </div>
   );
 };
