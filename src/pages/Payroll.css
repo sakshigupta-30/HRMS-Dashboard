@@ -1,39 +1,59 @@
 .payroll-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
   padding: 2rem;
+  background: #f4f7fa;
   font-family: sans-serif;
 }
 
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1.5rem;
+.card {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
 }
 
-.card {
-  background-color: #fff;
-  padding: 1.5rem;
-  border-radius: 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+.card h3 {
+  margin-bottom: 1rem;
+  color: #333;
 }
 
 .card table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 1rem;
 }
 
-.card table th, .card table td {
-  border: 1px solid #ccc;
+.card table th,
+.card table td {
   padding: 0.5rem;
   text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.card ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.card ul li {
+  margin: 0.5rem 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.status {
+  padding: 0.2rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  color: white;
 }
 
 .status.filed {
-  color: green;
-  font-weight: bold;
+  background-color: #28a745;
 }
 
 .status.pending {
-  color: orange;
-  font-weight: bold;
+  background-color: #ffc107;
+  color: #000;
 }
