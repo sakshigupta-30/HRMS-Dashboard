@@ -11,6 +11,8 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import { CandidateProvider } from './context/CandidateContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import Payroll from './pages/Payroll'; // ✅ Add this with your other imports
+
 
 
 const PrivateLayout = ({ children }) => {
@@ -113,6 +115,15 @@ const AppContent = () => {
           </PrivateLayout>
         }
       />
+      <Route
+        path="/payroll"
+        element={
+          <PrivateLayout>
+            <Payroll />
+          </PrivateLayout>
+        }
+      />
+
     </Routes>
   );
 };

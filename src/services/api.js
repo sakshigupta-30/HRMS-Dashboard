@@ -10,9 +10,10 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   },
-  withCredentials: false, // Temporarily disable credentials for testing
-  timeout: 10000 // 10 second timeout
+  withCredentials: true, // ✅ Must be true when backend sends cookies or uses CORS with auth
+  timeout: 10000
 });
+
 
 // Log API base URL for debugging
 console.log('API Base URL:', API_BASE_URL);
