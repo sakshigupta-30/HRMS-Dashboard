@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import './EmployeeList.css';
+
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = 'https://hrms-backend-50gj.onrender.com/api';
-
-
-import './EmployeeList.css';
 
 const EmployeeList = () => {
   const navigate = useNavigate();
@@ -17,7 +16,7 @@ const EmployeeList = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await axios.get('https://hrms-backend-50gj.onrender.com/api/candidates/employees');
+        const response = await axios.get('/candidates/employees'); // ✅ new route
         setEmployees(response.data);
       } catch (error) {
         console.error('Error fetching employees:', error);
@@ -31,7 +30,7 @@ const EmployeeList = () => {
     const fullName = `${emp.personalDetails?.firstName || ''} ${emp.personalDetails?.lastName || ''}`;
     const department = emp.professionalDetails?.department || '';
     const status = emp.status || '';
-    
+
     return (
       fullName.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (departmentFilter ? department === departmentFilter : true) &&
@@ -83,30 +82,37 @@ const EmployeeList = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredEmployees.map(emp => (
-            <tr key={emp._id}>
-              <td>
-                <div className="employee-name">
-                  <img
-                    src={emp.avatar || '/default-avatar.png'}
-                    alt={`${emp.personalDetails?.firstName || ''} ${emp.personalDetails?.lastName || ''}`}
-                  />
-                  <span>
-                    {emp.personalDetails?.firstName || ''} {emp.personalDetails?.lastName || ''}
+          {filteredEmployees.map((emp, index) => {
+            const empId = `EMP${String(index + 1).padStart(3, '0')}`;
+            return (
+              <tr key={emp._id}>
+                <td>
+                  <div className="employee-name">
+                    <img
+                      src={emp.avatar || '/default-avatar.png'}
+                      alt={`${emp.personalDetails?.firstName || ''} ${emp.personalDetails?.lastName || ''}`}
+                    />
+                    <span>
+                      {emp.personalDetails?.firstName || ''} {emp.personalDetails?.lastName || ''}
+                    </span>
+                  </div>
+                </td>
+                <td>{empId}</td>
+                <td>{emp.professionalDetails?.department || '—'}</td>
+                <td>{emp.professionalDetails?.currentJobTitle || '—'}</td>
+                <td>
+                  <span className={`status-badge ${emp.status?.toLowerCase() || 'unknown'}`}>
+                    {emp.status || 'Unknown'}
                   </span>
-                </div>
-              </td>
-              <td>{emp.empId || '—'}</td>
-              <td>{emp.professionalDetails?.department || '—'}</td>
-              <td>{emp.professionalDetails?.currentJobTitle || '—'}</td>
-              <td>
-                <span className={`status-badge ${emp.status?.toLowerCase() || 'unknown'}`}>
-                  {emp.status || 'Unknown'}
-                </span>
-              </td>
-              <td>{emp.professionalDetails?.availableFrom ? new Date(emp.professionalDetails.availableFrom).toLocaleDateString() : '—'}</td>
-            </tr>
-          ))}
+                </td>
+                <td>
+                  {emp.professionalDetails?.availableFrom
+                    ? new Date(emp.professionalDetails.availableFrom).toLocaleDateString()
+                    : '—'}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
