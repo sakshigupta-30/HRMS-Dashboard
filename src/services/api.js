@@ -10,10 +10,9 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   },
-  withCredentials: true, // ✅ Must be true when backend sends cookies or uses CORS with auth
-  timeout: 10000
+  withCredentials: true,
+  timeout: 30000 // Increased timeout for slower responses
 });
-
 
 // Log API base URL for debugging
 console.log('API Base URL:', API_BASE_URL);
@@ -32,10 +31,33 @@ api.interceptors.request.use(
   }
 );
 
-// Add response interceptor to handle token expiration and CORS errors
+// Enhanced response interceptor with retry logic
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Handle rate limiting (429) and network errors with retry
+    if (
+      (error.response?.status === 429 || !error.response) && 
+      !originalRequest._retry
+    ) {
+      originalRequest._retry = true;
+      
+      // Wait before retrying (exponential backoff)
+      const delay = error.response?.status === 429 ? 5000 : 3000;
+      console.log(`Retrying request in ${delay}ms...`);
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+      
+      try {
+        return await api.request(originalRequest);
+      } catch (retryError) {
+        console.error('Retry failed:', retryError.message);
+        return Promise.reject(retryError);
+      }
+    }
+
     // Handle network errors (including CORS)
     if (!error.response) {
       console.error('Network Error:', error.message);
@@ -59,44 +81,74 @@ api.interceptors.response.use(
   }
 );
 
-// Auth API calls
+// Helper function for making requests with custom retry logic
+const makeRequestWithRetry = async (requestFn, maxRetries = 3) => {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await requestFn();
+    } catch (error) {
+      if (i === maxRetries - 1) throw error;
+      
+      // Wait longer for each retry
+      const delay = (i + 1) * 2000;
+      console.log(`Request failed, retrying in ${delay}ms... (${i + 1}/${maxRetries})`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+};
+
+// Auth API calls with retry logic
 export const authAPI = {
   login: async (credentials) => {
-    const response = await api.post('/auth/login', credentials);
-    return response.data;
+    return await makeRequestWithRetry(async () => {
+      const response = await api.post('/auth/login', credentials);
+      return response.data;
+    });
   },
   
   register: async (userData) => {
-    const response = await api.post('/auth/register', userData);
-    return response.data;
+    return await makeRequestWithRetry(async () => {
+      const response = await api.post('/auth/register', userData);
+      return response.data;
+    });
   },
 };
 
-// Candidate API calls
+// Candidate API calls with retry logic
 export const candidateAPI = {
   getAllCandidates: async () => {
-    const response = await api.get('/candidates');
-    return response.data;
+    return await makeRequestWithRetry(async () => {
+      const response = await api.get('/candidates');
+      return response.data;
+    });
   },
   
   getCandidateById: async (id) => {
-    const response = await api.get(`/candidates/${id}`);
-    return response.data;
+    return await makeRequestWithRetry(async () => {
+      const response = await api.get(`/candidates/${id}`);
+      return response.data;
+    });
   },
   
   addCandidate: async (candidateData) => {
-    const response = await api.post('/candidates', candidateData);
-    return response.data;
+    return await makeRequestWithRetry(async () => {
+      const response = await api.post('/candidates', candidateData);
+      return response.data;
+    });
   },
   
   updateCandidate: async (id, candidateData) => {
-    const response = await api.put(`/candidates/${id}`, candidateData);
-    return response.data;
+    return await makeRequestWithRetry(async () => {
+      const response = await api.put(`/candidates/${id}`, candidateData);
+      return response.data;
+    });
   },
   
   deleteCandidate: async (id) => {
-    const response = await api.delete(`/candidates/${id}`);
-    return response.data;
+    return await makeRequestWithRetry(async () => {
+      const response = await api.delete(`/candidates/${id}`);
+      return response.data;
+    });
   },
 };
 
