@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './EmployeeList.css';
 
-axios.defaults.withCredentials = true;
 axios.defaults.baseURL = 'https://hrms-backend-50gj.onrender.com/api';
 
 const EmployeeList = () => {
@@ -16,7 +15,12 @@ const EmployeeList = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await axios.get('/candidates/employees'); // ✅ new route
+        const token = localStorage.getItem('token');
+        const response = await axios.get('/candidates/employees', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setEmployees(response.data);
       } catch (error) {
         console.error('Error fetching employees:', error);
@@ -26,7 +30,7 @@ const EmployeeList = () => {
     fetchEmployees();
   }, []);
 
-  const filteredEmployees = employees.filter(emp => {
+  const filteredEmployees = employees.filter((emp) => {
     const fullName = `${emp.personalDetails?.firstName || ''} ${emp.personalDetails?.lastName || ''}`;
     const department = emp.professionalDetails?.department || '';
     const status = emp.status || '';
@@ -52,9 +56,9 @@ const EmployeeList = () => {
           type="text"
           placeholder="Search by name"
           value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <select onChange={e => setDepartmentFilter(e.target.value)} value={departmentFilter}>
+        <select onChange={(e) => setDepartmentFilter(e.target.value)} value={departmentFilter}>
           <option value="">Department</option>
           <option value="Marketing">Marketing</option>
           <option value="Sales">Sales</option>
@@ -62,7 +66,7 @@ const EmployeeList = () => {
           <option value="Human Resources">Human Resources</option>
           <option value="Finance">Finance</option>
         </select>
-        <select onChange={e => setStatusFilter(e.target.value)} value={statusFilter}>
+        <select onChange={(e) => setStatusFilter(e.target.value)} value={statusFilter}>
           <option value="">All Status</option>
           <option value="Selected">Selected</option>
           <option value="Active">Active</option>
