@@ -36,7 +36,7 @@ const AddEmployee = () => {
     };
 
     try {
-      await candidateAPI.createCandidate(newEmployee);
+      await candidateAPI.addCandidate(newEmployee);
       await refreshCandidates();
       alert('Employee added successfully!');
       navigate('/employees');
