@@ -41,6 +41,9 @@ const Sidebar = () => {
           <NavLink to="/add-candidate" className="nav-link">
             <FaUserPlus /> Add Candidate
           </NavLink>
+          <NavLink to="/employees" className="nav-link">
+            <FaUserTie /> Employees
+          </NavLink>
           <NavLink to="/settings" className="nav-link">
             <FaCog /> Settings
           </NavLink>
