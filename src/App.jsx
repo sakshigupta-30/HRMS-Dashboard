@@ -13,7 +13,7 @@ import { CandidateProvider } from './context/CandidateContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Payroll from './pages/Payroll'; // ✅ Add this with your other imports
 import EmployeeList from './pages/EmployeeList';
-
+import AddEmployee from './pages/AddEmployee';
 
 const PrivateLayout = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -131,6 +131,18 @@ const AppContent = () => {
           </PrivateLayout>
         }
       />
+
+        <Route
+        path="/add-employee"
+        element={
+          <PrivateLayout>
+            <AddEmployee />
+          </PrivateLayout>
+        }
+      />
+
+      
+        
 
     </Routes>
   );
