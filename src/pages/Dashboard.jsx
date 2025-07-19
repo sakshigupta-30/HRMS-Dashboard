@@ -8,14 +8,13 @@ import { useCandidateContext } from '../context/CandidateContext';
 const Dashboard = () => {
   const { candidateCount } = useCandidateContext();
   
-  // Base classes for the main content boxes for consistency
   const boxClasses = "rounded-xl p-4 shadow-md flex flex-col overflow-hidden";
 
   return (
-    // Main container with full height and consistent spacing
+    // Changes are in this line: p-4 and gap-4
     <div className="flex flex-col h-full gap-4 p-4">
       
-      {/* Top Summary Cards - Responsive Grid */}
+      {/* Top Summary Cards - Change is here: gap-4 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 flex-shrink-0">
         <DashboardCard title="Total Candidates" value={candidateCount.toString()} bgColor="#F97316" textColor="#ffffff" />
         <DashboardCard title="Placement Today" value="0" bgColor="#FACC15" textColor="#1E293B" />
@@ -25,24 +24,21 @@ const Dashboard = () => {
         <DashboardCard title="Talent Acquisition" bgColor="#EF4444" textColor="#ffffff" />
       </div>
 
-      {/* Bottom Row - Proportional, Responsive Grid */}
+      {/* Bottom Row - Change is here: gap-4 */}
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_1.5fr_1.2fr] gap-4 flex-grow overflow-hidden max-h-[calc(100vh-180px)]">
         
-        {/* Candidate List Box */}
         <div className={`${boxClasses} bg-white`}>
           <div className="overflow-y-auto">
             <CandidateList />
           </div>
         </div>
 
-        {/* Upcoming Interviews Box */}
         <div className={`${boxClasses} bg-white`}>
           <div className="overflow-y-auto">
             <UpcomingInterviews />
           </div>
         </div>
 
-        {/* Profile Card Box */}
         <div className={`${boxClasses} bg-emerald-500 text-white items-center justify-center`}>
           <ProfileCard />
         </div>

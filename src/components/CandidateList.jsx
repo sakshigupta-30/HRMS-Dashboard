@@ -20,13 +20,28 @@ const CandidateList = () => {
   // Your existing state and helper functions (handleDelete, getDisplayName, etc.) remain unchanged.
   // [NOTE: Your logic functions are omitted for brevity but should be kept in your file.]
 
-  if (loading) return <div className="p-4">Loading candidates...</div>;
+  // This is the updated loading state
+  if (loading) {
+    return (
+      <div className="flex h-full flex-grow items-center justify-center p-4">
+        <p className="text-lg text-gray-500">Loading candidates...</p>
+      </div>
+    );
+  }
+
+  // The error state can also be improved
+  if (error) {
+    return (
+      <div className="flex h-full flex-grow items-center justify-center p-4">
+        <p className="text-lg text-red-500">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg">
       <h3 className="text-xl font-bold p-4">Candidate List</h3>
       <div className="overflow-x-auto">
-        {/* The main changes are in this table element and its children */}
         <table className="w-full table-fixed text-left">
           <thead className="border-b border-slate-200">
             <tr>
@@ -56,7 +71,7 @@ const CandidateList = () => {
                         >
                           {getInitials(name)}
                         </div>
-                        <div className="min-w-0"> {/* Wrapper to allow truncation */}
+                        <div className="min-w-0">
                           <strong 
                             className="block truncate cursor-pointer text-blue-600 hover:underline"
                             onClick={() => navigate(`/candidate/${candidate._id}`)}
