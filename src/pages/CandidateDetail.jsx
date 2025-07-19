@@ -1,7 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { candidateAPI } from '../services/api';
-import './CandidateDetail.css';
+
+// Reusable object for status badge styles
+const statusStyles = {
+  Applied: 'bg-blue-100 text-blue-800',
+  Draft: 'bg-amber-100 text-amber-800',
+  Interview: 'bg-purple-100 text-purple-800',
+  Selected: 'bg-green-100 text-green-800',
+  Rejected: 'bg-red-100 text-red-800',
+  Screening: 'bg-cyan-100 text-cyan-800',
+  'On Hold': 'bg-gray-200 text-gray-700',
+  default: 'bg-slate-100 text-slate-800',
+};
+
+// Reusable component for displaying detail items to reduce repetition
+const DetailItem = ({ label, children }) => (
+  <div className="flex flex-col gap-1">
+    <label className="text-sm font-semibold text-gray-600 uppercase tracking-wider">{label}</label>
+    <span className="text-base text-slate-800 break-words">{children || 'N/A'}</span>
+  </div>
+);
 
 const CandidateDetail = () => {
   const { id } = useParams();
@@ -38,70 +57,19 @@ const CandidateDetail = () => {
     }
   };
 
-  const formatDate = (date) => {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString();
-  };
-
-  const getStatusBadgeStyle = (status) => {
-    const baseStyle = {
-      padding: '6px 12px',
-      borderRadius: '20px',
-      fontSize: '12px',
-      fontWeight: 'bold',
-      display: 'inline-block'
-    };
-
-    switch (status) {
-      case 'Applied':
-        return { ...baseStyle, backgroundColor: '#e3f2fd', color: '#1976d2' };
-      case 'Draft':
-        return { ...baseStyle, backgroundColor: '#fff3e0', color: '#f57c00' };
-      case 'Interview':
-        return { ...baseStyle, backgroundColor: '#f3e5f5', color: '#7b1fa2' };
-      case 'Selected':
-        return { ...baseStyle, backgroundColor: '#e8f5e8', color: '#388e3c' };
-      case 'Rejected':
-        return { ...baseStyle, backgroundColor: '#ffebee', color: '#d32f2f' };
-      case 'Screening':
-        return { ...baseStyle, backgroundColor: '#e1f5fe', color: '#0277bd' };
-      case 'On Hold':
-        return { ...baseStyle, backgroundColor: '#fafafa', color: '#616161' };
-      default:
-        return { ...baseStyle, backgroundColor: '#f5f5f5', color: '#666' };
-    }
-  };
+  const formatDate = (date) => date ? new Date(date).toLocaleDateString() : 'N/A';
 
   if (loading) {
-    return (
-      <div className="candidate-detail-container">
-        <div className="loading">
-          <h2>Loading candidate details...</h2>
-        </div>
-      </div>
-    );
+    return <div className="p-10 text-center text-gray-500">Loading candidate details...</div>;
   }
 
-  if (error) {
+  if (error || !candidate) {
     return (
-      <div className="candidate-detail-container">
-        <div className="error">
-          <h2>Error</h2>
-          <p>{error}</p>
-          <button onClick={() => navigate('/')} className="back-button">
-            Back to Dashboard
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!candidate) {
-    return (
-      <div className="candidate-detail-container">
-        <div className="error">
-          <h2>Candidate not found</h2>
-          <button onClick={() => navigate('/')} className="back-button">
+      <div className="p-5 sm:p-10">
+        <div className="text-center p-10 sm:p-16 bg-white rounded-xl shadow-lg">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">{error ? 'Error' : 'Candidate Not Found'}</h2>
+          <p className="text-gray-600 mb-6">{error || 'The requested candidate could not be found.'}</p>
+          <button onClick={() => navigate('/')} className="bg-gray-500 text-white py-2.5 px-4 rounded-md text-sm hover:bg-gray-600 transition-colors">
             Back to Dashboard
           </button>
         </div>
@@ -110,223 +78,124 @@ const CandidateDetail = () => {
   }
 
   return (
-    <div className="candidate-detail-container">
-      {/* Header */}
-      <div className="detail-header">
-        <button onClick={() => navigate('/')} className="back-button">
-          ← Back to Dashboard
-        </button>
-        <div className="candidate-header">
-          <div className="candidate-avatar">
-            {(candidate.personalDetails?.firstName?.charAt(0) || '') +
-              (candidate.personalDetails?.lastName?.charAt(0) || '')}
-          </div>
-          <div className="candidate-basic-info">
-            <h1>
-              {candidate.personalDetails?.firstName} {candidate.personalDetails?.lastName}
-            </h1>
-            <p className="job-title">
-              {candidate.professionalDetails?.currentJobTitle || 'No title specified'}
-            </p>
-            <span style={getStatusBadgeStyle(candidate.status)}>
-              {candidate.status || 'Applied'}
-            </span>
-          </div>
-        </div>
-        <div className="action-buttons">
-          <select
-            value={candidate.status}
-            onChange={(e) => handleStatusUpdate(e.target.value)}
-            className="status-dropdown"
-          >
-            <option value="Applied">Applied</option>
-            <option value="Screening">Screening</option>
-            <option value="Interview">Interview</option>
-            <option value="Selected">Selected</option>
-            <option value="Rejected">Rejected</option>
-            <option value="On Hold">On Hold</option>
-            <option value="Draft">Draft</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="detail-content">
-        {/* Personal Details */}
-        <div className="detail-section">
-          <h3>Personal Information</h3>
-          <div className="detail-grid">
-            <div className="detail-item">
-              <label>Full Name:</label>
-              <span>{candidate.personalDetails?.firstName} {candidate.personalDetails?.lastName}</span>
+    <div className="min-h-screen bg-slate-100 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <header className="bg-white p-5 rounded-xl shadow-lg mb-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+          <button onClick={() => navigate('/')} className="hidden md:block bg-gray-500 text-white py-2.5 px-4 rounded-md text-sm hover:bg-gray-600 transition-colors self-start">
+            ← Back
+          </button>
+          <div className="flex flex-col text-center md:flex-row md:text-left items-center gap-4 flex-1">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold uppercase flex-shrink-0">
+              {(candidate.personalDetails?.firstName?.charAt(0) || '') + (candidate.personalDetails?.lastName?.charAt(0) || '')}
             </div>
-            <div className="detail-item">
-              <label>Email:</label>
-              <span>{candidate.personalDetails?.email || 'N/A'}</span>
-            </div>
-            <div className="detail-item">
-              <label>Phone:</label>
-              <span>{candidate.personalDetails?.phone || 'N/A'}</span>
-            </div>
-            <div className="detail-item">
-              <label>Date of Birth:</label>
-              <span>{formatDate(candidate.personalDetails?.dateOfBirth)}</span>
-            </div>
-            <div className="detail-item">
-              <label>Gender:</label>
-              <span>{candidate.personalDetails?.gender || 'N/A'}</span>
-            </div>
-            <div className="detail-item">
-              <label>Nationality:</label>
-              <span>{candidate.personalDetails?.nationality || 'N/A'}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Address */}
-        <div className="detail-section">
-          <h3>Address Information</h3>
-          <div className="detail-grid">
-            <div className="detail-item">
-              <label>Street:</label>
-              <span>{candidate.address?.street || 'N/A'}</span>
-            </div>
-            <div className="detail-item">
-              <label>City:</label>
-              <span>{candidate.address?.city || 'N/A'}</span>
-            </div>
-            <div className="detail-item">
-              <label>State:</label>
-              <span>{candidate.address?.state || 'N/A'}</span>
-            </div>
-            <div className="detail-item">
-              <label>Country:</label>
-              <span>{candidate.address?.country || 'N/A'}</span>
-            </div>
-            <div className="detail-item">
-              <label>Zip Code:</label>
-              <span>{candidate.address?.zipCode || 'N/A'}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Professional Details */}
-        <div className="detail-section">
-          <h3>Professional Information</h3>
-          <div className="detail-grid">
-            <div className="detail-item">
-              <label>Job Title:</label>
-              <span>{candidate.professionalDetails?.currentJobTitle || 'N/A'}</span>
-            </div>
-            <div className="detail-item">
-              <label>Department:</label>
-              <span>{candidate.professionalDetails?.department || 'N/A'}</span>
-            </div>
-            <div className="detail-item">
-              <label>Employment Type:</label>
-              <span>{candidate.professionalDetails?.employmentType || 'N/A'}</span>
-            </div>
-            <div className="detail-item">
-              <label>Current Salary:</label>
-              <span>
-                {candidate.professionalDetails?.currentSalary
-                  ? `₹${candidate.professionalDetails.currentSalary.toLocaleString()}`
-                  : 'N/A'}
+            <div>
+              <h1 className="text-3xl font-bold text-slate-800">
+                {candidate.personalDetails?.firstName} {candidate.personalDetails?.lastName}
+              </h1>
+              <p className="text-gray-500 mt-1 mb-2">
+                {candidate.professionalDetails?.currentJobTitle || 'No title specified'}
+              </p>
+              <span className={`inline-block py-1.5 px-3 rounded-full text-xs font-bold ${statusStyles[candidate.status] || statusStyles.default}`}>
+                {candidate.status || 'Applied'}
               </span>
             </div>
-            <div className="detail-item">
-              <label>Expected Salary:</label>
-              <span>
-                {candidate.professionalDetails?.expectedSalary
-                  ? `₹${candidate.professionalDetails.expectedSalary.toLocaleString()}`
-                  : 'N/A'}
-              </span>
+          </div>
+          <div className="flex items-center justify-center">
+            <select
+              value={candidate.status}
+              onChange={(e) => handleStatusUpdate(e.target.value)}
+              className="p-2 border-2 border-gray-200 rounded-md bg-white text-sm focus:outline-none focus:border-blue-500"
+            >
+                <option value="Applied">Applied</option>
+                <option value="Screening">Screening</option>
+                <option value="Interview">Interview</option>
+                <option value="Selected">Selected</option>
+                <option value="Rejected">Rejected</option>
+                <option value="On Hold">On Hold</option>
+                <option value="Draft">Draft</option>
+            </select>
+          </div>
+        </header>
+
+        {/* Content Grid */}
+        <main className="grid gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-lg">
+            <h3 className="text-xl font-semibold text-slate-800 mb-5 pb-2.5 border-b-2 border-slate-100">Personal Information</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6">
+              <DetailItem label="Full Name">{candidate.personalDetails?.firstName} {candidate.personalDetails?.lastName}</DetailItem>
+              <DetailItem label="Email">{candidate.personalDetails?.email}</DetailItem>
+              <DetailItem label="Phone">{candidate.personalDetails?.phone}</DetailItem>
+              <DetailItem label="Date of Birth">{formatDate(candidate.personalDetails?.dateOfBirth)}</DetailItem>
+              <DetailItem label="Gender">{candidate.personalDetails?.gender}</DetailItem>
+              <DetailItem label="Nationality">{candidate.personalDetails?.nationality}</DetailItem>
             </div>
-            <div className="detail-item">
-              <label>Available From:</label>
-              <span>{formatDate(candidate.professionalDetails?.availableFrom)}</span>
+          </div>
+          
+          <div className="bg-white p-6 rounded-xl shadow-lg">
+            <h3 className="text-xl font-semibold text-slate-800 mb-5 pb-2.5 border-b-2 border-slate-100">Address Information</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6">
+              <DetailItem label="Street">{candidate.address?.street}</DetailItem>
+              <DetailItem label="City">{candidate.address?.city}</DetailItem>
+              <DetailItem label="State">{candidate.address?.state}</DetailItem>
+              <DetailItem label="Country">{candidate.address?.country}</DetailItem>
+              <DetailItem label="Zip Code">{candidate.address?.zipCode}</DetailItem>
             </div>
-            <div className="detail-item full-width">
-              <label>Skills:</label>
-              <div className="skills-container">
-                {candidate.professionalDetails?.skills?.length > 0 ? (
-                  candidate.professionalDetails.skills.map((skill, index) => (
-                    <span key={index} className="skill-tag">{skill}</span>
-                  ))
-                ) : (
-                  <span>No skills listed</span>
-                )}
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-lg">
+             <h3 className="text-xl font-semibold text-slate-800 mb-5 pb-2.5 border-b-2 border-slate-100">Professional Information</h3>
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6">
+                <DetailItem label="Job Title">{candidate.professionalDetails?.currentJobTitle}</DetailItem>
+                <DetailItem label="Department">{candidate.professionalDetails?.department}</DetailItem>
+                <DetailItem label="Employment Type">{candidate.professionalDetails?.employmentType}</DetailItem>
+                <DetailItem label="Current Salary">{candidate.professionalDetails?.currentSalary?.toLocaleString()}</DetailItem>
+                <DetailItem label="Expected Salary">{candidate.professionalDetails?.expectedSalary?.toLocaleString()}</DetailItem>
+                <DetailItem label="Available From">{formatDate(candidate.professionalDetails?.availableFrom)}</DetailItem>
+                <div className="sm:col-span-2 lg:col-span-3">
+                    <DetailItem label="Skills">
+                        <div className="flex flex-wrap gap-2 mt-1">
+                            {candidate.professionalDetails?.skills?.length > 0 ? (
+                                candidate.professionalDetails.skills.map((skill, index) => (
+                                    <span key={index} className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white py-1 px-3 rounded-full text-xs font-medium">{skill}</span>
+                                ))
+                            ) : ( <span>No skills listed</span> )}
+                        </div>
+                    </DetailItem>
+                </div>
+             </div>
+          </div>
+
+          {candidate.education?.length > 0 && (
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+              <h3 className="text-xl font-semibold text-slate-800 mb-5 pb-2.5 border-b-2 border-slate-100">Education</h3>
+              <div className="space-y-4">
+                {candidate.education.map((edu, index) => (
+                  <div key={index} className="bg-slate-50 p-4 rounded-lg border-l-4 border-blue-500">
+                    <h4 className="font-bold text-slate-800">{edu.degree || 'Degree not specified'}</h4>
+                    <p className="text-sm text-gray-600"><strong>Institution:</strong> {edu.institution || 'N/A'}</p>
+                    <p className="text-sm text-gray-600"><strong>End Date:</strong> {formatDate(edu.endDate)}</p>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
-        </div>
+          )}
 
-        {/* Education */}
-        {candidate.education?.length > 0 && (
-          <div className="detail-section">
-            <h3>Education</h3>
-            {candidate.education.map((edu, index) => (
-              <div key={index} className="education-item">
-                <h4>{edu.degree || 'Degree not specified'}</h4>
-                <p><strong>Institution:</strong> {edu.institution || 'N/A'}</p>
-                <p><strong>Field of Study:</strong> {edu.fieldOfStudy || 'N/A'}</p>
-                <p><strong>End Date:</strong> {formatDate(edu.endDate)}</p>
-                <p><strong>Grade:</strong> {edu.grade || 'N/A'}</p>
+          {candidate.experience?.length > 0 && (
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+              <h3 className="text-xl font-semibold text-slate-800 mb-5 pb-2.5 border-b-2 border-slate-100">Work Experience</h3>
+              <div className="space-y-4">
+                {candidate.experience.map((exp, index) => (
+                  <div key={index} className="bg-slate-50 p-4 rounded-lg border-l-4 border-blue-500">
+                    <h4 className="font-bold text-slate-800">{exp.position || 'Position not specified'}</h4>
+                    <p className="text-sm text-gray-600"><strong>Company:</strong> {exp.company || 'N/A'}</p>
+                    <p className="text-sm text-gray-600"><strong>Duration:</strong> {formatDate(exp.startDate)} - {exp.isCurrentJob ? 'Present' : formatDate(exp.endDate)}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
-
-        {/* Experience */}
-        {candidate.experience?.length > 0 && (
-          <div className="detail-section">
-            <h3>Work Experience</h3>
-            {candidate.experience.map((exp, index) => (
-              <div key={index} className="experience-item">
-                <h4>{exp.position || 'Position not specified'}</h4>
-                <p><strong>Company:</strong> {exp.company || 'N/A'}</p>
-                <p><strong>Duration:</strong> {formatDate(exp.startDate)} - {exp.isCurrentJob ? 'Present' : formatDate(exp.endDate)}</p>
-                {exp.description && <p><strong>Description:</strong> {exp.description}</p>}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Application Info */}
-        <div className="detail-section">
-          <h3>Application Information</h3>
-          <div className="detail-grid">
-            <div className="detail-item">
-              <label>Application Date:</label>
-              <span>{formatDate(candidate.applicationDate)}</span>
             </div>
-            <div className="detail-item">
-              <label>Last Updated:</label>
-              <span>{formatDate(candidate.lastUpdated || candidate.updatedAt)}</span>
-            </div>
-            {candidate.notes && (
-              <div className="detail-item full-width">
-                <label>Notes:</label>
-                <span>{candidate.notes}</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ✅ Client Assignment - Only for Employees */}
-        {candidate.isEmployee && (
-          <div className="detail-section">
-            <h3>Client Assignment</h3>
-            <div className="detail-item">
-              <label>Client Details:</label>
-              <span>
-              {candidate.client
-                ? `${candidate.personalDetails?.firstName || 'This employee'} is working with ${candidate.client?.name} at ${candidate.client?.location}`
-                : `No client assigned to ${candidate.personalDetails?.firstName || 'this employee'} till now.`}
-            </span>
-            </div>
-          </div>
-        )}
+          )}
+        </main>
       </div>
     </div>
   );
