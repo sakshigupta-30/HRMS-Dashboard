@@ -1,8 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './CandidateList.css';
 import { candidateAPI } from '../services/api';
 import { useCandidateContext } from '../context/CandidateContext';
+
+// Helper object for status badge styling. This is much cleaner than inline conditional styles.
+const statusStyles = {
+  Applied: 'bg-blue-100 text-blue-800',
+  Draft: 'bg-amber-100 text-amber-800',
+  Interview: 'bg-purple-100 text-purple-800',
+  Selected: 'bg-green-100 text-green-800',
+  Rejected: 'bg-red-100 text-red-800',
+  default: 'bg-slate-100 text-slate-800',
+};
 
 const CandidateList = () => {
   const { candidates, loading, refreshCandidates } = useCandidateContext();
@@ -13,7 +22,6 @@ const CandidateList = () => {
     if (window.confirm(`Are you sure you want to delete ${candidateName}? This action cannot be undone.`)) {
       try {
         await candidateAPI.deleteCandidate(candidateId);
-        // Refresh the candidate list and count
         await refreshCandidates();
         alert('Candidate deleted successfully!');
       } catch (error) {
@@ -23,155 +31,92 @@ const CandidateList = () => {
     }
   };
 
-  const getDisplayName = (candidate) => {
-    const firstName = candidate.personalDetails?.firstName || '';
-    const lastName = candidate.personalDetails?.lastName || '';
-    return `${firstName} ${lastName}`.trim() || 'Unknown';
-  };
+  // Helper functions remain the same
+  const getDisplayName = (candidate) => `${candidate.personalDetails?.firstName || ''} ${candidate.personalDetails?.lastName || ''}`.trim() || 'Unknown';
+  const getJobTitle = (candidate) => candidate.professionalDetails?.currentJobTitle || 'N/A';
+  const getDepartment = (candidate) => candidate.professionalDetails?.department || 'N/A';
+  const getInitials = (name) => name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
+  const getRandomColor = (index) => ['#60A5FA', '#FBBF24', '#34D399', '#EC4899', '#A78BFA', '#F87171', '#6EE7B7'][index % 7];
 
-  const getJobTitle = (candidate) => {
-    return candidate.professionalDetails?.currentJobTitle || 'N/A';
-  };
+  if (loading) return <div className="p-4">Loading candidates...</div>;
+  if (error) return <div className="p-4 text-red-600">{error}</div>;
 
-  const getDepartment = (candidate) => {
-    return candidate.professionalDetails?.department || 'N/A';
-  };
-
-  const getInitials = (name) => {
-    return name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
-  };
-
-  const getRandomColor = (index) => {
-    const colors = ['#60A5FA', '#FBBF24', '#34D399', '#EC4899', '#A78BFA', '#F87171', '#6EE7B7'];
-    return colors[index % colors.length];
-  };
-
-  if (loading) {
-    return (
-      <div className="candidate-list-container">
-        <h3>Candidate List</h3>
-        <p>Loading candidates...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="candidate-list-container">
-        <h3>Candidate List</h3>
-        <p style={{ color: 'red' }}>{error}</p>
-      </div>
-    );
-  }
   return (
-    <div className="candidate-list-container">
-      <h3>Candidate List</h3>
-      <table className="candidate-table">
-        <thead>
-          <tr>
-            <th>Candidate</th>
-            <th>Department</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {candidates.length === 0 ? (
+    <div className="bg-white rounded-lg shadow-sm">
+      <h3 className="text-xl font-bold p-4">Candidate List</h3>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-left">
+          <thead className="border-b border-slate-200">
             <tr>
-              <td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>
-                No candidates found
-              </td>
+              <th className="p-4 font-medium text-slate-500">Candidate</th>
+              <th className="p-4 font-medium text-slate-500">Department</th>
+              <th className="p-4 font-medium text-slate-500">Status</th>
+              <th className="p-4 font-medium text-slate-500">Actions</th>
             </tr>
-          ) : (
-            candidates.map((candidate, index) => {
-              const name = getDisplayName(candidate);
-              const jobTitle = getJobTitle(candidate);
-              const department = getDepartment(candidate);
-              
-              return (
-                <tr key={candidate._id || index}>
-                  <td className="candidate-info">
-                    <span className="avatar" style={{ backgroundColor: getRandomColor(index) }}>
-                      {getInitials(name)}
-                    </span>
-                    <div className="details">
-                      <strong 
-                        style={{ cursor: 'pointer', color: '#007bff' }} 
-                        onClick={() => navigate(`/candidate/${candidate._id}`)}
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {candidates.length === 0 ? (
+              <tr>
+                <td colSpan="4" className="text-center p-5">No candidates found</td>
+              </tr>
+            ) : (
+              candidates.map((candidate, index) => {
+                const name = getDisplayName(candidate);
+                const jobTitle = getJobTitle(candidate);
+                const department = getDepartment(candidate);
+                
+                return (
+                  <tr key={candidate._id || index}>
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="w-[35px] h-[35px] rounded-full text-white font-bold flex items-center justify-center" 
+                          style={{ backgroundColor: getRandomColor(index) }}
+                        >
+                          {getInitials(name)}
+                        </div>
+                        <div>
+                          <strong 
+                            className="cursor-pointer text-blue-600 hover:underline"
+                            onClick={() => navigate(`/candidate/${candidate._id}`)}
+                          >
+                            {name}
+                          </strong>
+                          <div className="text-sm text-slate-500">{jobTitle}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4 align-middle">{department}</td>
+                    <td className="p-4 align-middle">
+                      <span 
+                        className={`px-2 py-1 rounded-full text-xs font-bold ${statusStyles[candidate.status] || statusStyles.default}`}
                       >
-                        {name}
-                      </strong>
-                      <span className="role">{jobTitle}</span>
-                    </div>
-                  </td>
-                  <td>{department}</td>
-                  <td>
-                    <span 
-                      className="status-badge" 
-                      style={{
-                        padding: '4px 8px',
-                        borderRadius: '12px',
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        backgroundColor: 
-                          candidate.status === 'Applied' ? '#e3f2fd' :
-                          candidate.status === 'Draft' ? '#fff3e0' :
-                          candidate.status === 'Interview' ? '#f3e5f5' :
-                          candidate.status === 'Selected' ? '#e8f5e8' :
-                          candidate.status === 'Rejected' ? '#ffebee' : '#f5f5f5',
-                        color:
-                          candidate.status === 'Applied' ? '#1976d2' :
-                          candidate.status === 'Draft' ? '#f57c00' :
-                          candidate.status === 'Interview' ? '#7b1fa2' :
-                          candidate.status === 'Selected' ? '#388e3c' :
-                          candidate.status === 'Rejected' ? '#d32f2f' : '#666'
-                      }}
-                    >
-                      {candidate.status || 'Applied'}
-                    </span>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button 
-                        onClick={() => navigate(`/candidate/${candidate._id}`)}
-                        style={{
-                          backgroundColor: '#007bff',
-                          color: 'white',
-                          border: 'none',
-                          padding: '6px 12px',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                        onMouseOver={(e) => e.target.style.backgroundColor = '#0056b3'}
-                        onMouseOut={(e) => e.target.style.backgroundColor = '#007bff'}
-                      >
-                        View
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteCandidate(candidate._id, name)}
-                        style={{
-                          backgroundColor: '#f44336',
-                          color: 'white',
-                          border: 'none',
-                          padding: '6px 12px',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                        onMouseOver={(e) => e.target.style.backgroundColor = '#d32f2f'}
-                        onMouseOut={(e) => e.target.style.backgroundColor = '#f44336'}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })
-          )}
-        </tbody>
-      </table>
+                        {candidate.status || 'Applied'}
+                      </span>
+                    </td>
+                    <td className="p-4 align-middle">
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => navigate(`/candidate/${candidate._id}`)}
+                          className="bg-blue-500 text-white px-3 py-1.5 rounded text-xs hover:bg-blue-600 transition-colors"
+                        >
+                          View
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteCandidate(candidate._id, name)}
+                          className="bg-red-500 text-white px-3 py-1.5 rounded text-xs hover:bg-red-600 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

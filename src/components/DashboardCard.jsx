@@ -1,30 +1,29 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './DashboardCard.css';
 
 const DashboardCard = ({ title, value, bgColor, textColor }) => {
-  const cardStyles = {
+  // All static styles from the CSS file are now combined into Tailwind classes.
+  const cardClasses = "rounded-lg p-4 flex-1 min-w-[150px] flex flex-col justify-between shadow-md transition-transform duration-200 hover:scale-[1.02]";
+
+  // The style object is now only for dynamic colors passed as props.
+  const dynamicStyles = {
     backgroundColor: bgColor,
     color: textColor,
-    textDecoration: 'none',
-    display: 'block',
-    borderRadius: '8px',
-    padding: '1rem',
   };
 
   const content = (
     <>
-      <p className="card-title">{title}</p>
-      {value && <h2 className="card-value">{value}</h2>}
+      <p className="text-base font-medium">{title}</p>
+      {value && <h2 className="text-3xl font-bold mt-2">{value}</h2>}
     </>
   );
 
   return title === "Payroll & Expenses" ? (
-    <Link to="/payroll" className="dashboard-card" style={cardStyles}>
+    <Link to="/payroll" className={cardClasses} style={dynamicStyles}>
       {content}
     </Link>
   ) : (
-    <div className="dashboard-card" style={cardStyles}>
+    <div className={cardClasses} style={dynamicStyles}>
       {content}
     </div>
   );

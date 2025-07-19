@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './EmployeeList.css';
 import { candidateAPI } from '../services/api';
 import { useCandidateContext } from '../context/CandidateContext';
 
@@ -24,155 +23,102 @@ const EmployeeList = () => {
     }
   };
 
-  const getDisplayName = (emp) => {
-    const firstName = emp.personalDetails?.firstName || '';
-    const lastName = emp.personalDetails?.lastName || '';
-    return `${firstName} ${lastName}`.trim() || 'Unknown';
-  };
-
-  const getInitials = (name) => {
-    return name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
-  };
-
-  const getRandomColor = (index) => {
-    const colors = ['#60A5FA', '#FBBF24', '#34D399', '#EC4899', '#A78BFA', '#F87171', '#6EE7B7'];
-    return colors[index % colors.length];
-  };
-
+  // Helper functions remain the same
+  const getDisplayName = (emp) => `${emp.personalDetails?.firstName || ''} ${emp.personalDetails?.lastName || ''}`.trim() || 'Unknown';
+  const getInitials = (name) => name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
+  const getRandomColor = (index) => ['#60A5FA', '#FBBF24', '#34D399', '#EC4899', '#A78BFA', '#F87171', '#6EE7B7'][index % 7];
   const getDepartment = (emp) => emp.professionalDetails?.department || 'N/A';
   const getJobTitle = (emp) => emp.professionalDetails?.currentJobTitle || 'N/A';
-  const getJoinDate = (emp) =>
-    emp.professionalDetails?.availableFrom
-      ? new Date(emp.professionalDetails.availableFrom).toLocaleDateString()
-      : 'N/A';
+  const getJoinDate = (emp) => emp.professionalDetails?.availableFrom ? new Date(emp.professionalDetails.availableFrom).toLocaleDateString() : 'N/A';
 
-  if (loading) {
-    return (
-      <div className="employee-container">
-        <h3>Employee Database</h3>
-        <p>Loading employees...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="employee-container">
-        <h3>Employee Database</h3>
-        <p style={{ color: 'red' }}>{error}</p>
-      </div>
-    );
-  }
+  if (loading) return <div className="p-8">Loading employees...</div>;
+  if (error) return <div className="p-8 text-red-600">{error}</div>;
 
   return (
-    <div className="employee-container">
-      <div className="employee-header">
-        <h3>Employee Database</h3>
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-8">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-2xl sm:text-3xl font-semibold text-gray-800">Employee Database</h3>
         <button 
-          className="add-button" 
+          className="bg-green-500 text-white font-medium py-2 px-4 rounded-md hover:bg-green-600 transition-colors text-sm"
           onClick={() => navigate('/add-employee')}
         >
           + Add Employee
         </button>
       </div>
-      <table className="employee-table">
-        <thead>
-          <tr>
-            <th>Employee</th>
-            <th>Department</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Join Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {employees.length === 0 ? (
-            <tr>
-              <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
-                No employees found
-              </td>
-            </tr>
-          ) : (
-            employees.map((emp, index) => {
-              const name = getDisplayName(emp);
-              const department = getDepartment(emp);
-              const jobTitle = getJobTitle(emp);
-              const status = emp.status;
-              const joinDate = getJoinDate(emp);
-
-              return (
-                <tr key={emp._id || index}>
-                  <td className="employee-info">
-                    <span className="avatar" style={{ backgroundColor: getRandomColor(index) }}>
-                      {getInitials(name)}
-                    </span>
-                    <div className="details">
-                      <strong 
-                        style={{ cursor: 'pointer', color: '#007bff' }} 
-                        onClick={() => navigate(`/candidate/${emp._id}`)}
-                      >
-                        {name}
-                      </strong>
-                      <span className="role">{jobTitle}</span>
-                    </div>
-                  </td>
-                  <td>{department}</td>
-                  <td>{jobTitle}</td>
-                  <td>
-                    <span 
-                      className="status-badge"
-                      style={{
-                        padding: '4px 8px',
-                        borderRadius: '12px',
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        backgroundColor: '#e8f5e8',
-                        color: '#388e3c'
-                      }}
-                    >
-                      {status}
-                    </span>
-                  </td>
-                  <td>{joinDate}</td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button 
-                        onClick={() => navigate(`/candidate/${emp._id}`)}
-                        style={{
-                          backgroundColor: '#007bff',
-                          color: 'white',
-                          border: 'none',
-                          padding: '6px 12px',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                      >
-                        View
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteEmployee(emp._id, name)}
-                        style={{
-                          backgroundColor: '#f44336',
-                          color: 'white',
-                          border: 'none',
-                          padding: '6px 12px',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="p-4 text-left font-semibold text-gray-500">Employee</th>
+                <th className="p-4 text-left font-semibold text-gray-500">Department</th>
+                <th className="p-4 text-left font-semibold text-gray-500">Role</th>
+                <th className="p-4 text-left font-semibold text-gray-500">Status</th>
+                <th className="p-4 text-left font-semibold text-gray-500">Join Date</th>
+                <th className="p-4 text-left font-semibold text-gray-500">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {employees.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="text-center p-5">No employees found</td>
                 </tr>
-              );
-            })
-          )}
-        </tbody>
-      </table>
+              ) : (
+                employees.map((emp, index) => {
+                  const name = getDisplayName(emp);
+                  return (
+                    <tr key={emp._id || index}>
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div 
+                            className="w-9 h-9 rounded-full text-white font-semibold flex items-center justify-center text-sm"
+                            style={{ backgroundColor: getRandomColor(index) }}
+                          >
+                            {getInitials(name)}
+                          </div>
+                          <div>
+                            <strong 
+                              className="cursor-pointer text-blue-600 hover:underline"
+                              onClick={() => navigate(`/candidate/${emp._id}`)}
+                            >
+                              {name}
+                            </strong>
+                            <div className="text-sm text-gray-500">{getJobTitle(emp)}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4 align-middle">{getDepartment(emp)}</td>
+                      <td className="p-4 align-middle">{getJobTitle(emp)}</td>
+                      <td className="p-4 align-middle">
+                        <span className="inline-block py-1.5 px-3 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                          {emp.status}
+                        </span>
+                      </td>
+                      <td className="p-4 align-middle">{getJoinDate(emp)}</td>
+                      <td className="p-4 align-middle">
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => navigate(`/candidate/${emp._id}`)}
+                            className="bg-blue-500 text-white py-1.5 px-2.5 text-xs rounded-md hover:bg-blue-600 transition-colors"
+                          >
+                            View
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteEmployee(emp._id, name)}
+                            className="bg-red-500 text-white py-1.5 px-2.5 text-xs rounded-md hover:bg-red-600 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };

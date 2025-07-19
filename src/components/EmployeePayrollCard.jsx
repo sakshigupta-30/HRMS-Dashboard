@@ -1,59 +1,69 @@
-// src/components/EmployeePayrollCard.jsx
 import React from 'react';
-import './EmployeePayrollCard.css'; // Optional for styling
+
+// A reusable style for each card in the component to ensure consistency.
+const cardClasses = "bg-white border border-gray-300 rounded-lg p-4 w-full sm:w-[300px] flex-shrink-0 flex flex-col";
+const cardTitleClasses = "font-semibold mb-2";
 
 const EmployeePayrollCard = ({ employee }) => {
   return (
-    <div className="employee-payroll-card">
-      <div className="card">
-        <h4>Payslip Details</h4>
-        <p>{employee.name} ({employee.empId})</p>
-        <p>{employee.month} | Net Pay: ₹{employee.netPay}</p>
+    <div className="flex flex-wrap gap-4 mb-8">
+      {/* Card 1: Payslip Details */}
+      <div className={cardClasses}>
+        <h4 className={cardTitleClasses}>Payslip Details</h4>
+        <p className="text-sm">{employee.name} ({employee.empId})</p>
+        <p className="text-sm text-gray-600">{employee.month} | Net Pay: ₹{employee.netPay}</p>
       </div>
 
-      <div className="card">
-        <h4>Salary Components</h4>
-        <table>
-          <tbody>
+      {/* Card 2: Salary Components */}
+      <div className={cardClasses}>
+        <h4 className={cardTitleClasses}>Salary Components</h4>
+        <table className="w-full text-sm">
+          <tbody className="divide-y divide-gray-200">
             {employee.salaryComponents.map((item, idx) => (
               <tr key={idx}>
-                <td>{item.component}</td>
-                <td>₹{item.amount}</td>
+                <td className="py-1.5">{item.component}</td>
+                <td className="text-right font-medium">₹{item.amount}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <div className="card">
-        <h4>Payroll Summary</h4>
-        <table>
-          <thead>
+      {/* Card 3: Payroll Summary */}
+      <div className={cardClasses}>
+        <h4 className={cardTitleClasses}>Payroll Summary</h4>
+        <table className="w-full text-sm text-left">
+          <thead className="border-b border-gray-200">
             <tr>
-              <th>Month</th>
-              <th>Employees</th>
-              <th>Total Pay</th>
+              <th className="py-1.5 font-medium text-gray-500">Month</th>
+              <th className="py-1.5 font-medium text-gray-500">Employees</th>
+              <th className="py-1.5 font-medium text-gray-500">Total Pay</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-gray-200">
             {employee.payrollSummary.map((item, idx) => (
               <tr key={idx}>
-                <td>{item.month}</td>
-                <td>{item.totalEmployees}</td>
-                <td>{item.totalPay}</td>
+                <td className="py-1.5">{item.month}</td>
+                <td className="py-1.5">{item.totalEmployees}</td>
+                <td className="py-1.5">{item.totalPay}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <div className="card">
-        <h4>Compliance Filing</h4>
-        <ul>
+      {/* Card 4: Compliance Filing */}
+      <div className={cardClasses}>
+        <h4 className={cardTitleClasses}>Compliance Filing</h4>
+        <ul className="space-y-2 text-sm">
           {employee.compliance.map((item, idx) => (
             <li key={idx}>
               {item.type} ({item.month}) — 
-              <span className={item.status.toLowerCase()}>{item.status}</span>
+              <span className={`font-bold ${
+                item.status.toLowerCase() === 'filed' ? 'text-green-600' : 'text-orange-500'
+              }`}>
+                {' '}{item.status}
+              </span>
             </li>
           ))}
         </ul>
