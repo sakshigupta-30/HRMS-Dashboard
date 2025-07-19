@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-
+import './AddEmployee.css'; // Assuming you have some styles in this file
 const AddEmployee = ({ onSuccess, onClose }) => {
   const [formData, setFormData] = useState({
     firstName: '',
