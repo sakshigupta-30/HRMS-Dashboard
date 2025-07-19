@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'; // Make sure useState is imported
 import { useNavigate } from 'react-router-dom';
 import { candidateAPI } from '../services/api';
 import { useCandidateContext } from '../context/CandidateContext';
 
 const EmployeeList = () => {
   const { candidates, loading, refreshCandidates } = useCandidateContext();
-  const [error, setError] = useState('');
+  const [error, setError] = useState(''); // ✅ THIS LINE WAS MISSING
   const navigate = useNavigate();
 
   const employees = candidates.filter(c => c.status === 'Selected');
@@ -18,18 +18,21 @@ const EmployeeList = () => {
         alert('Employee deleted successfully!');
       } catch (error) {
         console.error('Error deleting employee:', error);
+        // Use setError to display errors if you add an error message element
+        setError('Failed to delete employee. Please try again.'); 
         alert('Failed to delete employee. Please try again.');
       }
     }
   };
 
-  // Helper functions remain the same
+  // Helper functions remain the same...
   const getDisplayName = (emp) => `${emp.personalDetails?.firstName || ''} ${emp.personalDetails?.lastName || ''}`.trim() || 'Unknown';
   const getInitials = (name) => name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
   const getRandomColor = (index) => ['#60A5FA', '#FBBF24', '#34D399', '#EC4899', '#A78BFA', '#F87171', '#6EE7B7'][index % 7];
   const getDepartment = (emp) => emp.professionalDetails?.department || 'N/A';
   const getJobTitle = (emp) => emp.professionalDetails?.currentJobTitle || 'N/A';
   const getJoinDate = (emp) => emp.professionalDetails?.availableFrom ? new Date(emp.professionalDetails.availableFrom).toLocaleDateString() : 'N/A';
+
 
   if (loading) return <div className="p-8">Loading employees...</div>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
@@ -48,6 +51,7 @@ const EmployeeList = () => {
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
+            {/* Table Head */}
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="p-4 text-left font-semibold text-gray-500">Employee</th>
@@ -58,6 +62,7 @@ const EmployeeList = () => {
                 <th className="p-4 text-left font-semibold text-gray-500">Actions</th>
               </tr>
             </thead>
+            {/* Table Body */}
             <tbody className="divide-y divide-gray-200">
               {employees.length === 0 ? (
                 <tr>
@@ -71,7 +76,7 @@ const EmployeeList = () => {
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div 
-                            className="w-9 h-9 rounded-full text-white font-semibold flex items-center justify-center text-sm"
+                            className="w-9 h-9 rounded-full text-white font-semibold flex items-center justify-center text-sm flex-shrink-0"
                             style={{ backgroundColor: getRandomColor(index) }}
                           >
                             {getInitials(name)}

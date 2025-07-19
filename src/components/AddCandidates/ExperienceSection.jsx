@@ -1,6 +1,5 @@
 import React from 'react';
 
-// Reusing the same compact input styles for consistency within tables
 const tableInputClasses = "w-full p-2 border border-slate-300 rounded-md bg-white text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition";
 
 const ExperienceSection = ({ data, updateData }) => {
@@ -58,7 +57,8 @@ const ExperienceSection = ({ data, updateData }) => {
                 <td className="p-2 border border-slate-200 align-top">
                   <textarea 
                     value={exp.summary}
-                    onChange={(e) => handleChange(index, 'summary', e.targe.value)}
+                    // ✅ This line is now corrected (e.target.value)
+                    onChange={(e) => handleChange(index, 'summary', e.target.value)}
                     className={tableInputClasses}
                     rows="1"
                   />
