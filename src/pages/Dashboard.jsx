@@ -11,10 +11,10 @@ const Dashboard = () => {
   const boxClasses = "rounded-xl p-4 shadow-md flex flex-col overflow-hidden";
 
   return (
-    // Changes are in this line: p-4 and gap-4
-    <div className="flex flex-col h-full gap-4 p-4">
+    // The only change is in this line: p-4 is now p-2
+    <div className="flex flex-col h-full gap-4 p-2">
       
-      {/* Top Summary Cards - Change is here: gap-4 */}
+      {/* Top Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 flex-shrink-0">
         <DashboardCard title="Total Candidates" value={candidateCount.toString()} bgColor="#F97316" textColor="#ffffff" />
         <DashboardCard title="Placement Today" value="0" bgColor="#FACC15" textColor="#1E293B" />
@@ -24,7 +24,7 @@ const Dashboard = () => {
         <DashboardCard title="Talent Acquisition" bgColor="#EF4444" textColor="#ffffff" />
       </div>
 
-      {/* Bottom Row - Change is here: gap-4 */}
+      {/* Bottom Row */}
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_1.5fr_1.2fr] gap-4 flex-grow overflow-hidden max-h-[calc(100vh-180px)]">
         
         <div className={`${boxClasses} bg-white`}>

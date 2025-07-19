@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; // Make sure useState is imported
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { candidateAPI } from '../services/api';
 import { useCandidateContext } from '../context/CandidateContext';
@@ -15,7 +15,7 @@ const statusStyles = {
 
 const CandidateList = () => {
   const { candidates, loading, refreshCandidates } = useCandidateContext();
-  const [error, setError] = useState(''); // ✅ THIS LINE WAS MISSING
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleDeleteCandidate = async (candidateId, candidateName) => {
@@ -48,7 +48,7 @@ const CandidateList = () => {
     );
   }
 
-  // Improved error state (now works correctly)
+  // Improved error state
   if (error) {
     return (
       <div className="flex h-full flex-grow items-center justify-center p-4">
@@ -65,8 +65,8 @@ const CandidateList = () => {
           <thead className="border-b border-slate-200">
             <tr>
               <th className="p-4 font-medium text-slate-500 w-[40%]">Candidate</th>
-              <th className="p-4 font-medium text-slate-500 w-[20%]">Department</th>
-              <th className="p-4 font-medium text-slate-500 w-[20%]">Status</th>
+              <th className="p-4 font-medium text-slate-500 w-[20%] border-l border-slate-200 pl-6">Department</th>
+              <th className="p-4 font-medium text-slate-500 w-[20%] border-l border-slate-200 pl-6">Status</th>
               <th className="p-4 font-medium text-slate-500 w-[20%]">Actions</th>
             </tr>
           </thead>
@@ -90,7 +90,7 @@ const CandidateList = () => {
                         >
                           {getInitials(name)}
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0"> {/* Wrapper to allow truncation */}
                           <strong 
                             className="block truncate cursor-pointer text-blue-600 hover:underline"
                             onClick={() => navigate(`/candidate/${candidate._id}`)}
@@ -101,8 +101,8 @@ const CandidateList = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="p-4 align-middle truncate">{getDepartment(candidate)}</td>
-                    <td className="p-4 align-middle">
+                    <td className="p-4 align-middle truncate border-l border-slate-200 pl-6">{getDepartment(candidate)}</td>
+                    <td className="p-4 align-middle border-l border-slate-200 pl-6">
                       <span 
                         className={`inline-block whitespace-nowrap px-2 py-1 rounded-full text-xs font-bold ${statusStyles[candidate.status] || statusStyles.default}`}
                       >
