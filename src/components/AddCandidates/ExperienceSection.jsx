@@ -25,58 +25,36 @@ const ExperienceSection = ({ data, updateData }) => {
         Experience
       </h3>
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse mb-4">
+        {/* CHANGE 1: Added 'border-separate border-spacing-y-3' to the table */}
+        <table className="w-full border-separate border-spacing-y-3 mb-4">
           <thead>
             <tr>
-              <th className="p-3 border border-slate-200 bg-slate-50 font-semibold text-slate-800 text-sm text-left">Occupation</th>
-              <th className="p-3 border border-slate-200 bg-slate-50 font-semibold text-slate-800 text-sm text-left">Company</th>
-              <th className="p-3 border border-slate-200 bg-slate-50 font-semibold text-slate-800 text-sm text-left">Summary</th>
-              <th className="p-3 border border-slate-200 bg-slate-50 font-semibold text-slate-800 text-sm text-left">Duration</th>
-              <th className="p-3 border border-slate-200 bg-slate-50 font-semibold text-slate-800 text-sm text-left">Currently Work Here</th>
+              {/* CHANGE 2: Removed borders from headers, adjusted padding */}
+              <th className="p-2 font-semibold text-slate-800 text-sm text-left">Occupation</th>
+              <th className="p-2 font-semibold text-slate-800 text-sm text-left">Company</th>
+              <th className="p-2 font-semibold text-slate-800 text-sm text-left">Summary</th>
+              <th className="p-2 font-semibold text-slate-800 text-sm text-left">Duration</th>
+              <th className="p-2 font-semibold text-slate-800 text-sm text-left">Currently Work Here</th>
             </tr>
           </thead>
           <tbody>
             {data.map((exp, index) => (
               <tr key={index}>
-                <td className="p-2 border border-slate-200 align-top">
-                  <input 
-                    type="text" 
-                    value={exp.occupation}
-                    onChange={(e) => handleChange(index, 'occupation', e.target.value)}
-                    className={tableInputClasses}
-                  />
+                {/* CHANGE 3: Removed borders from cells, added bg-slate-50 and rounded corners */}
+                <td className="p-2 align-top bg-slate-50 rounded-l-md">
+                  <input type="text" value={exp.occupation} onChange={(e) => handleChange(index, 'occupation', e.target.value)} className={tableInputClasses} />
                 </td>
-                <td className="p-2 border border-slate-200 align-top">
-                  <input 
-                    type="text" 
-                    value={exp.company}
-                    onChange={(e) => handleChange(index, 'company', e.target.value)}
-                    className={tableInputClasses}
-                  />
+                <td className="p-2 align-top bg-slate-50">
+                  <input type="text" value={exp.company} onChange={(e) => handleChange(index, 'company', e.target.value)} className={tableInputClasses} />
                 </td>
-                <td className="p-2 border border-slate-200 align-top">
-                  <textarea 
-                    value={exp.summary}
-                    // ✅ This line is now corrected (e.target.value)
-                    onChange={(e) => handleChange(index, 'summary', e.target.value)}
-                    className={tableInputClasses}
-                    rows="1"
-                  />
+                <td className="p-2 align-top bg-slate-50">
+                  <textarea value={exp.summary} onChange={(e) => handleChange(index, 'summary', e.target.value)} className={tableInputClasses} rows="1" />
                 </td>
-                <td className="p-2 border border-slate-200 align-top">
-                  <input 
-                    type="text" 
-                    value={exp.duration}
-                    onChange={(e) => handleChange(index, 'duration', e.target.value)}
-                    className={tableInputClasses}
-                  />
+                <td className="p-2 align-top bg-slate-50">
+                  <input type="text" value={exp.duration} onChange={(e) => handleChange(index, 'duration', e.target.value)} className={tableInputClasses} />
                 </td>
-                <td className="p-2 border border-slate-200 align-top">
-                  <select 
-                    value={exp.currentlyWorkHere ? 'yes' : 'no'}
-                    onChange={(e) => handleChange(index, 'currentlyWorkHere', e.target.value === 'yes')}
-                    className={tableInputClasses}
-                  >
+                <td className="p-2 align-top bg-slate-50 rounded-r-md">
+                  <select value={exp.currentlyWorkHere ? 'yes' : 'no'} onChange={(e) => handleChange(index, 'currentlyWorkHere', e.target.value === 'yes')} className={tableInputClasses}>
                     <option value="no">No</option>
                     <option value="yes">Yes</option>
                   </select>
