@@ -118,8 +118,8 @@ const CandidateDetail = () => {
         </button>
         <div className="candidate-header">
           <div className="candidate-avatar">
-            {(candidate.personalDetails?.firstName?.charAt(0) || '') + 
-             (candidate.personalDetails?.lastName?.charAt(0) || '')}
+            {(candidate.personalDetails?.firstName?.charAt(0) || '') +
+              (candidate.personalDetails?.lastName?.charAt(0) || '')}
           </div>
           <div className="candidate-basic-info">
             <h1>
@@ -134,8 +134,8 @@ const CandidateDetail = () => {
           </div>
         </div>
         <div className="action-buttons">
-          <select 
-            value={candidate.status} 
+          <select
+            value={candidate.status}
             onChange={(e) => handleStatusUpdate(e.target.value)}
             className="status-dropdown"
           >
@@ -229,16 +229,16 @@ const CandidateDetail = () => {
             <div className="detail-item">
               <label>Current Salary:</label>
               <span>
-                {candidate.professionalDetails?.currentSalary 
-                  ? `₹${candidate.professionalDetails.currentSalary.toLocaleString()}` 
+                {candidate.professionalDetails?.currentSalary
+                  ? `₹${candidate.professionalDetails.currentSalary.toLocaleString()}`
                   : 'N/A'}
               </span>
             </div>
             <div className="detail-item">
               <label>Expected Salary:</label>
               <span>
-                {candidate.professionalDetails?.expectedSalary 
-                  ? `₹${candidate.professionalDetails.expectedSalary.toLocaleString()}` 
+                {candidate.professionalDetails?.expectedSalary
+                  ? `₹${candidate.professionalDetails.expectedSalary.toLocaleString()}`
                   : 'N/A'}
               </span>
             </div>
@@ -262,7 +262,7 @@ const CandidateDetail = () => {
         </div>
 
         {/* Education */}
-        {candidate.education && candidate.education.length > 0 && (
+        {candidate.education?.length > 0 && (
           <div className="detail-section">
             <h3>Education</h3>
             {candidate.education.map((edu, index) => (
@@ -278,7 +278,7 @@ const CandidateDetail = () => {
         )}
 
         {/* Experience */}
-        {candidate.experience && candidate.experience.length > 0 && (
+        {candidate.experience?.length > 0 && (
           <div className="detail-section">
             <h3>Work Experience</h3>
             {candidate.experience.map((exp, index) => (
@@ -292,7 +292,7 @@ const CandidateDetail = () => {
           </div>
         )}
 
-        {/* Application Details */}
+        {/* Application Info */}
         <div className="detail-section">
           <h3>Application Information</h3>
           <div className="detail-grid">
@@ -312,6 +312,21 @@ const CandidateDetail = () => {
             )}
           </div>
         </div>
+
+        {/* ✅ Client Assignment - Only for Employees */}
+        {candidate.isEmployee && (
+          <div className="detail-section">
+            <h3>Client Assignment</h3>
+            <div className="detail-item">
+              <label>Client Details:</label>
+              <span>
+                {candidate.client
+                  ? `${candidate.personalDetails?.firstName || 'This employee'} is working with ${candidate.client}`
+                  : `No client assigned to ${candidate.personalDetails?.firstName || 'this employee'} till now.`}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
