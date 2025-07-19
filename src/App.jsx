@@ -87,7 +87,7 @@ const AppContent = () => {
         path="/reports"
         element={
           <PrivateLayout>
-            <Placements />
+            <Reports />
           </PrivateLayout>
         }
       />

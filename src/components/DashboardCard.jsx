@@ -2,10 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const DashboardCard = ({ title, value, bgColor, textColor }) => {
-  // All static styles from the CSS file are now combined into Tailwind classes.
-  const cardClasses = "rounded-lg p-4 flex-1 min-w-[150px] flex flex-col justify-between shadow-md transition-transform duration-200 hover:scale-[1.02]";
+  // Changes are in this line: p-6 and min-h-[120px] are added/changed
+  const cardClasses = "rounded-lg p-6 flex-1 min-w-[150px] flex flex-col justify-between shadow-md transition-transform duration-200 hover:scale-[1.02] min-h-[120px]";
 
-  // The style object is now only for dynamic colors passed as props.
   const dynamicStyles = {
     backgroundColor: bgColor,
     color: textColor,
@@ -13,7 +12,8 @@ const DashboardCard = ({ title, value, bgColor, textColor }) => {
 
   const content = (
     <>
-      <p className="text-base font-medium">{title}</p>
+      {/* Change is in this line: text-lg */}
+      <p className="text-lg font-medium">{title}</p>
       {value && <h2 className="text-3xl font-bold mt-2">{value}</h2>}
     </>
   );
