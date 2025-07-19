@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './AddEmployee.css'; // Assuming you have some styles in this file
+import './AddCandidateForm.css'; // Reuse this CSS
+
 const AddEmployee = ({ onSuccess, onClose }) => {
   const [formData, setFormData] = useState({
     firstName: '',
@@ -48,7 +49,7 @@ const AddEmployee = ({ onSuccess, onClose }) => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-      `${import.meta.env.VITE_API_URL}/v1/candidates`,
+        `${import.meta.env.VITE_API_URL}/v1/candidates`,
         newEmployee,
         {
           headers: {
@@ -56,7 +57,7 @@ const AddEmployee = ({ onSuccess, onClose }) => {
           }
         }
       );
-      onSuccess(); // refresh employee list or close modal
+      onSuccess();
       onClose();
     } catch (err) {
       setError('Failed to add employee. Please try again.');
@@ -67,91 +68,94 @@ const AddEmployee = ({ onSuccess, onClose }) => {
   };
 
   return (
-    <div className="p-6 bg-white rounded-xl shadow-md max-w-md mx-auto mt-10">
-      <h2 className="text-xl font-semibold mb-4">Add Employee</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            name="firstName"
-            placeholder="First Name"
-            value={formData.firstName}
-            onChange={handleChange}
-            required
-            className="border p-2 rounded"
-          />
-          <input
-            type="text"
-            name="lastName"
-            placeholder="Last Name"
-            value={formData.lastName}
-            onChange={handleChange}
-            required
-            className="border p-2 rounded"
-          />
+    <div className="add-candidate-page">
+      <div className="form-header-section">
+        <div className="form-header">
+          <h2>Add Employee</h2>
+          <button className="close-button" onClick={onClose}>✕</button>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        <div className="form-section">
+          <h3>Employee Details</h3>
+          <div className="form-grid">
+            <div>
+              <label>First Name</label>
+              <input
+                type="text"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div>
+              <label>Last Name</label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div>
+              <label>Department</label>
+              <input
+                type="text"
+                name="department"
+                value={formData.department}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div>
+              <label>Current Job Title</label>
+              <input
+                type="text"
+                name="currentJobTitle"
+                value={formData.currentJobTitle}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div>
+              <label>Available From</label>
+              <input
+                type="date"
+                name="availableFrom"
+                value={formData.availableFrom}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div>
+              <label>Client Name</label>
+              <input
+                type="text"
+                name="clientName"
+                value={formData.clientName}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label>Client Location</label>
+              <input
+                type="text"
+                name="clientLocation"
+                value={formData.clientLocation}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
         </div>
 
-        <input
-          type="text"
-          name="department"
-          placeholder="Department"
-          value={formData.department}
-          onChange={handleChange}
-          required
-          className="border p-2 rounded w-full"
-        />
-        <input
-          type="text"
-          name="currentJobTitle"
-          placeholder="Current Job Title"
-          value={formData.currentJobTitle}
-          onChange={handleChange}
-          required
-          className="border p-2 rounded w-full"
-        />
-        <input
-          type="date"
-          name="availableFrom"
-          value={formData.availableFrom}
-          onChange={handleChange}
-          required
-          className="border p-2 rounded w-full"
-        />
+        {error && <p className="form-error">{error}</p>}
 
-        {/* New Client Fields */}
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            name="clientName"
-            placeholder="Client Name"
-            value={formData.clientName}
-            onChange={handleChange}
-            className="border p-2 rounded"
-          />
-          <input
-            type="text"
-            name="clientLocation"
-            placeholder="Client Location"
-            value={formData.clientLocation}
-            onChange={handleChange}
-            className="border p-2 rounded"
-          />
-        </div>
-
-        {error && <p className="text-red-500">{error}</p>}
-        <div className="flex justify-end gap-2 mt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-300 text-black rounded"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded"
-          >
+        <div className="form-footer">
+          <button type="button" className="secondary" onClick={onClose}>Cancel</button>
+          <button type="submit" className="primary" disabled={loading}>
             {loading ? 'Saving...' : 'Save'}
           </button>
         </div>
