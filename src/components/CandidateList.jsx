@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'; // Make sure useState is imported
 import { useNavigate } from 'react-router-dom';
 import { candidateAPI } from '../services/api';
 import { useCandidateContext } from '../context/CandidateContext';
@@ -15,12 +15,31 @@ const statusStyles = {
 
 const CandidateList = () => {
   const { candidates, loading, refreshCandidates } = useCandidateContext();
+  const [error, setError] = useState(''); // ✅ THIS LINE WAS MISSING
   const navigate = useNavigate();
 
-  // Your existing state and helper functions (handleDelete, getDisplayName, etc.) remain unchanged.
-  // [NOTE: Your logic functions are omitted for brevity but should be kept in your file.]
+  const handleDeleteCandidate = async (candidateId, candidateName) => {
+    if (window.confirm(`Are you sure you want to delete ${candidateName}? This action cannot be undone.`)) {
+      try {
+        await candidateAPI.deleteCandidate(candidateId);
+        await refreshCandidates();
+        alert('Candidate deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting candidate:', error);
+        setError('Failed to delete candidate.');
+        alert('Failed to delete candidate. Please try again.');
+      }
+    }
+  };
 
-  // This is the updated loading state
+  // Helper functions
+  const getDisplayName = (candidate) => `${candidate.personalDetails?.firstName || ''} ${candidate.personalDetails?.lastName || ''}`.trim() || 'Unknown';
+  const getJobTitle = (candidate) => candidate.professionalDetails?.currentJobTitle || 'N/A';
+  const getDepartment = (candidate) => candidate.professionalDetails?.department || 'N/A';
+  const getInitials = (name) => name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
+  const getRandomColor = (index) => ['#60A5FA', '#FBBF24', '#34D399', '#EC4899', '#A78BFA', '#F87171', '#6EE7B7'][index % 7];
+
+  // Improved loading state
   if (loading) {
     return (
       <div className="flex h-full flex-grow items-center justify-center p-4">
@@ -29,7 +48,7 @@ const CandidateList = () => {
     );
   }
 
-  // The error state can also be improved
+  // Improved error state (now works correctly)
   if (error) {
     return (
       <div className="flex h-full flex-grow items-center justify-center p-4">
