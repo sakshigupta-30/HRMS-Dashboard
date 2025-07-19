@@ -14,6 +14,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Payroll from './pages/Payroll'; // ✅ Add this with your other imports
 import EmployeeList from './pages/EmployeeList';
 import AddEmployee from './pages/AddEmployee';
+import SalarySlips from './pages/SalarySlips';
 
 const PrivateLayout = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -143,6 +144,16 @@ const AppContent = () => {
             </PrivateLayout>
           }
         />
+
+        <Route 
+          path="/salary-slips" 
+          element={
+           <PrivateLayout>
+              <SalarySlips />
+            </PrivateLayout>
+          } 
+        />
+
 
       
         
