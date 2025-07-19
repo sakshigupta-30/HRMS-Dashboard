@@ -11,6 +11,7 @@ const AddEmployee = () => {
     department: '',
     currentJobTitle: '',
     availableFrom: '',
+    client: '' // ✅ new field
   });
 
   const navigate = useNavigate();
@@ -22,8 +23,10 @@ const AddEmployee = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const newEmployee = {
       status: 'Selected',
+      client: formData.client, // ✅ send client to backend
       personalDetails: {
         firstName: formData.firstName,
         lastName: formData.lastName
@@ -55,6 +58,10 @@ const AddEmployee = () => {
         <input name="department" placeholder="Department" value={formData.department} onChange={handleChange} required />
         <input name="currentJobTitle" placeholder="Job Title" value={formData.currentJobTitle} onChange={handleChange} required />
         <input type="date" name="availableFrom" value={formData.availableFrom} onChange={handleChange} required />
+        
+        {/* ✅ New Client Input */}
+        <input name="client" placeholder="Client" value={formData.client} onChange={handleChange} required />
+
         <button type="submit">Add Employee</button>
       </form>
     </div>
