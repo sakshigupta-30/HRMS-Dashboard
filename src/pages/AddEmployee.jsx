@@ -48,7 +48,7 @@ const AddEmployee = ({ onSuccess, onClose }) => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/v1/candidates`,
+        `${import.meta.env.VITE_API_URL}/candidates`,
         newEmployee,
         {
           headers: {

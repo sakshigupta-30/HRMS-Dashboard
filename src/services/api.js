@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // ✅ Set base URL from environment or fallback to Render
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://hrms-backend-50gj.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://hrms-backend-50gj.onrender.com/api';
 
 console.log('API Base URL:', API_BASE_URL);
 
