@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './AddEmployee.css'; // Assuming you have a CSS file for styling
-const AddEmployee = ({ onSuccess, onClose }) => {
+import './AddEmployee.css';
+
+const AddEmployee = ({ 
+  onSuccess = () => {}, 
+  onClose = () => window.history.back() 
+}) => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -56,7 +60,7 @@ const AddEmployee = ({ onSuccess, onClose }) => {
           }
         }
       );
-      onSuccess(); // refresh employee list or close modal
+      onSuccess();
       onClose();
     } catch (err) {
       setError('Failed to add employee. Please try again.');
@@ -118,7 +122,6 @@ const AddEmployee = ({ onSuccess, onClose }) => {
           className="border p-2 rounded w-full"
         />
 
-        {/* New Client Fields */}
         <div className="grid grid-cols-2 gap-4">
           <input
             type="text"

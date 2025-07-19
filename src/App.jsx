@@ -132,14 +132,17 @@ const AppContent = () => {
         }
       />
 
-        <Route
-        path="/add-employee"
-        element={
-          <PrivateLayout>
-            <AddEmployee />
-          </PrivateLayout>
-        }
-      />
+       <Route
+          path="/add-employee"
+          element={
+            <PrivateLayout>
+              <AddEmployee
+                onSuccess={() => console.log('Employee successfully added.')}
+                onClose={() => window.history.back()}
+              />
+            </PrivateLayout>
+          }
+        />
 
       
         
