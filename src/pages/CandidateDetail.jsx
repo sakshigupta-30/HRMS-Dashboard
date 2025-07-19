@@ -320,10 +320,10 @@ const CandidateDetail = () => {
             <div className="detail-item">
               <label>Client Details:</label>
               <span>
-                {candidate.client
-                  ? `${candidate.personalDetails?.firstName || 'This employee'} is working with ${candidate.client}`
-                  : `No client assigned to ${candidate.personalDetails?.firstName || 'this employee'} till now.`}
-              </span>
+              {candidate.client
+                ? `${candidate.personalDetails?.firstName || 'This employee'} is working with ${candidate.client?.name} at ${candidate.client?.location}`
+                : `No client assigned to ${candidate.personalDetails?.firstName || 'this employee'} till now.`}
+            </span>
             </div>
           </div>
         )}

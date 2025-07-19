@@ -1,32 +1,39 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { candidateAPI } from '../services/api';
-import { useCandidateContext } from '../context/CandidateContext';
-import './AddEmployee.css';
+import axios from 'axios';
 
-const AddEmployee = () => {
+const AddEmployee = ({ onSuccess, onClose }) => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     department: '',
     currentJobTitle: '',
     availableFrom: '',
-    client: '' // ✅ new field
+    clientName: '',
+    clientLocation: ''
   });
 
-  const navigate = useNavigate();
-  const { refreshCandidates } = useCandidateContext();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
 
     const newEmployee = {
       status: 'Selected',
-      client: formData.client, // ✅ send client to backend
+      client: {
+        name: formData.clientName || 'No client assigned',
+        location: formData.clientLocation || ''
+      },
       personalDetails: {
         firstName: formData.firstName,
         lastName: formData.lastName
@@ -39,30 +46,115 @@ const AddEmployee = () => {
     };
 
     try {
-      await candidateAPI.addCandidate(newEmployee);
-      await refreshCandidates();
-      alert('Employee added successfully!');
-      navigate('/employees');
-    } catch (error) {
-      console.error('Error adding employee:', error);
-      alert('Failed to add employee. Please try again.');
+      const token = localStorage.getItem('token');
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/v1/candidates`,
+        newEmployee,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      onSuccess(); // refresh employee list or close modal
+      onClose();
+    } catch (err) {
+      setError('Failed to add employee. Please try again.');
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="form-container">
-      <h3>Add New Employee</h3>
-      <form onSubmit={handleSubmit}>
-        <input name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} required />
-        <input name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} required />
-        <input name="department" placeholder="Department" value={formData.department} onChange={handleChange} required />
-        <input name="currentJobTitle" placeholder="Job Title" value={formData.currentJobTitle} onChange={handleChange} required />
-        <input type="date" name="availableFrom" value={formData.availableFrom} onChange={handleChange} required />
-        
-        {/* ✅ New Client Input */}
-        <input name="client" placeholder="Client" value={formData.client} onChange={handleChange} required />
+    <div className="p-6 bg-white rounded-xl shadow-md max-w-md mx-auto mt-10">
+      <h2 className="text-xl font-semibold mb-4">Add Employee</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <input
+            type="text"
+            name="firstName"
+            placeholder="First Name"
+            value={formData.firstName}
+            onChange={handleChange}
+            required
+            className="border p-2 rounded"
+          />
+          <input
+            type="text"
+            name="lastName"
+            placeholder="Last Name"
+            value={formData.lastName}
+            onChange={handleChange}
+            required
+            className="border p-2 rounded"
+          />
+        </div>
 
-        <button type="submit">Add Employee</button>
+        <input
+          type="text"
+          name="department"
+          placeholder="Department"
+          value={formData.department}
+          onChange={handleChange}
+          required
+          className="border p-2 rounded w-full"
+        />
+        <input
+          type="text"
+          name="currentJobTitle"
+          placeholder="Current Job Title"
+          value={formData.currentJobTitle}
+          onChange={handleChange}
+          required
+          className="border p-2 rounded w-full"
+        />
+        <input
+          type="date"
+          name="availableFrom"
+          value={formData.availableFrom}
+          onChange={handleChange}
+          required
+          className="border p-2 rounded w-full"
+        />
+
+        {/* New Client Fields */}
+        <div className="grid grid-cols-2 gap-4">
+          <input
+            type="text"
+            name="clientName"
+            placeholder="Client Name"
+            value={formData.clientName}
+            onChange={handleChange}
+            className="border p-2 rounded"
+          />
+          <input
+            type="text"
+            name="clientLocation"
+            placeholder="Client Location"
+            value={formData.clientLocation}
+            onChange={handleChange}
+            className="border p-2 rounded"
+          />
+        </div>
+
+        {error && <p className="text-red-500">{error}</p>}
+        <div className="flex justify-end gap-2 mt-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-300 text-black rounded"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-4 py-2 bg-blue-600 text-white rounded"
+          >
+            {loading ? 'Saving...' : 'Save'}
+          </button>
+        </div>
       </form>
     </div>
   );
