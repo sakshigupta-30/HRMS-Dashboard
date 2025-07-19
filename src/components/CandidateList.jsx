@@ -1,22 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './CandidateList.css';
 import { candidateAPI } from '../services/api';
 import { useCandidateContext } from '../context/CandidateContext';
 
-// Helper object for status badge styling
-const statusStyles = {
-  Applied: 'bg-blue-100 text-blue-800',
-  Draft: 'bg-amber-100 text-amber-800',
-  Interview: 'bg-purple-100 text-purple-800',
-  Selected: 'bg-green-100 text-green-800',
-  Rejected: 'bg-red-100 text-red-800',
-  default: 'bg-slate-100 text-slate-800',
-};
-
 const CandidateList = () => {
-  const { candidates, loading, refreshCandidates } = useCandidateContext();
+  const { candidates, refreshCandidates } = useCandidateContext();
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const safeCandidates = candidates || [];
 
   const handleDeleteCandidate = async (candidateId, candidateName) => {
     if (window.confirm(`Are you sure you want to delete ${candidateName}? This action cannot be undone.`)) {
@@ -26,112 +19,123 @@ const CandidateList = () => {
         alert('Candidate deleted successfully!');
       } catch (error) {
         console.error('Error deleting candidate:', error);
-        setError('Failed to delete candidate.');
         alert('Failed to delete candidate. Please try again.');
       }
     }
   };
 
-  // Helper functions
-  const getDisplayName = (candidate) => `${candidate.personalDetails?.firstName || ''} ${candidate.personalDetails?.lastName || ''}`.trim() || 'Unknown';
+  const getDisplayName = (candidate) => {
+    const firstName = candidate.personalDetails?.firstName || '';
+    const lastName = candidate.personalDetails?.lastName || '';
+    return `${firstName} ${lastName}`.trim() || 'Unknown';
+  };
+
   const getJobTitle = (candidate) => candidate.professionalDetails?.currentJobTitle || 'N/A';
   const getDepartment = (candidate) => candidate.professionalDetails?.department || 'N/A';
   const getInitials = (name) => name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
-  const getRandomColor = (index) => ['#60A5FA', '#FBBF24', '#34D399', '#EC4899', '#A78BFA', '#F87171', '#6EE7B7'][index % 7];
+  const getRandomColor = (index) => {
+    const colors = ['#60A5FA', '#FBBF24', '#34D399', '#EC4899', '#A78BFA', '#F87171', '#6EE7B7'];
+    return colors[index % colors.length];
+  };
 
-  // Improved loading state
-  if (loading) {
-    return (
-      <div className="flex h-full flex-grow items-center justify-center p-4">
-        <p className="text-lg text-gray-500">Loading candidates...</p>
-      </div>
-    );
-  }
+  const getStatusBadgeStyle = (status) => {
+    const baseStyle = {
+      padding: '4px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold'
+    };
+    switch (status) {
+      case 'Applied': return { ...baseStyle, backgroundColor: '#e3f2fd', color: '#1976d2' };
+      case 'Draft': return { ...baseStyle, backgroundColor: '#fff3e0', color: '#f57c00' };
+      case 'Interview': return { ...baseStyle, backgroundColor: '#f3e5f5', color: '#7b1fa2' };
+      case 'Selected': return { ...baseStyle, backgroundColor: '#e8f5e8', color: '#388e3c' };
+      case 'Rejected': return { ...baseStyle, backgroundColor: '#ffebee', color: '#d32f2f' };
+      default: return { ...baseStyle, backgroundColor: '#f5f5f5', color: '#666' };
+    }
+  };
 
-  // Improved error state
   if (error) {
     return (
-      <div className="flex h-full flex-grow items-center justify-center p-4">
-        <p className="text-lg text-red-500">{error}</p>
+      <div className="candidate-list-container">
+        <h3>Candidate List</h3>
+        <p style={{ color: 'red' }}>{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg">
-      <h3 className="text-xl font-bold p-4">Candidate List</h3>
-      <div className="overflow-x-auto">
-        <table className="w-full table-fixed text-left">
-          <thead className="border-b border-slate-200">
+    <div className="candidate-list-container">
+      <h3>Candidate List</h3>
+      <table className="candidate-table">
+        <thead>
+          <tr>
+            <th>Candidate</th>
+            <th>Department</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {safeCandidates.length === 0 ? (
             <tr>
-              <th className="p-4 font-medium text-slate-500 w-[40%]">Candidate</th>
-              <th className="p-4 font-medium text-slate-500 w-[20%] border-l border-slate-200 pl-6">Department</th>
-              <th className="p-4 font-medium text-slate-500 w-[20%] border-l border-slate-200 pl-6">Status</th>
-              <th className="p-4 font-medium text-slate-500 w-[20%]">Actions</th>
+              <td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>
+                No candidates found
+              </td>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-200">
-            {candidates.length === 0 ? (
-              <tr>
-                <td colSpan="4" className="text-center p-5">No candidates found</td>
-              </tr>
-            ) : (
-              candidates.map((candidate, index) => {
-                const name = getDisplayName(candidate);
-                const jobTitle = getJobTitle(candidate);
-                
-                return (
-                  <tr key={candidate._id || index}>
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-[35px] h-[35px] rounded-full text-white font-bold flex items-center justify-center flex-shrink-0"
-                          style={{ backgroundColor: getRandomColor(index) }}
-                        >
-                          {getInitials(name)}
-                        </div>
-                        <div className="min-w-0"> {/* Wrapper to allow truncation */}
-                          <strong 
-                            className="block truncate cursor-pointer text-blue-600 hover:underline"
-                            onClick={() => navigate(`/candidate/${candidate._id}`)}
-                          >
-                            {name}
-                          </strong>
-                          <div className="truncate text-sm text-slate-500">{jobTitle}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-4 align-middle truncate border-l border-slate-200 pl-6">{getDepartment(candidate)}</td>
-                    <td className="p-4 align-middle border-l border-slate-200 pl-6">
-                      <span 
-                        className={`inline-block whitespace-nowrap px-2 py-1 rounded-full text-xs font-bold ${statusStyles[candidate.status] || statusStyles.default}`}
+          ) : (
+            safeCandidates.map((candidate, index) => {
+              const name = getDisplayName(candidate);
+              const jobTitle = getJobTitle(candidate);
+              const department = getDepartment(candidate);
+
+              return (
+                <tr key={candidate._id || index}>
+                  <td className="candidate-info">
+                    <span className="avatar" style={{ backgroundColor: getRandomColor(index) }}>
+                      {getInitials(name)}
+                    </span>
+                    <div className="details">
+                      <strong
+                        style={{ cursor: 'pointer', color: '#007bff' }}
+                        onClick={() => navigate(`/candidate/${candidate._id}`)}
                       >
-                        {candidate.status || 'Applied'}
-                      </span>
-                    </td>
-                    <td className="p-4 align-middle">
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={() => navigate(`/candidate/${candidate._id}`)}
-                          className="bg-blue-500 text-white px-3 py-2 text-xs rounded-md hover:bg-blue-600 transition-colors"
-                        >
-                          View
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteCandidate(candidate._id, name)}
-                          className="bg-red-500 text-white px-3 py-2 text-xs rounded-md hover:bg-red-600 transition-colors"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+                        {name}
+                      </strong>
+                      <span className="role">{jobTitle}</span>
+                    </div>
+                  </td>
+                  <td>{department}</td>
+                  <td>
+                    <span className="status-badge" style={getStatusBadgeStyle(candidate.status)}>
+                      {candidate.status || 'Applied'}
+                    </span>
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        onClick={() => navigate(`/candidate/${candidate._id}`)}
+                        style={{
+                          backgroundColor: '#007bff', color: 'white', border: 'none',
+                          padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px'
+                        }}
+                      >
+                        View
+                      </button>
+                      <button
+                        onClick={() => handleDeleteCandidate(candidate._id, name)}
+                        style={{
+                          backgroundColor: '#f44336', color: 'white', border: 'none',
+                          padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px'
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })
+          )}
+        </tbody>
+      </table>
     </div>
   );
 };

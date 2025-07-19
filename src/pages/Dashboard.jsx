@@ -6,12 +6,14 @@ import ProfileCard from '../components/ProfileCard';
 import { useCandidateContext } from '../context/CandidateContext';
 
 const Dashboard = () => {
-  const { candidateCount } = useCandidateContext();
-  
+  const { candidates } = useCandidateContext();
+
+  // Use fallback value safely
+  const candidateCount = candidates?.length || 0;
+
   const boxClasses = "rounded-xl p-4 shadow-md flex flex-col overflow-hidden";
 
   return (
-    // The only change is in this line: p-4 is now p-2
     <div className="flex flex-col h-full gap-4 p-2">
       
       {/* Top Summary Cards */}

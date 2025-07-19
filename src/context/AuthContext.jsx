@@ -15,46 +15,43 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check authentication status on app load
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('token');
-      const savedUser = localStorage.getItem('user');
-      const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
-      
-      if (token && isLoggedIn && savedUser) {
-        try {
-          const userData = JSON.parse(savedUser);
-          setIsAuthenticated(true);
-          setUser(userData);
-        } catch (error) {
-          console.error('Error parsing saved user data:', error);
-          // Clear corrupted data
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          sessionStorage.removeItem('isLoggedIn');
-          setIsAuthenticated(false);
-          setUser(null);
-        }
-      } else {
-        setIsAuthenticated(false);
-        setUser(null);
-      }
-      setLoading(false);
-    };
+    console.log('[Auth] 1. Checking authentication status...');
+    const token = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    
+    console.log('[Auth] 2. Found in localStorage:', { token, savedUser });
 
-    checkAuth();
+    if (token && savedUser) {
+      try {
+        const userData = JSON.parse(savedUser);
+        setIsAuthenticated(true);
+        setUser(userData);
+        console.log('[Auth] 3. User is authenticated. Setting user data:', userData);
+      } catch (error) {
+        console.error('[Auth] 3. Error parsing user data from localStorage. Logging out.', error);
+        logout(); // Use logout function to clear everything
+      }
+    } else {
+      console.log('[Auth] 3. No token/user found. User is not authenticated.');
+      setIsAuthenticated(false);
+      setUser(null);
+    }
+    setLoading(false);
   }, []);
 
   const login = (userData) => {
+    console.log('[Auth] Login function called. Saving user data:', userData);
     setIsAuthenticated(true);
     setUser(userData);
     localStorage.setItem('token', userData.token);
     localStorage.setItem('user', JSON.stringify(userData));
-    sessionStorage.setItem('isLoggedIn', 'true');
+    // sessionStorage is optional, localStorage is more common for persistence
+    sessionStorage.setItem('isLoggedIn', 'true'); 
   };
 
   const logout = () => {
+    console.log('[Auth] Logout function called. Clearing auth data.');
     setIsAuthenticated(false);
     setUser(null);
     localStorage.removeItem('token');
