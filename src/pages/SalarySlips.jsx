@@ -40,10 +40,6 @@ const SalarySlips = () => {
         "Paid Leave": parseInt(row["__EMPTY_10"] || 0),
         "Com Off": parseInt(row["__EMPTY_11"] || 0),
         "Working on Holiday": parseInt(row["__EMPTY_12"] || 0),
-        "Total Paid Days": 0,
-        "Earned Gross Pay": 0,
-        "Net Pay": 0,
-        "Grand Total": 0,
       };
 
       Object.values(row).forEach((code) => {
@@ -123,6 +119,19 @@ const SalarySlips = () => {
       const subTotal = totalCTC + serviceCharge;
       const gst = Math.round(subTotal * 0.18);
       const grandTotal = subTotal + gst;
+
+      // Add all detailed fields for the slip template
+      summary["Earned Basic"] = earnedBasic;
+      summary["Earned HRA"] = earnedHRA;
+      summary["Earn Retention"] = earnedRetention;
+      summary["Earn OT"] = earnedOT;
+      summary["Earn Extra Duty"] = earnedExtraDuty;
+      summary["Earn Other Allow"] = earnedOtherAllow;
+      summary["Emp PF"] = empPF;
+      summary["Emp ESI"] = empESI;
+      summary["LWF"] = lwf;
+      summary["Total Deductions"] = totalDeduction;
+      summary["Take Home Pay"] = netPay;
 
       summary["Earned Gross Pay"] = earnedGrossPay;
       summary["Net Pay"] = netPay;
