@@ -9,8 +9,8 @@ const AddEmployee = ({
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    department: '',
-    currentJobTitle: '',
+    
+    designation: '',
     availableFrom: '',
     clientName: '',
     clientLocation: ''
@@ -43,8 +43,8 @@ const AddEmployee = ({
         lastName: formData.lastName
       },
       professionalDetails: {
-        department: formData.department,
-        currentJobTitle: formData.currentJobTitle,
+        
+        designation: formData.designation,
         availableFrom: formData.availableFrom
       }
     };
@@ -95,24 +95,19 @@ const AddEmployee = ({
           />
         </div>
 
-        <input
-          type="text"
-          name="department"
-          placeholder="Department"
-          value={formData.department}
-          onChange={handleChange}
-          required
-          className="border p-2 rounded w-full"
-        />
-        <input
-          type="text"
-          name="currentJobTitle"
-          placeholder="Current Job Title"
-          value={formData.currentJobTitle}
-          onChange={handleChange}
-          required
-          className="border p-2 rounded w-full"
-        />
+<select
+  name="designation"
+  value={formData.designation}
+  onChange={handleChange}
+  required
+  className="border p-2 rounded w-full"
+>
+  <option value="">Select Designation</option>
+        <option value="Picker&Packar">Picker&Packar</option>
+        <option value="SG">SG</option>
+        <option value="HK">HK</option>
+      </select>
+
         <input
           type="date"
           name="availableFrom"

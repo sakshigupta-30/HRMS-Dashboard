@@ -94,7 +94,7 @@ const CandidateDetail = () => {
                 {candidate.personalDetails?.firstName} {candidate.personalDetails?.lastName}
               </h1>
               <p className="text-gray-500 mt-1 mb-2">
-                {candidate.professionalDetails?.currentJobTitle || 'No title specified'}
+                {candidate.professionalDetails?.designation || 'No title specified'}
               </p>
               <span className={`inline-block py-1.5 px-3 rounded-full text-xs font-bold ${statusStyles[candidate.status] || statusStyles.default}`}>
                 {candidate.status || 'Applied'}
@@ -146,8 +146,8 @@ const CandidateDetail = () => {
           <div className="bg-white p-6 rounded-xl shadow-lg">
              <h3 className="text-xl font-semibold text-slate-800 mb-5 pb-2.5 border-b-2 border-slate-100">Professional Information</h3>
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6">
-                <DetailItem label="Job Title">{candidate.professionalDetails?.currentJobTitle}</DetailItem>
-                <DetailItem label="Department">{candidate.professionalDetails?.department}</DetailItem>
+                <DetailItem label="Job Title">{candidate.professionalDetails?.designation}</DetailItem>
+                
                 <DetailItem label="Employment Type">{candidate.professionalDetails?.employmentType}</DetailItem>
                 <DetailItem label="Current Salary">{candidate.professionalDetails?.currentSalary?.toLocaleString()}</DetailItem>
                 <DetailItem label="Expected Salary">{candidate.professionalDetails?.expectedSalary?.toLocaleString()}</DetailItem>

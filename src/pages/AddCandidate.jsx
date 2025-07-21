@@ -15,8 +15,7 @@ const AddCandidate = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
-  // Form state
+
   const [formData, setFormData] = useState({
     personalDetails: {
       firstName: '',
@@ -87,25 +86,19 @@ const AddCandidate = () => {
 
   const validateForm = () => {
     const { personalDetails } = formData;
-    
     if (!personalDetails.firstName || !personalDetails.lastName || !personalDetails.email) {
       setError('Please fill in required fields: First Name, Last Name, Email');
       return false;
     }
-    
     return true;
   };
 
   const prepareDataForBackend = (isDraft = false) => {
-    // Helper function to return null for empty strings or use default values
     const getValue = (value, defaultValue = null) => {
-      if (isDraft) {
-        return value || null;
-      }
+      if (isDraft) return value || null;
       return value || defaultValue;
     };
 
-    // Convert form data to match backend schema
     const backendData = {
       personalDetails: {
         firstName: getValue(formData.personalDetails.firstName),
@@ -117,96 +110,82 @@ const AddCandidate = () => {
         nationality: getValue(formData.personalDetails.nationality, 'Indian')
       },
       address: {
-        street: isDraft ? 
-          getValue(formData.address.present.address1 + ' ' + formData.address.present.address2) :
-          (formData.address.present.address1 + ' ' + formData.address.present.address2) || 'Not specified',
+        street: isDraft
+          ? getValue(formData.address.present.address1 + ' ' + formData.address.present.address2)
+          : (formData.address.present.address1 + ' ' + formData.address.present.address2) || 'Not specified',
         city: getValue(formData.address.present.city, 'Not specified'),
         state: getValue(formData.address.present.state, 'Not specified'),
         country: getValue(formData.address.present.country, 'India'),
         zipCode: getValue(formData.address.present.postalCode, '000000')
       },
       professionalDetails: {
-        currentJobTitle: getValue(formData.professionalDetails.title, 'Not specified'),
-        department: getValue(formData.professionalDetails.department, 'General'),
+        designation: getValue(formData.professionalDetails.designation, null), // FIXED HERE
+        department: getValue(formData.professionalDetails.department, null),
         expectedSalary: formData.professionalDetails.currentSalary ? parseInt(formData.professionalDetails.currentSalary) : (isDraft ? null : 0),
         currentSalary: formData.professionalDetails.currentSalary ? parseInt(formData.professionalDetails.currentSalary) : (isDraft ? null : 0),
         availableFrom: getValue(formData.professionalDetails.tentativeJoiningDate, new Date().toISOString().split('T')[0]),
         employmentType: 'Full-time',
-        skills: formData.professionalDetails.skillSet ? formData.professionalDetails.skillSet.split(',').map(s => s.trim()) : []
+        skills: formData.professionalDetails.skillSet
+          ? formData.professionalDetails.skillSet.split(',').map(s => s.trim())
+          : []
       },
-      education: isDraft ? 
-        formData.education.map(edu => ({
-          degree: getValue(edu.degree),
-          institution: getValue(edu.schoolName),
-          fieldOfStudy: getValue(edu.fieldOfStudy),
-          startDate: '',
-          endDate: getValue(edu.dateOfCompletion),
-          grade: '',
-          isCompleted: false
-        })) :
-        formData.education.filter(edu => edu.schoolName || edu.degree).map(edu => ({
-          degree: edu.degree || '',
-          institution: edu.schoolName || '',
-          fieldOfStudy: edu.fieldOfStudy || '',
-          startDate: '',
-          endDate: edu.dateOfCompletion || '',
-          grade: '',
-          isCompleted: true
-        })),
-      experience: isDraft ?
-        formData.experience.map(exp => ({
-          company: getValue(exp.company),
-          position: getValue(exp.occupation),
-          startDate: '',
-          endDate: '',
-          isCurrentJob: exp.currentlyWorkHere || false,
-          description: getValue(exp.summary)
-        })) :
-        formData.experience.filter(exp => exp.company || exp.occupation).map(exp => ({
-          company: exp.company || '',
-          position: exp.occupation || '',
-          startDate: '',
-          endDate: '',
-          isCurrentJob: exp.currentlyWorkHere || false,
-          description: exp.summary || ''
-        })),
+      education: isDraft
+        ? formData.education.map(edu => ({
+            degree: getValue(edu.degree),
+            institution: getValue(edu.schoolName),
+            fieldOfStudy: getValue(edu.fieldOfStudy),
+            startDate: '',
+            endDate: getValue(edu.dateOfCompletion),
+            grade: '',
+            isCompleted: false
+          }))
+        : formData.education.filter(edu => edu.schoolName || edu.degree).map(edu => ({
+            degree: edu.degree || '',
+            institution: edu.schoolName || '',
+            fieldOfStudy: edu.fieldOfStudy || '',
+            startDate: '',
+            endDate: edu.dateOfCompletion || '',
+            grade: '',
+            isCompleted: true
+          })),
+      experience: isDraft
+        ? formData.experience.map(exp => ({
+            company: getValue(exp.company),
+            position: getValue(exp.occupation),
+            startDate: '',
+            endDate: '',
+            isCurrentJob: exp.currentlyWorkHere || false,
+            description: getValue(exp.summary)
+          }))
+        : formData.experience.filter(exp => exp.company || exp.occupation).map(exp => ({
+            company: exp.company || '',
+            position: exp.occupation || '',
+            startDate: '',
+            endDate: '',
+            isCurrentJob: exp.currentlyWorkHere || false,
+            description: exp.summary || ''
+          })),
       status: isDraft ? 'Draft' : 'Applied'
     };
-    
+
     return backendData;
   };
 
   const handleSubmit = async (submitAndNew = false) => {
     setError('');
     setSuccess('');
-    
-    if (!validateForm()) {
-      return;
-    }
-    
+    if (!validateForm()) return;
+
     setLoading(true);
-    
+
     try {
       const backendData = prepareDataForBackend();
-      console.log('Submitting data:', backendData);
       await candidateAPI.addCandidate(backendData);
-      
-      // Refresh candidate count immediately
       await refreshCandidates();
-      
       setSuccess('Candidate added successfully!');
-      
-      if (submitAndNew) {
-        // Reset form for new candidate
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
-      } else {
-        // Navigate back to dashboard after 2 seconds
-        setTimeout(() => {
-          navigate('/');
-        }, 2000);
-      }
+      setTimeout(() => {
+        submitAndNew ? window.location.reload() : navigate('/');
+      }, 2000);
     } catch (error) {
       console.error('Error adding candidate:', error);
       setError(error.response?.data?.error || 'Failed to add candidate');
@@ -219,21 +198,13 @@ const AddCandidate = () => {
     setError('');
     setSuccess('');
     setLoading(true);
-    
+
     try {
-      const backendData = prepareDataForBackend(true); // Pass true for draft mode
-      console.log('Saving draft:', backendData);
+      const backendData = prepareDataForBackend(true);
       await candidateAPI.addCandidate(backendData);
-      
-      // Refresh candidate count immediately
       await refreshCandidates();
-      
       setSuccess('Draft saved successfully!');
-      
-      // Navigate back to dashboard after 2 seconds
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
+      setTimeout(() => navigate('/'), 2000);
     } catch (error) {
       console.error('Error saving draft:', error);
       setError(error.response?.data?.error || 'Failed to save draft');
@@ -254,54 +225,38 @@ const AddCandidate = () => {
       {error && <div className="error-message" style={{ color: 'red', margin: '1rem', padding: '1rem', backgroundColor: '#ffe6e6', borderRadius: '4px' }}>{error}</div>}
       {success && <div className="success-message" style={{ color: 'green', margin: '1rem', padding: '1rem', backgroundColor: '#e6ffe6', borderRadius: '4px' }}>{success}</div>}
 
-      <CandidateDetails 
+      <CandidateDetails
         data={formData.personalDetails}
         updateData={(data) => updateFormData('personalDetails', data)}
       />
-      <AddressSection 
+      <AddressSection
         data={formData.address}
         updateData={(data) => updateFormData('address', data)}
       />
-      <ProfessionalDetails 
+      <ProfessionalDetails
         data={formData.professionalDetails}
         updateData={(data) => updateFormData('professionalDetails', data)}
       />
-      <EducationSection 
+      <EducationSection
         data={formData.education}
         updateData={(data) => updateFormData('education', data)}
       />
-      <ExperienceSection 
+      <ExperienceSection
         data={formData.experience}
         updateData={(data) => updateFormData('experience', data)}
       />
 
       <div className="form-footer">
-        <button 
-          className="primary" 
-          onClick={() => handleSubmit(false)}
-          disabled={loading}
-        >
+        <button className="primary" onClick={() => handleSubmit(false)} disabled={loading}>
           {loading ? 'Submitting...' : 'Submit'}
         </button>
-        <button 
-          className="primary" 
-          onClick={() => handleSubmit(true)}
-          disabled={loading}
-        >
+        <button className="primary" onClick={() => handleSubmit(true)} disabled={loading}>
           Submit and New
         </button>
-        <button 
-          className="secondary"
-          onClick={handleSaveDraft}
-          disabled={loading}
-        >
+        <button className="secondary" onClick={handleSaveDraft} disabled={loading}>
           Save Draft
         </button>
-        <button 
-          className="secondary"
-          onClick={() => navigate('/')}
-          disabled={loading}
-        >
+        <button className="secondary" onClick={() => navigate('/')} disabled={loading}>
           Cancel
         </button>
       </div>

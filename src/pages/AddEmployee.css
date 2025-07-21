@@ -1,29 +1,64 @@
-.form-container {
-  max-width: 400px;
-  margin: 30px auto;
-  padding: 20px;
-  background: #f9f9f9;
+/* AddEmployee.css */
+
+.add-employee-container {
+  max-width: 500px;
+  margin: 2rem auto;
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: "Segoe UI", sans-serif;
+}
+
+.add-employee-container h2 {
+  text-align: center;
+  color: #333333;
+  margin-bottom: 1.5rem;
+}
+
+.add-employee-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 0.5rem;
+  color: #444444;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.75rem;
+  border: 1px solid #cccccc;
   border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
 }
 
-form input {
-  display: block;
-  width: 100%;
-  margin-bottom: 12px;
-  padding: 8px;
-  font-size: 14px;
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #007bff;
+  outline: none;
 }
 
-form button {
+.submit-btn {
+  padding: 0.75rem;
   background-color: #007bff;
-  color: white;
-  padding: 10px;
+  color: #ffffff;
   border: none;
-  width: 100%;
-  border-radius: 4px;
+  border-radius: 8px;
+  font-size: 1rem;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-form button:hover {
+.submit-btn:hover {
   background-color: #0056b3;
 }

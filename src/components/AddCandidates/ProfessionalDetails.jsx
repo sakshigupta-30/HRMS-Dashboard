@@ -1,6 +1,5 @@
 import React from 'react';
 
-// Revised style constants to perfectly match your new CSS
 const labelClasses = "block font-medium mb-1.5 text-sm";
 const inputClasses = "w-full py-2 px-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none";
 
@@ -13,13 +12,12 @@ const ProfessionalDetails = ({ data, updateData }) => {
   };
 
   return (
-    // The margin is applied when you use this component, not on the component itself.
     <section className="bg-white rounded-lg p-6 shadow-sm border border-slate-200">
       <h2 className="text-lg font-semibold mb-5">
         Professional Details
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-10">
-        
+
         <div>
           <label className={labelClasses}>Experience</label>
           <input 
@@ -52,26 +50,25 @@ const ProfessionalDetails = ({ data, updateData }) => {
           />
         </div>
 
-        <div>
-          <label className={labelClasses}>Title</label>
-          <div className="flex flex-col gap-2.5 mt-1.5">
-            <label className="flex items-center gap-2.5 font-normal text-sm text-gray-800 cursor-pointer">
-              <input type="radio" name="title" value="CEO" checked={data.title === 'CEO'} onChange={(e) => handleChange('title', e.target.value)} className="w-[18px] h-[18px] accent-blue-600 focus:ring-2 focus:ring-offset-1 focus:ring-blue-300" /> CEO
+       <div>
+        <label className={labelClasses}>Designation</label>
+        <div className="flex flex-col gap-2.5 mt-1.5">
+          {['Picker&Packar', 'SG', 'HK'].map(role => (
+            <label key={role} className="flex items-center gap-2.5 font-normal text-sm text-gray-800 cursor-pointer">
+              <input
+                type="radio"
+                name="designation"
+                value={role}
+                checked={data.designation === role}
+                onChange={(e) => handleChange('designation', e.target.value)}
+                className="w-[18px] h-[18px] accent-blue-600 focus:ring-2 focus:ring-offset-1 focus:ring-blue-300"
+              />
+              {role}
             </label>
-            <label className="flex items-center gap-2.5 font-normal text-sm text-gray-800 cursor-pointer">
-              <input type="radio" name="title" value="Administration" checked={data.title === 'Administration'} onChange={(e) => handleChange('title', e.target.value)} className="w-[18px] h-[18px] accent-blue-600 focus:ring-2 focus:ring-offset-1 focus:ring-blue-300" /> Administration
-            </label>
-            <label className="flex items-center gap-2.5 font-normal text-sm text-gray-800 cursor-pointer">
-              <input type="radio" name="title" value="Manager" checked={data.title === 'Manager'} onChange={(e) => handleChange('title', e.target.value)} className="w-[18px] h-[18px] accent-blue-600 focus:ring-2 focus:ring-offset-1 focus:ring-blue-300" /> Manager
-            </label>
-            <label className="flex items-center gap-2.5 font-normal text-sm text-gray-800 cursor-pointer">
-              <input type="radio" name="title" value="Assistant Manager" checked={data.title === 'Assistant Manager'} onChange={(e) => handleChange('title', e.target.value)} className="w-[18px] h-[18px] accent-blue-600 focus:ring-2 focus:ring-offset-1 focus:ring-blue-300" /> Assistant Manager
-            </label>
-            <label className="flex items-center gap-2.5 font-normal text-sm text-gray-800 cursor-pointer">
-              <input type="radio" name="title" value="Team Member" checked={data.title === 'Team Member'} onChange={(e) => handleChange('title', e.target.value)} className="w-[18px] h-[18px] accent-blue-600 focus:ring-2 focus:ring-offset-1 focus:ring-blue-300" /> Team Member
-            </label>
-          </div>
+          ))}
         </div>
+      </div>
+
 
         <div>
           <label className={labelClasses}>Skill Set</label>
@@ -103,23 +100,6 @@ const ProfessionalDetails = ({ data, updateData }) => {
           />
         </div>
 
-        <div>
-          <label className={labelClasses}>Department</label>
-          <select 
-            className={inputClasses}
-            value={data.department}
-            onChange={(e) => handleChange('department', e.target.value)}
-          >
-            <option value="">Select Department</option>
-            <option value="Engineering">Engineering</option>
-            <option value="Marketing">Marketing</option>
-            <option value="Sales">Sales</option>
-            <option value="HR">Human Resources</option>
-            <option value="Finance">Finance</option>
-            <option value="Operations">Operations</option>
-          </select>
-        </div>
-        
         <div className="md:col-span-2">
           <label className={labelClasses}>Additional Information</label>
           <textarea 

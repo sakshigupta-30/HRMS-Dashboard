@@ -10,53 +10,56 @@ const EmployeeList = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    const fetchCandidates = async () => {
-      try {
-        setLoading(true);
-        const data = await candidateAPI.getAllCandidates(page);
-        const selected = data.candidates.filter((c) => c.status === 'Selected');
-        setEmployees(selected);
-        setTotalPages(data.totalPages || 1);
-        setLoading(false);
-      } catch (err) {
-        console.error('Failed to load candidates:', err);
-        setError('Error fetching employees.');
-        setLoading(false);
-      }
-    };
+  const fetchEmployees = async () => {
+    try {
+      setLoading(true);
+      const data = await candidateAPI.getAllCandidates({ page, isEmployee: true });
+      setEmployees(data.candidates || []);
+      setTotalPages(data.totalPages || 1);
+    } catch (err) {
+      console.error('Failed to load employees:', err);
+      setError('Error fetching employees.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchCandidates();
+  useEffect(() => {
+    fetchEmployees();
   }, [page]);
 
   const handleDeleteEmployee = async (employeeId, name) => {
-    if (window.confirm(`Are you sure you want to delete ${name}? This action cannot be undone.`)) {
+    if (window.confirm(`Are you sure you want to delete ${name}?`)) {
       try {
         await candidateAPI.deleteCandidate(employeeId);
-        const data = await candidateAPI.getAllCandidates(page);
-        const selected = data.candidates.filter((c) => c.status === 'Selected');
-        setEmployees(selected);
-        setTotalPages(data.totalPages || 1);
+        await fetchEmployees();
         alert('Employee deleted successfully!');
       } catch (err) {
         console.error('Error deleting employee:', err);
-        setError('Failed to delete employee. Please try again.');
         alert('Failed to delete employee. Please try again.');
       }
     }
   };
 
   const getDisplayName = (emp) =>
-    `${emp.personalDetails?.firstName || ''} ${emp.personalDetails?.lastName || ''}`.trim() || 'Unknown';
-  const getInitials = (name) => name.split(' ').map((n) => n.charAt(0)).join('').toUpperCase();
-  const getRandomColor = (index) =>
-    ['#60A5FA', '#FBBF24', '#34D399', '#EC4899', '#A78BFA', '#F87171', '#6EE7B7'][index % 7];
-  const getDepartment = (emp) => emp.professionalDetails?.department || 'N/A';
-  const getJobTitle = (emp) => emp.professionalDetails?.currentJobTitle || 'N/A';
-  const getJoinDate = (emp) =>
-    emp.professionalDetails?.availableFrom
-      ? new Date(emp.professionalDetails.availableFrom).toLocaleDateString()
-      : 'N/A';
+  (`${emp.personalDetails?.firstName || ''} ${emp.personalDetails?.lastName || ''}`.trim()) || 'Unknown';
+
+  const getInitials = (name) =>
+    name?.split(' ').map((n) => n[0]).join('').toUpperCase();
+
+  const getRandomColor = (i) =>
+    ['#60A5FA', '#FBBF24', '#34D399', '#EC4899', '#A78BFA', '#F87171', '#6EE7B7'][i % 7];
+
+  const getDesignation = (emp) =>
+    emp.professionalDetails?.designation || emp.role || emp.designation || 'N/A';
+
+  const getLocation = (emp) =>
+    emp.client?.location || emp.clientLocation|| 'N/A';
+
+  const getJoinDate = (emp) => {
+    const date = emp.professionalDetails?.availableFrom || emp.joiningDate || emp.doj;
+    return date ? new Date(date).toLocaleDateString() : 'N/A';
+  };
 
   if (loading) return <div className="p-8">Loading employees...</div>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
@@ -66,7 +69,7 @@ const EmployeeList = () => {
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-2xl sm:text-3xl font-semibold text-gray-800">Employee Database</h3>
         <button
-          className="bg-green-500 text-white font-medium py-2 px-4 rounded-md hover:bg-green-600 transition-colors text-sm"
+          className="bg-green-500 text-white font-medium py-2 px-4 rounded-md hover:bg-green-600 text-sm"
           onClick={() => navigate('/add-employee')}
         >
           + Add Employee
@@ -79,8 +82,8 @@ const EmployeeList = () => {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="p-4 text-left font-semibold text-gray-500">Employee</th>
-                <th className="p-4 text-left font-semibold text-gray-500">Department</th>
-                <th className="p-4 text-left font-semibold text-gray-500">Role</th>
+                <th className="p-4 text-left font-semibold text-gray-500">Designation</th>
+                <th className="p-4 text-left font-semibold text-gray-500">Location</th>
                 <th className="p-4 text-left font-semibold text-gray-500">Status</th>
                 <th className="p-4 text-left font-semibold text-gray-500">Join Date</th>
                 <th className="p-4 text-left font-semibold text-gray-500">Actions</th>
@@ -94,15 +97,15 @@ const EmployeeList = () => {
                   </td>
                 </tr>
               ) : (
-                employees.map((emp, index) => {
+                employees.map((emp, i) => {
                   const name = getDisplayName(emp);
                   return (
-                    <tr key={emp._id || index}>
+                    <tr key={emp._id || i}>
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div
                             className="w-9 h-9 rounded-full text-white font-semibold flex items-center justify-center text-sm flex-shrink-0"
-                            style={{ backgroundColor: getRandomColor(index) }}
+                            style={{ backgroundColor: getRandomColor(i) }}
                           >
                             {getInitials(name)}
                           </div>
@@ -113,15 +116,15 @@ const EmployeeList = () => {
                             >
                               {name}
                             </strong>
-                            <div className="text-sm text-gray-500">{getJobTitle(emp)}</div>
+                            <div className="text-sm text-gray-500">{getDesignation(emp)}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="p-4 align-middle">{getDepartment(emp)}</td>
-                      <td className="p-4 align-middle">{getJobTitle(emp)}</td>
+                      <td className="p-4 align-middle">{getDesignation(emp)}</td>
+                      <td className="p-4 align-middle">{getLocation(emp)}</td>
                       <td className="p-4 align-middle">
                         <span className="inline-block py-1.5 px-3 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                          {emp.status}
+                          {emp.status || 'N/A'}
                         </span>
                       </td>
                       <td className="p-4 align-middle">{getJoinDate(emp)}</td>
@@ -129,13 +132,13 @@ const EmployeeList = () => {
                         <div className="flex gap-2">
                           <button
                             onClick={() => navigate(`/candidate/${emp._id}`)}
-                            className="bg-blue-500 text-white py-1.5 px-2.5 text-xs rounded-md hover:bg-blue-600 transition-colors"
+                            className="bg-blue-500 text-white py-1.5 px-2.5 text-xs rounded-md hover:bg-blue-600"
                           >
                             View
                           </button>
                           <button
                             onClick={() => handleDeleteEmployee(emp._id, name)}
-                            className="bg-red-500 text-white py-1.5 px-2.5 text-xs rounded-md hover:bg-red-600 transition-colors"
+                            className="bg-red-500 text-white py-1.5 px-2.5 text-xs rounded-md hover:bg-red-600"
                           >
                             Delete
                           </button>
@@ -150,7 +153,7 @@ const EmployeeList = () => {
         </div>
       </div>
 
-      {/* Pagination Controls */}
+      {/* Pagination */}
       <div className="flex justify-center mt-6 space-x-2">
         <button
           disabled={page === 1}
@@ -162,9 +165,11 @@ const EmployeeList = () => {
 
         {[...Array(totalPages)].map((_, i) => (
           <button
-            key={i + 1}
+            key={i}
             onClick={() => setPage(i + 1)}
-            className={`px-3 py-1 rounded ${page === i + 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'} hover:bg-gray-300`}
+            className={`px-3 py-1 rounded ${
+              page === i + 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'
+            } hover:bg-gray-300`}
           >
             {i + 1}
           </button>

@@ -30,8 +30,8 @@ const CandidateList = () => {
     return `${firstName} ${lastName}`.trim() || 'Unknown';
   };
 
-  const getJobTitle = (candidate) => candidate.professionalDetails?.currentJobTitle || 'N/A';
-  const getDepartment = (candidate) => candidate.professionalDetails?.department || 'N/A';
+  const getJobTitle = (candidate) => candidate.professionalDetails?.designation || 'N/A';
+  
   const getInitials = (name) => name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
   const getRandomColor = (index) => {
     const colors = ['#60A5FA', '#FBBF24', '#34D399', '#EC4899', '#A78BFA', '#F87171', '#6EE7B7'];
@@ -68,7 +68,7 @@ const CandidateList = () => {
         <thead>
           <tr>
             <th>Candidate</th>
-            <th>Department</th>
+            
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -84,7 +84,7 @@ const CandidateList = () => {
             safeCandidates.map((candidate, index) => {
               const name = getDisplayName(candidate);
               const jobTitle = getJobTitle(candidate);
-              const department = getDepartment(candidate);
+              
 
               return (
                 <tr key={candidate._id || index}>
@@ -102,7 +102,7 @@ const CandidateList = () => {
                       <span className="role">{jobTitle}</span>
                     </div>
                   </td>
-                  <td>{department}</td>
+                  
                   <td>
                     <span className="status-badge" style={getStatusBadgeStyle(candidate.status)}>
                       {candidate.status || 'Applied'}
