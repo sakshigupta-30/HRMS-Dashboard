@@ -1,5 +1,10 @@
 import React, { useState } from "react";
 import * as XLSX from "xlsx";
+import "./SalarySlips.css";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { createRoot } from "react-dom/client";
+import SalarySlipTemplate from "../components/SalarySlipTemplate";
 
 const SalarySlips = () => {
   const [summaryData, setSummaryData] = useState([]);
@@ -21,10 +26,14 @@ const SalarySlips = () => {
       );
     });
 
-    const attendanceSummary = filteredRows.map((row) => {
+    const attendanceSummary = filteredRows.map((row, index) => {
       const name = row["Name Of Employee"] || row["__EMPTY"];
+      const designation = row["Designation"] || row["__EMPTY_1"] || "";
+
       const summary = {
+        "Employee Code": `RAY${String(index + 1).padStart(3, "0")}`,
         Name: name,
+        Designation: designation,
         Present: 0,
         "Week Off": 0,
         Holiday: 0,
@@ -102,7 +111,6 @@ const SalarySlips = () => {
       const netPay = Math.round(earnedGrossPay - totalDeduction);
 
       const attendanceBonus = paidDays >= 31 ? 1000 : 0;
-      const takeHome = netPay + attendanceBonus;
 
       const emprPF = Math.round(earnedBasic * 0.13);
       const emprESI = earnedGrossPay < 21001 ? Math.ceil(earnedGrossPay * 0.0325) : 0;
@@ -137,45 +145,76 @@ const SalarySlips = () => {
     reader.readAsArrayBuffer(file);
   };
 
+  const generatePDF = (employee) => {
+    const wrapper = document.createElement("div");
+    wrapper.style.position = "fixed";
+    wrapper.style.top = "-10000px";
+    document.body.appendChild(wrapper);
+
+    const root = createRoot(wrapper);
+    root.render(<SalarySlipTemplate employee={employee} />);
+
+    setTimeout(() => {
+      html2canvas(wrapper, { scale: 2 }).then((canvas) => {
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`${employee["Employee Code"]}_${employee.Name}_SalarySlip.pdf`);
+
+        root.unmount();
+        document.body.removeChild(wrapper);
+      });
+    }, 300);
+  };
+
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      <h2>Salary Slips Summary</h2>
-      <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
+    <div className="salary-slips p-6">
+      <h2 className="text-xl font-semibold mb-4">Salary Slips Summary</h2>
+      <input
+        type="file"
+        accept=".xlsx, .xls"
+        onChange={handleFileUpload}
+        className="mb-4"
+      />
       {summaryData.length > 0 && (
-        <table border="1" style={{ marginTop: "20px", borderCollapse: "collapse", width: "100%" }}>
-          <thead style={{ backgroundColor: "#f0f0f0" }}>
-            <tr>
-              <th>Name</th>
-              <th>Present</th>
-              <th>Week Off</th>
-              <th>Holiday</th>
-              <th>Paid Leave</th>
-              <th>Com Off</th>
-              <th>Working on Holiday</th>
-              <th>Total Paid Days</th>
-              <th>Earned Gross Pay</th>
-              <th>Net Pay</th>
-              <th>Grand Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {summaryData.map((row, index) => (
-              <tr key={index}>
-                <td>{row.Name}</td>
-                <td>{row.Present}</td>
-                <td>{row["Week Off"]}</td>
-                <td>{row.Holiday}</td>
-                <td>{row["Paid Leave"]}</td>
-                <td>{row["Com Off"]}</td>
-                <td>{row["Working on Holiday"]}</td>
-                <td>{row["Total Paid Days"]}</td>
-                <td>{row["Earned Gross Pay"]}</td>
-                <td>{row["Net Pay"]}</td>
-                <td>{row["Grand Total"]}</td>
+        <div className="salary-slips-table-container overflow-x-auto">
+          <table className="salary-slips-table w-full border-collapse">
+            <thead>
+              <tr className="bg-gray-100 text-left">
+                <th className="p-2">Emp Code</th>
+                <th className="p-2">Employee</th>
+                <th className="p-2">Earned Gross Pay</th>
+                <th className="p-2">Net Pay</th>
+                <th className="p-2">Grand Total</th>
+                <th className="p-2">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {summaryData.map((row, index) => (
+                <tr key={index} className="border-b hover:bg-gray-50">
+                  <td className="p-2 font-mono text-sm">{row["Employee Code"]}</td>
+                  <td className="p-2">
+                    <div className="font-medium">{row.Name}</div>
+                    <div className="text-sm text-gray-500">{row.Designation}</div>
+                  </td>
+                  <td className="p-2">₹ {row["Earned Gross Pay"]}</td>
+                  <td className="p-2">₹ {row["Net Pay"]}</td>
+                  <td className="p-2 font-bold">₹ {row["Grand Total"]}</td>
+                  <td className="p-2">
+                    <button
+                      onClick={() => generatePDF(row)}
+                      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
+                    >
+                      Generate Slip
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
