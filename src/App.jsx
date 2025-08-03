@@ -1,32 +1,35 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
-import Dashboard from './pages/Dashboard';
-import Placements from './pages/Placements';
-import Reports from './pages/Reports';
-import Settings from './pages/Settings';
-import AddCandidate from './pages/AddCandidate';
-import CandidateDetail from './pages/CandidateDetail';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import { CandidateProvider } from './context/CandidateContext';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import Payroll from './pages/Payroll'; // ✅ Add this with your other imports
-import EmployeeList from './pages/EmployeeList';
-import AddEmployee from './pages/AddEmployee';
-import SalarySlips from './pages/SalarySlips';
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import Sidebar from "./components/Sidebar";
+import Dashboard from "./pages/Dashboard";
+import Placements from "./pages/Placements";
+import Reports from "./pages/Reports";
+import Settings from "./pages/Settings";
+import AddCandidate from "./pages/AddCandidate";
+import CandidateDetail from "./pages/CandidateDetail";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import { CandidateProvider } from "./context/CandidateContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import Payroll from "./pages/Payroll";
+import EmployeeList from "./pages/EmployeeList";
+import AddEmployee from "./pages/AddEmployee";
+import SalarySlips from "./pages/SalarySlips";
+import OfferLetter from "./pages/OfferLetter";
 
 const PrivateLayout = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh' 
-      }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
         Loading...
       </div>
     );
@@ -40,19 +43,19 @@ const PrivateLayout = ({ children }) => {
     <CandidateProvider>
       <div
         style={{
-          display: 'flex',
-          height: '100vh',
-          width: '100vw',
-          overflow: 'hidden',
+          display: "flex",
+          height: "100vh",
+          width: "100vw",
+          overflow: "hidden",
         }}
       >
         <Sidebar />
         <main
           style={{
             flex: 1,
-            backgroundColor: '#F1F5F9',
-            padding: '1rem',
-            overflow: 'auto',
+            backgroundColor: "#F1F5F9",
+            padding: "1rem",
+            overflow: "auto",
           }}
         >
           {children}
@@ -133,31 +136,35 @@ const AppContent = () => {
         }
       />
 
-       <Route
-          path="/add-employee"
-          element={
-            <PrivateLayout>
-              <AddEmployee
-                onSuccess={() => console.log('Employee successfully added.')}
-                onClose={() => window.history.back()}
-              />
-            </PrivateLayout>
-          }
-        />
+      <Route
+        path="/add-employee"
+        element={
+          <PrivateLayout>
+            <AddEmployee
+              onSuccess={() => console.log("Employee successfully added.")}
+              onClose={() => window.history.back()}
+            />
+          </PrivateLayout>
+        }
+      />
 
-        <Route 
-          path="/salary-slips" 
-          element={
-           <PrivateLayout>
-              <SalarySlips />
-            </PrivateLayout>
-          } 
-        />
+      <Route
+        path="/salary-slips"
+        element={
+          <PrivateLayout>
+            <SalarySlips />
+          </PrivateLayout>
+        }
+      />
 
-
-      
-        
-
+      <Route
+        path="/offer-letter"
+        element={
+          <PrivateLayout>
+            <OfferLetter />
+          </PrivateLayout>
+        }
+      />
     </Routes>
   );
 };

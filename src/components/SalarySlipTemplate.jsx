@@ -1,66 +1,132 @@
-// src/components/SalarySlipTemplate.jsx
-import React, { forwardRef } from 'react';
-import './SalarySlipTemplate.css';
+import React, { forwardRef } from "react";
+import "./SalarySlipTemplate.css";
+import logoImage from "../assets/logo.png"; // Use your logo path
 
 const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
-    console.log("Employee object for PDF:", employee);
-  // Fallback helper
-  const formatAmount = (value) => isNaN(value) ? '0' : `₹${Math.round(value)}`;
+  const formatAmount = (val) =>
+    isNaN(val) || val === null ? "₹0" : `₹${Math.round(val)}`;
 
   return (
-    <div ref={ref} className="salary-slip-template">
-      <h2>Payslip for the Month <span>March 2024</span></h2>
-      <hr />
-      <div className="employee-summary">
-        <div>
-          <p><strong>Employee Name:</strong> {employee.Name}</p>
-          <p><strong>Designation:</strong> {employee.Designation}</p>
-          <p><strong>Employee Code:</strong> {employee["Employee Code"]}</p>
-          <p><strong>Pay Date:</strong> 31/03/2024</p>
+    <div ref={ref} className="salary-container">
+      {/* Header */}
+      <div className="salary-header-row">
+        <div className="salary-header-left">
+          <div className="company-name">Raymoon Services Private Limited</div>
+          <div className="company-address">
+            DLF Corporate Greens, Unit no. 807, 8th floor, sec 74A, Gurgaon
+            122004
+          </div>
         </div>
-        <div>
-          <p><strong>Net Pay:</strong> ₹{employee["Net Pay"] ?? 0}</p>
-          <p><strong>Paid Days:</strong> {employee["Total Paid Days"] ?? 0}</p>
-          <p><strong>Grand Total:</strong> ₹{employee["Grand Total"] ?? 0}</p>
+        <div className="company-logo">
+          <img
+            src={logoImage}
+            alt="Company Logo"
+            className="company-logo-img"
+          />
         </div>
       </div>
 
-      <table className="salary-table">
-        <thead>
-          <tr>
-            <th>EARNINGS</th><th>AMOUNT</th><th>DEDUCTIONS</th><th>AMOUNT</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Basic</td>
-            <td>{formatAmount(employee["Earned Basic"])}</td>
-            <td>PF (12%)</td>
-            <td>{formatAmount(employee["Emp PF"])}</td>
-          </tr>
-          <tr>
-            <td>HRA</td>
-            <td>{formatAmount(employee["Earned HRA"])}</td>
-            <td>ESI (0.75%)</td>
-            <td>{formatAmount(employee["Emp ESI"])}</td>
-          </tr>
-          <tr>
-            <td>OT</td>
-            <td>{formatAmount(employee["Earn OT"])}</td>
-            <td>LWF</td>
-            <td>{formatAmount(employee["LWF"])}</td>
-          </tr>
-          <tr>
-            <td colSpan="2"><strong>Total Earnings: ₹{employee["Earned Gross Pay"] ?? 0}</strong></td>
-            <td colSpan="2"><strong>Total Deductions: ₹{employee["Total Deductions"] ?? 0}</strong></td>
-          </tr>
-        </tbody>
-      </table>
+      {/* Title */}
+      <div className="salary-title-row">
+        <div className="salary-title-text">Salary Slip</div>
+        <div className="salary-subtitle-text">
+          Salary / Wages Advice for the Month: March 2024
+        </div>
+      </div>
 
-      <div className="net-pay-summary">
-        <p><strong>Net Pay:</strong> ₹{employee["Net Pay"] ?? 0}</p>
-        <p><strong>Take Home Pay:</strong> ₹{employee["Take Home Pay"] ?? 0}</p>
-        <p><strong>Grand Total (CTC):</strong> ₹{employee["Grand Total"] ?? 0}</p>
+      {/* Employee Info */}
+      <div className="salary-emp-info-grid">
+        <div className="salary-emp-column">
+          <div>Emp Code: {employee["Employee Code"]}</div>
+          <div>Emp Name: {employee.Name}</div>
+          <div>F/H Name: -</div>
+        </div>
+        <div className="salary-emp-column">
+          <div>Designation: {employee.Designation}</div>
+          <div>Location: Gurgaon-FC5</div>
+          <div>DOJ: {employee["DOJ"] ?? "-"}</div>
+        </div>
+        <div className="salary-emp-column">
+          <div>PF / UAN No: {employee["PF/UAN"] ?? "-"}</div>
+          <div>ESIC No: {employee["ESIC No"] ?? "-"}</div>
+          <div>Bank A/C No: {employee["Bank A/C"] ?? "-"}</div>
+        </div>
+      </div>
+
+      {/* Main Grid */}
+      <div className="salary-main-grid">
+        {/* Column 1 – Rate of Wages */}
+        <div className="main-grid-column">
+          <strong>Rate of Salary / Wages</strong>
+          <div>Basic: {formatAmount(employee["Basic"])}</div>
+          <div>HRA: {formatAmount(employee["HRA"])}</div>
+          <div>Bonus: {formatAmount(employee["Bonus"])}</div>
+          <div>
+            Night Shift Incentive: {formatAmount(employee["Night Shift"])}
+          </div>
+          <div>OT Amount: {formatAmount(employee["OT Amount"])}</div>
+          <strong>Gross: {formatAmount(employee["Gross Salary"])}</strong>
+        </div>
+
+        {/* Column 2 – Earnings */}
+        <div className="main-grid-column">
+          <strong>Earnings</strong>
+          <div>Basic: {formatAmount(employee["Earned Basic"])}</div>
+          <div>HRA: {formatAmount(employee["Earned HRA"])}</div>
+          <div>Bonus: {formatAmount(employee["Earn Bonus"])}</div>
+          <div>Night Shift: {formatAmount(employee["Earn Night Shift"])}</div>
+          <div>OT: {formatAmount(employee["Earn OT"])}</div>
+          <strong>
+            Total Earnings: {formatAmount(employee["Earned Gross Pay"])}
+          </strong>
+        </div>
+
+        {/* Column 3 – Deductions */}
+        <div className="main-grid-column">
+          <strong>Deductions</strong>
+          <div>PF (12%): {formatAmount(employee["Emp PF"])}</div>
+          <div>ESI (0.75%): {formatAmount(employee["Emp ESI"])}</div>
+          <div>LWF: {formatAmount(employee["LWF"])}</div>
+          <div>
+            Other Deductions: {formatAmount(employee["Other Deductions"] ?? 0)}
+          </div>
+          <strong>
+            Total Deduction: {formatAmount(employee["Total Deductions"])}
+          </strong>
+        </div>
+
+        {/* Column 4 – Attendance */}
+        <div className="main-grid-column">
+          <strong>Attendance / Leave</strong>
+          <div>Days of Month: {employee["Total Days"] ?? 31}</div>
+          <div>Paid Days: {employee["Total Paid Days"] ?? 0}</div>
+          <div>OT Hrs: {employee["OT Hours"] ?? 0}</div>
+        </div>
+
+        {/* Column 5 – Signature & Payment */}
+        <div className="main-grid-column">
+          <strong>Payment & Signature</strong>
+          <div>Mode of Payment: {employee["Payment Mode"] ?? "NEFT"}</div>
+          <div>Net Pay: {formatAmount(employee["Net Pay"])}</div>
+          <div className="signature-box">Signature of Employee</div>
+          <div className="salary-note">
+            This is a computer-generated slip. Authorized signatory not
+            required.
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="salary-footer-row">
+        <div className="footer-item">
+          Gross: {formatAmount(employee["Earned Gross Pay"])}
+        </div>
+        <div className="footer-item">
+          Total Deduction: {formatAmount(employee["Total Deductions"])}
+        </div>
+        <div className="footer-net-salary">
+          Net Salary: {formatAmount(employee["Net Pay"])}
+        </div>
       </div>
     </div>
   );

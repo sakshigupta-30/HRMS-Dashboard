@@ -1,23 +1,18 @@
-// src/api/index.js
 import axios from 'axios';
 
-// ✅ Set base URL from environment or fallback to Render
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://hrms-backend-50gj.onrender.com/api';
-
 console.log('API Base URL:', API_BASE_URL);
 
-// ✅ Create Axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
   },
   timeout: 60000,
-  // withCredentials: true, // Uncomment if backend uses cookies/sessions
 });
 
-// ✅ Add token to request headers
+// Request interceptor for token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -29,7 +24,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ Handle 401 Unauthorized globally
+// Response interceptor for auth errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -44,19 +39,26 @@ api.interceptors.response.use(
   }
 );
 
-// ✅ Auth APIs
+// Auth APIs
 export const authAPI = {
   login: async (credentials) => {
     const response = await api.post('/auth/login', credentials);
     return response.data;
   },
-  // Add more auth functions like register, logout, etc., if needed
 };
 
-// ✅ Candidate APIs
+// Candidate APIs
 export const candidateAPI = {
-  getAllCandidates: async (page = 1) => {
-    const response = await api.get(`/candidates?page=${page}&limit=20`);
+  // Now supports flexible pagination, filtering, and search.
+  getAllCandidates: async ({
+    page = 1,
+    limit = 20,
+    isEmployee,
+    ...restFilters
+  } = {}) => {
+    const params = { page, limit, ...restFilters };
+    if (typeof isEmployee !== 'undefined') params.isEmployee = isEmployee;
+    const response = await api.get('/candidates', { params });
     return response.data;
   },
 
@@ -76,7 +78,21 @@ export const candidateAPI = {
   },
 
   deleteCandidate: async (id) => {
-    const response = await api.delete(`/candidates/${id}`);
+    try {
+      const response = await api.delete(`/candidates/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Delete Candidate API Error:', error?.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  bulkUploadCandidates: async (formData) => {
+    const response = await api.post('/candidates/bulk-upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
 };

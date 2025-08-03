@@ -1,6 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { candidateAPI } from '../services/api';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { candidateAPI } from "../services/api";
+import * as XLSX from "xlsx";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
+
+const ITEMS_PER_PAGE = 20;
 
 const EmployeeList = () => {
   const navigate = useNavigate();
@@ -8,17 +15,38 @@ const EmployeeList = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const [uploadProgress, setUploadProgress] = useState({ done: 0, total: 0 });
+  const [message, setMessage] = useState("");
+  const [selectedIds, setSelectedIds] = useState([]);
+
+  const showMessage = (msg) => {
+    setMessage(msg);
+    setTimeout(() => setMessage(""), 3000);
+  };
+
+  const excelDateToJSDate = (serial) => {
+    const utc_days = Math.floor(serial - 25569);
+    const utc_value = utc_days * 86400;
+    return new Date(utc_value * 1000);
+  };
 
   const fetchEmployees = async () => {
     try {
       setLoading(true);
-      const data = await candidateAPI.getAllCandidates({ page, isEmployee: true });
+      console.log("Fetching employees, page:", page);
+
+      const data = await candidateAPI.getAllCandidates({
+        page,
+        limit: ITEMS_PER_PAGE,
+        isEmployee: true,
+      });
+
       setEmployees(data.candidates || []);
       setTotalPages(data.totalPages || 1);
     } catch (err) {
-      console.error('Failed to load employees:', err);
-      setError('Error fetching employees.');
+      console.error("Failed to load employees:", err);
+      setError("Error fetching employees.");
     } finally {
       setLoading(false);
     }
@@ -28,37 +56,192 @@ const EmployeeList = () => {
     fetchEmployees();
   }, [page]);
 
-  const handleDeleteEmployee = async (employeeId, name) => {
-    if (window.confirm(`Are you sure you want to delete ${name}?`)) {
-      try {
-        await candidateAPI.deleteCandidate(employeeId);
-        await fetchEmployees();
-        alert('Employee deleted successfully!');
-      } catch (err) {
-        console.error('Error deleting employee:', err);
-        alert('Failed to delete employee. Please try again.');
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const isSelected = (id) => selectedIds.includes(id);
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.length === 0) return;
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete ${selectedIds.length} selected employee(s)?`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await Promise.all(
+        selectedIds.map((id) => candidateAPI.deleteCandidate(id))
+      );
+      setEmployees((prev) =>
+        prev.filter((emp) => !selectedIds.includes(emp._id))
+      );
+      setSelectedIds([]);
+      showMessage(`✅ ${selectedIds.length} employee(s) deleted`);
+    } catch (err) {
+      console.error("Error deleting selected employees:", err);
+      showMessage("❌ Failed to delete selected employees");
+    }
+  };
+
+  const handleBulkUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = async (event) => {
+      const data = new Uint8Array(event.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+
+      const sheetName =
+        workbook.SheetNames.find((name) => name.toLowerCase() === "wages") ||
+        workbook.SheetNames[0];
+
+      const sheet = workbook.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+      const normalizedRows = rows.map((row) =>
+        Object.fromEntries(
+          Object.entries(row).map(([key, value]) => [
+            key.trim().toLowerCase(),
+            value,
+          ])
+        )
+      );
+
+      setUploadProgress({ done: 0, total: normalizedRows.length });
+
+      let startCodeNum =
+        employees.reduce((max, emp) => {
+          const num = parseInt(emp.code?.replace("RAY", ""));
+          return isNaN(num) ? max : Math.max(max, num);
+        }, 0) + 1;
+
+      for (let [index, row] of normalizedRows.entries()) {
+        try {
+          const fullName = String(row["name"] || "").trim();
+          if (!fullName) continue;
+
+          const [firstName, ...rest] = fullName.split(" ");
+          const lastName = rest.join(" ");
+
+          const location = String(row["location"] || "").trim();
+          const dojRaw = String(row["doj"] || "").trim();
+
+          let availableFromDate = null;
+          if (dojRaw && dojRaw !== "-" && dojRaw.toLowerCase() !== "n/a") {
+            if (!isNaN(dojRaw)) {
+              availableFromDate = excelDateToJSDate(
+                Number(dojRaw)
+              ).toISOString();
+            } else {
+              const parsedDate = dayjs(dojRaw, "DD-MM-YYYY", true);
+              if (parsedDate.isValid()) {
+                availableFromDate = parsedDate.toISOString();
+              }
+            }
+          }
+
+          const generatedCode = `RAY${String(startCodeNum).padStart(3, "0")}`;
+          startCodeNum++;
+
+          const payload = {
+            personalDetails: {
+              firstName: firstName || "",
+              lastName: lastName || "",
+            },
+            professionalDetails: {
+              designation: String(row["designation"] || "").trim(),
+              location,
+              availableFrom: availableFromDate || null,
+              salary: {
+                basic: parseFloat(row["basic"]) || 0,
+                hra: parseFloat(row["hra"]) || 0,
+                retention: parseFloat(row["4 hrs retention"]) || 0,
+                otherAllowances: parseFloat(row["other allowances"]) || 0,
+                actualSalary: parseFloat(row["actual salary"]) || 0,
+              },
+            },
+            client: {
+              location: location || "Unknown",
+            },
+            code: generatedCode,
+            role: "Employee",
+            status: "Selected",
+            isEmployee: true,
+          };
+
+          await candidateAPI.addCandidate(payload);
+        } catch (err) {
+          console.error(`Failed to add: ${row["name"]}`, err);
+        } finally {
+          setUploadProgress({ done: index + 1, total: normalizedRows.length });
+        }
       }
+
+      await fetchEmployees();
+      showMessage("✅ Bulk upload complete!");
+      setUploadProgress({ done: 0, total: 0 });
+    };
+
+    reader.readAsArrayBuffer(file);
+  };
+
+  const handleDeleteEmployee = async (employeeId, name) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete ${name}?`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await candidateAPI.deleteCandidate(employeeId);
+      setEmployees((prev) => prev.filter((emp) => emp._id !== employeeId));
+      showMessage(`✅ ${name} deleted`);
+    } catch (err) {
+      console.error("Error deleting employee:", err);
+      showMessage("❌ Failed to delete employee");
     }
   };
 
   const getDisplayName = (emp) =>
-  (`${emp.personalDetails?.firstName || ''} ${emp.personalDetails?.lastName || ''}`.trim()) || 'Unknown';
+    `${emp.personalDetails?.firstName || ""} ${
+      emp.personalDetails?.lastName || ""
+    }`.trim() || "Unknown";
 
   const getInitials = (name) =>
-    name?.split(' ').map((n) => n[0]).join('').toUpperCase();
+    name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
 
   const getRandomColor = (i) =>
-    ['#60A5FA', '#FBBF24', '#34D399', '#EC4899', '#A78BFA', '#F87171', '#6EE7B7'][i % 7];
+    [
+      "#60A5FA",
+      "#FBBF24",
+      "#34D399",
+      "#EC4899",
+      "#A78BFA",
+      "#F87171",
+      "#6EE7B7",
+    ][i % 7];
 
   const getDesignation = (emp) =>
-    emp.professionalDetails?.designation || emp.role || emp.designation || 'N/A';
+    emp.professionalDetails?.designation ||
+    emp.role ||
+    emp.designation ||
+    "N/A";
 
   const getLocation = (emp) =>
-    emp.client?.location || emp.clientLocation|| 'N/A';
+    emp.client?.location || emp.clientLocation || "N/A";
 
   const getJoinDate = (emp) => {
-    const date = emp.professionalDetails?.availableFrom || emp.joiningDate || emp.doj;
-    return date ? new Date(date).toLocaleDateString() : 'N/A';
+    const date =
+      emp.professionalDetails?.availableFrom || emp.joiningDate || emp.doj;
+    return date ? dayjs(date).format("DD-MM-YYYY") : "N/A";
   };
 
   if (loading) return <div className="p-8">Loading employees...</div>;
@@ -66,33 +249,119 @@ const EmployeeList = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-2xl sm:text-3xl font-semibold text-gray-800">Employee Database</h3>
-        <button
-          className="bg-green-500 text-white font-medium py-2 px-4 rounded-md hover:bg-green-600 text-sm"
-          onClick={() => navigate('/add-employee')}
-        >
-          + Add Employee
-        </button>
+      <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
+        <h3 className="text-2xl sm:text-3xl font-semibold text-gray-800">
+          Employee Database
+        </h3>
+        <div className="flex gap-2 flex-wrap">
+          <button
+            className="bg-green-500 text-white font-medium py-2 px-4 rounded-md hover:bg-green-600 text-sm"
+            onClick={() => navigate("/add-employee")}
+          >
+            + Add Employee
+          </button>
+          <button
+            className="bg-blue-500 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-600 text-sm"
+            onClick={() => document.getElementById("bulk-upload-input").click()}
+          >
+            ⬆️ Bulk Upload
+          </button>
+          <input
+            type="file"
+            id="bulk-upload-input"
+            accept=".xlsx, .xls"
+            onChange={handleBulkUpload}
+            className="hidden"
+          />
+          {selectedIds.length > 0 && (
+            <button
+              className="bg-red-500 text-white font-medium py-2 px-4 rounded-md hover:bg-red-600 text-sm"
+              onClick={handleDeleteSelected}
+            >
+              🗑️ Delete Selected ({selectedIds.length})
+            </button>
+          )}
+        </div>
       </div>
+
+      {uploadProgress.total > 0 && (
+        <div className="text-sm text-gray-600 mb-4">
+          Uploading: {uploadProgress.done}/{uploadProgress.total}
+        </div>
+      )}
+
+      {message && (
+        <div className="mb-4 p-3 rounded bg-green-100 text-green-800 font-medium border border-green-300">
+          {message}
+        </div>
+      )}
 
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
+          <table className="w-full table-auto border-collapse">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="p-4 text-left font-semibold text-gray-500">Employee</th>
-                <th className="p-4 text-left font-semibold text-gray-500">Designation</th>
-                <th className="p-4 text-left font-semibold text-gray-500">Location</th>
-                <th className="p-4 text-left font-semibold text-gray-500">Status</th>
-                <th className="p-4 text-left font-semibold text-gray-500">Join Date</th>
-                <th className="p-4 text-left font-semibold text-gray-500">Actions</th>
+                <th className="p-4 whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedIds(employees.map((emp) => emp._id));
+                      } else {
+                        setSelectedIds([]);
+                      }
+                    }}
+                    checked={
+                      employees.length > 0 &&
+                      selectedIds.length === employees.length
+                    }
+                  />
+                </th>
+                <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
+                  CODE
+                </th>
+                <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
+                  Employee
+                </th>
+                <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
+                  Designation
+                </th>
+                <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
+                  Location
+                </th>
+                <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
+                  Join Date
+                </th>
+                <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
+                  Basic
+                </th>
+                <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
+                  HRA
+                </th>
+                <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
+                  Retention
+                </th>
+                <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
+                  Allowances
+                </th>
+                <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
+                  Salary
+                </th>
+                <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
+                  Status
+                </th>
+                <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {employees.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center p-5">
+                  <td
+                    colSpan="13"
+                    className="text-center p-5 whitespace-nowrap"
+                  >
                     No employees found
                   </td>
                 </tr>
@@ -101,7 +370,17 @@ const EmployeeList = () => {
                   const name = getDisplayName(emp);
                   return (
                     <tr key={emp._id || i}>
-                      <td className="p-4">
+                      <td className="p-4 whitespace-nowrap">
+                        <input
+                          type="checkbox"
+                          checked={isSelected(emp._id)}
+                          onChange={() => toggleSelect(emp._id)}
+                        />
+                      </td>
+                      <td className="p-4 whitespace-nowrap">
+                        {emp.code || "N/A"}
+                      </td>
+                      <td className="p-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
                           <div
                             className="w-9 h-9 rounded-full text-white font-semibold flex items-center justify-center text-sm flex-shrink-0"
@@ -116,19 +395,40 @@ const EmployeeList = () => {
                             >
                               {name}
                             </strong>
-                            <div className="text-sm text-gray-500">{getDesignation(emp)}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="p-4 align-middle">{getDesignation(emp)}</td>
-                      <td className="p-4 align-middle">{getLocation(emp)}</td>
-                      <td className="p-4 align-middle">
+                      <td className="p-4 whitespace-nowrap">
+                        {getDesignation(emp)}
+                      </td>
+                      <td className="p-4 whitespace-nowrap">
+                        {getLocation(emp)}
+                      </td>
+                      <td className="p-4 whitespace-nowrap">
+                        {getJoinDate(emp)}
+                      </td>
+                      <td className="p-4 whitespace-nowrap">
+                        {emp.professionalDetails?.salary?.basic ?? "N/A"}
+                      </td>
+                      <td className="p-4 whitespace-nowrap">
+                        {emp.professionalDetails?.salary?.hra ?? "N/A"}
+                      </td>
+                      <td className="p-4 whitespace-nowrap">
+                        {emp.professionalDetails?.salary?.retention ?? "N/A"}
+                      </td>
+                      <td className="p-4 whitespace-nowrap">
+                        {emp.professionalDetails?.salary?.otherAllowances ??
+                          "N/A"}
+                      </td>
+                      <td className="p-4 whitespace-nowrap">
+                        {emp.professionalDetails?.salary?.actualSalary ?? "N/A"}
+                      </td>
+                      <td className="p-4 whitespace-nowrap">
                         <span className="inline-block py-1.5 px-3 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                          {emp.status || 'N/A'}
+                          {emp.status || "N/A"}
                         </span>
                       </td>
-                      <td className="p-4 align-middle">{getJoinDate(emp)}</td>
-                      <td className="p-4 align-middle">
+                      <td className="p-4 whitespace-nowrap">
                         <div className="flex gap-2">
                           <button
                             onClick={() => navigate(`/candidate/${emp._id}`)}
@@ -153,7 +453,6 @@ const EmployeeList = () => {
         </div>
       </div>
 
-      {/* Pagination */}
       <div className="flex justify-center mt-6 space-x-2">
         <button
           disabled={page === 1}
@@ -168,7 +467,9 @@ const EmployeeList = () => {
             key={i}
             onClick={() => setPage(i + 1)}
             className={`px-3 py-1 rounded ${
-              page === i + 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'
+              page === i + 1
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-800"
             } hover:bg-gray-300`}
           >
             {i + 1}

@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { candidateAPI } from '../services/api';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { candidateAPI } from "../services/api";
 
-const CandidateContext = createContext();
+export const CandidateContext = createContext();
 
 export const CandidateProvider = ({ children }) => {
   const [candidates, setCandidates] = useState([]);

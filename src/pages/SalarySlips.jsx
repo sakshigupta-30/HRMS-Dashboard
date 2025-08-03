@@ -89,7 +89,9 @@ const SalarySlips = () => {
       const earnedHRA = Math.round((hra / monthDays) * paidDays);
       const earnedRetention = Math.round((retention / monthDays) * paidDays);
       const earnedOT = Math.round((basic / 26 / 8) * otHours * 2);
-      const earnedExtraDuty = Math.round((actualSalary / monthDays) * extraDuty);
+      const earnedExtraDuty = Math.round(
+        (actualSalary / monthDays) * extraDuty
+      );
       const earnedOtherAllow = Math.round((otherAllow / monthDays) * paidDays);
 
       const earnedGrossPay =
@@ -101,7 +103,8 @@ const SalarySlips = () => {
         earnedOtherAllow;
 
       const empPF = Math.round(earnedBasic * 0.12);
-      const empESI = earnedGrossPay < 21001 ? Math.ceil(earnedGrossPay * 0.0075) : 0;
+      const empESI =
+        earnedGrossPay < 21001 ? Math.ceil(earnedGrossPay * 0.0075) : 0;
       const lwf = Math.ceil(Math.min(earnedGrossPay * 0.002, 34));
       const totalDeduction = empPF + empESI + lwf;
       const netPay = Math.round(earnedGrossPay - totalDeduction);
@@ -109,7 +112,8 @@ const SalarySlips = () => {
       const attendanceBonus = paidDays >= 31 ? 1000 : 0;
 
       const emprPF = Math.round(earnedBasic * 0.13);
-      const emprESI = earnedGrossPay < 21001 ? Math.ceil(earnedGrossPay * 0.0325) : 0;
+      const emprESI =
+        earnedGrossPay < 21001 ? Math.ceil(earnedGrossPay * 0.0325) : 0;
       const emplLWF = lwf * 2;
 
       const totalCTC =
@@ -143,14 +147,85 @@ const SalarySlips = () => {
     setSummaryData(merged);
   };
 
-  const handleFileUpload = (e) => {
+  const handleBulkUpload = async (e) => {
     const file = e.target.files[0];
+    if (!file) return;
+
     const reader = new FileReader();
-    reader.onload = (e) => {
-      const data = new Uint8Array(e.target.result);
+
+    reader.onload = async (event) => {
+      const data = new Uint8Array(event.target.result);
       const workbook = XLSX.read(data, { type: "array" });
-      parseExcel(workbook);
+
+      const sheetName =
+        workbook.SheetNames.find((name) => name.toLowerCase() === "wages") ||
+        workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+      setUploadProgress({ done: 0, total: rows.length });
+
+      // ⚠️ Start code from 1 (first person gets RAY001)
+      let startCode = 1;
+
+      for (let [index, row] of rows.entries()) {
+        try {
+          const fullName = String(row["NAME"] || "").trim();
+          if (!fullName) continue;
+
+          const [firstName, ...rest] = fullName.split(" ");
+          const lastName = rest.join(" ");
+
+          let availableFromDate = null;
+          const dojRaw = String(row["DoJ"] || "").trim();
+          if (dojRaw && dojRaw !== "-" && dojRaw.toLowerCase() !== "n/a") {
+            const parsedDate = new Date(dojRaw);
+            if (!isNaN(parsedDate.getTime())) {
+              availableFromDate = parsedDate.toISOString();
+            } else {
+              console.warn(`Invalid DoJ date at row ${index + 2}:`, dojRaw);
+            }
+          }
+
+          const generatedCode = `RAY${String(startCode).padStart(3, "0")}`;
+          startCode++; // next code
+
+          const payload = {
+            personalDetails: {
+              firstName: firstName || "",
+              lastName: lastName || "",
+            },
+            professionalDetails: {
+              designation: String(row["Designation"] || "").trim(),
+              location: String(row["Location"] || "").trim(),
+              availableFrom: availableFromDate || null,
+              salary: {
+                basic: parseFloat(row["Basic"]) || 0,
+                hra: parseFloat(row["HRA"]) || 0,
+                retention: parseFloat(row["4 Hrs Retention"]) || 0,
+                otherAllowances: parseFloat(row["Other Allowances"]) || 0,
+                actualSalary: parseFloat(row["Actual Salary"]) || 0,
+              },
+            },
+            code: generatedCode,
+            role: "Employee",
+            status: "Selected",
+            isEmployee: true,
+          };
+
+          await candidateAPI.addCandidate(payload);
+        } catch (err) {
+          console.error(`❌ Failed to add: ${row["NAME"]}`, err);
+        } finally {
+          setUploadProgress({ done: index + 1, total: rows.length });
+        }
+      }
+
+      alert("✅ Bulk upload complete!");
+      await fetchEmployees(); // refresh UI after upload
+      setUploadProgress({ done: 0, total: 0 });
     };
+
     reader.readAsArrayBuffer(file);
   };
 
@@ -170,7 +245,9 @@ const SalarySlips = () => {
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`${employee["Employee Code"]}_${employee.Name}_SalarySlip.pdf`);
+        pdf.save(
+          `${employee["Employee Code"]}_${employee.Name}_SalarySlip.pdf`
+        );
 
         root.unmount();
         document.body.removeChild(wrapper);
@@ -203,10 +280,14 @@ const SalarySlips = () => {
             <tbody>
               {summaryData.map((row, index) => (
                 <tr key={index} className="border-b hover:bg-gray-50">
-                  <td className="p-2 font-mono text-sm">{row["Employee Code"]}</td>
+                  <td className="p-2 font-mono text-sm">
+                    {row["Employee Code"]}
+                  </td>
                   <td className="p-2">
                     <div className="font-medium">{row.Name}</div>
-                    <div className="text-sm text-gray-500">{row.Designation}</div>
+                    <div className="text-sm text-gray-500">
+                      {row.Designation}
+                    </div>
                   </td>
                   <td className="p-2">₹ {row["Earned Gross Pay"]}</td>
                   <td className="p-2">₹ {row["Net Pay"]}</td>
