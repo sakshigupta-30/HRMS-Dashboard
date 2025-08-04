@@ -85,6 +85,12 @@ const SalarySlips = () => {
       const actualSalary = parseFloat(wageEntry["Actual Salary"]) || 0;
       const otherAllow = parseFloat(wageEntry["Other Allowances"]) || 0;
 
+      // Add the actual fixed monthly wage rates to summary to show in template
+      summary["Basic"] = basic;
+      summary["HRA"] = hra;
+      summary["Retention"] = retention;
+      summary["Other Allowances"] = otherAllow;
+
       const earnedBasic = Math.round((basic / monthDays) * paidDays);
       const earnedHRA = Math.round((hra / monthDays) * paidDays);
       const earnedRetention = Math.round((retention / monthDays) * paidDays);
@@ -118,13 +124,11 @@ const SalarySlips = () => {
 
       const totalCTC =
         earnedGrossPay + emprPF + emprESI + emplLWF + attendanceBonus;
-
       const serviceCharge = Math.round(totalCTC * 0.04);
       const subTotal = totalCTC + serviceCharge;
       const gst = Math.round(subTotal * 0.18);
       const grandTotal = subTotal + gst;
 
-      // Add all detailed fields for the slip template
       summary["Earned Basic"] = earnedBasic;
       summary["Earned HRA"] = earnedHRA;
       summary["Earn Retention"] = earnedRetention;
@@ -163,9 +167,9 @@ const SalarySlips = () => {
       const sheet = workbook.Sheets[sheetName];
       const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-      setUploadProgress({ done: 0, total: rows.length });
+      // Optional progress tracking (commented out for now)
+      // setUploadProgress({ done: 0, total: rows.length });
 
-      // ⚠️ Start code from 1 (first person gets RAY001)
       let startCode = 1;
 
       for (let [index, row] of rows.entries()) {
@@ -188,7 +192,7 @@ const SalarySlips = () => {
           }
 
           const generatedCode = `RAY${String(startCode).padStart(3, "0")}`;
-          startCode++; // next code
+          startCode++;
 
           const payload = {
             personalDetails: {
@@ -217,13 +221,15 @@ const SalarySlips = () => {
         } catch (err) {
           console.error(`❌ Failed to add: ${row["NAME"]}`, err);
         } finally {
-          setUploadProgress({ done: index + 1, total: rows.length });
+          // setUploadProgress({ done: index + 1, total: rows.length });
         }
       }
 
       alert("✅ Bulk upload complete!");
-      await fetchEmployees(); // refresh UI after upload
-      setUploadProgress({ done: 0, total: 0 });
+      // await fetchEmployees();
+      // setUploadProgress({ done: 0, total: 0 });
+
+      parseExcel(workbook); // Generate slips after upload
     };
 
     reader.readAsArrayBuffer(file);
@@ -244,6 +250,7 @@ const SalarySlips = () => {
         const pdf = new jsPDF("p", "mm", "a4");
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
         pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
         pdf.save(
           `${employee["Employee Code"]}_${employee.Name}_SalarySlip.pdf`
@@ -258,12 +265,14 @@ const SalarySlips = () => {
   return (
     <div className="salary-slips p-6">
       <h2 className="text-xl font-semibold mb-4">Salary Slips Summary</h2>
+
       <input
         type="file"
         accept=".xlsx, .xls"
-        onChange={handleFileUpload}
+        onChange={handleBulkUpload}
         className="mb-4"
       />
+
       {summaryData.length > 0 && (
         <div className="salary-slips-table-container overflow-x-auto">
           <table className="salary-slips-table w-full border-collapse">

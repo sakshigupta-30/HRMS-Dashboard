@@ -1,8 +1,9 @@
 import React, { forwardRef } from "react";
 import "./SalarySlipTemplate.css";
-import logoImage from "../assets/logo.png"; // Use your logo path
+import logoImage from "../assets/logo.png";
 
 const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
+  // Helper
   const formatAmount = (val) =>
     isNaN(val) || val === null ? "₹0" : `₹${Math.round(val)}`;
 
@@ -25,7 +26,6 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
           />
         </div>
       </div>
-
       {/* Title */}
       <div className="salary-title-row">
         <div className="salary-title-text">Salary Slip</div>
@@ -33,7 +33,6 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
           Salary / Wages Advice for the Month: March 2024
         </div>
       </div>
-
       {/* Employee Info */}
       <div className="salary-emp-info-grid">
         <div className="salary-emp-column">
@@ -52,7 +51,6 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
           <div>Bank A/C No: {employee["Bank A/C"] ?? "-"}</div>
         </div>
       </div>
-
       {/* Main Grid */}
       <div className="salary-main-grid">
         {/* Column 1 – Rate of Wages */}
@@ -60,27 +58,38 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
           <strong>Rate of Salary / Wages</strong>
           <div>Basic: {formatAmount(employee["Basic"])}</div>
           <div>HRA: {formatAmount(employee["HRA"])}</div>
-          <div>Bonus: {formatAmount(employee["Bonus"])}</div>
           <div>
-            Night Shift Incentive: {formatAmount(employee["Night Shift"])}
+            Retention:{" "}
+            {formatAmount(employee["Retention"] ?? employee["4 Hrs Retention"])}
           </div>
-          <div>OT Amount: {formatAmount(employee["OT Amount"])}</div>
-          <strong>Gross: {formatAmount(employee["Gross Salary"])}</strong>
+          <div>
+            Other Allowances: {formatAmount(employee["Other Allowances"])}
+          </div>
         </div>
-
         {/* Column 2 – Earnings */}
         <div className="main-grid-column">
           <strong>Earnings</strong>
-          <div>Basic: {formatAmount(employee["Earned Basic"])}</div>
-          <div>HRA: {formatAmount(employee["Earned HRA"])}</div>
-          <div>Bonus: {formatAmount(employee["Earn Bonus"])}</div>
-          <div>Night Shift: {formatAmount(employee["Earn Night Shift"])}</div>
-          <div>OT: {formatAmount(employee["Earn OT"])}</div>
+          <div>Earned Basic: {formatAmount(employee["Earned Basic"])}</div>
+          <div>Earned HRA: {formatAmount(employee["Earned HRA"])}</div>
+          <div>
+            Earned Retention: {formatAmount(employee["Earn Retention"])}
+          </div>
+          <div>Earned OT: {formatAmount(employee["Earn OT"])}</div>
+          <div>
+            Earned Extra Duty: {formatAmount(employee["Earn Extra Duty"])}
+          </div>
+          <div>
+            Earned Other Allow: {formatAmount(employee["Earn Other Allow"])}
+          </div>
+          {employee["Attendance Bonus"] !== undefined && (
+            <div>
+              Attendance Bonus: {formatAmount(employee["Attendance Bonus"])}
+            </div>
+          )}
           <strong>
             Total Earnings: {formatAmount(employee["Earned Gross Pay"])}
           </strong>
         </div>
-
         {/* Column 3 – Deductions */}
         <div className="main-grid-column">
           <strong>Deductions</strong>
@@ -94,7 +103,6 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
             Total Deduction: {formatAmount(employee["Total Deductions"])}
           </strong>
         </div>
-
         {/* Column 4 – Attendance */}
         <div className="main-grid-column">
           <strong>Attendance / Leave</strong>
@@ -102,7 +110,6 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
           <div>Paid Days: {employee["Total Paid Days"] ?? 0}</div>
           <div>OT Hrs: {employee["OT Hours"] ?? 0}</div>
         </div>
-
         {/* Column 5 – Signature & Payment */}
         <div className="main-grid-column">
           <strong>Payment & Signature</strong>
@@ -115,7 +122,6 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
           </div>
         </div>
       </div>
-
       {/* Footer */}
       <div className="salary-footer-row">
         <div className="footer-item">

@@ -20,6 +20,10 @@ const EmployeeList = () => {
   const [message, setMessage] = useState("");
   const [selectedIds, setSelectedIds] = useState([]);
 
+  // New states for search and location filtering
+  const [searchText, setSearchText] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
+
   const showMessage = (msg) => {
     setMessage(msg);
     setTimeout(() => setMessage(""), 3000);
@@ -244,6 +248,25 @@ const EmployeeList = () => {
     return date ? dayjs(date).format("DD-MM-YYYY") : "N/A";
   };
 
+  // Compute unique locations from employees for filter dropdown
+  const uniqueLocations = Array.from(
+    new Set(
+      employees.map(
+        (emp) => emp.client?.location || emp.clientLocation || "Unknown"
+      )
+    )
+  );
+
+  // Filtering employees based on search and location filter
+  const filteredEmployees = employees.filter((emp) => {
+    const name = getDisplayName(emp).toLowerCase();
+    const location = getLocation(emp);
+    const matchesName = name.includes(searchText.toLowerCase());
+    const matchesLocation =
+      locationFilter === "" || location === locationFilter;
+    return matchesName && matchesLocation;
+  });
+
   if (loading) return <div className="p-8">Loading employees...</div>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
@@ -284,6 +307,29 @@ const EmployeeList = () => {
         </div>
       </div>
 
+      {/* Search and Location Filters */}
+      <div className="flex flex-wrap gap-4 mb-6">
+        <input
+          type="text"
+          placeholder="Search by name..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          className="p-2 rounded border border-gray-300 focus:outline-blue-400 flex-grow max-w-xs"
+        />
+        <select
+          value={locationFilter}
+          onChange={(e) => setLocationFilter(e.target.value)}
+          className="p-2 rounded border border-gray-300 focus:outline-blue-400 max-w-xs"
+        >
+          <option value="">All Locations</option>
+          {uniqueLocations.map((loc) => (
+            <option key={loc} value={loc}>
+              {loc}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {uploadProgress.total > 0 && (
         <div className="text-sm text-gray-600 mb-4">
           Uploading: {uploadProgress.done}/{uploadProgress.total}
@@ -306,14 +352,14 @@ const EmployeeList = () => {
                     type="checkbox"
                     onChange={(e) => {
                       if (e.target.checked) {
-                        setSelectedIds(employees.map((emp) => emp._id));
+                        setSelectedIds(filteredEmployees.map((emp) => emp._id));
                       } else {
                         setSelectedIds([]);
                       }
                     }}
                     checked={
-                      employees.length > 0 &&
-                      selectedIds.length === employees.length
+                      filteredEmployees.length > 0 &&
+                      selectedIds.length === filteredEmployees.length
                     }
                   />
                 </th>
@@ -356,7 +402,7 @@ const EmployeeList = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {employees.length === 0 ? (
+              {filteredEmployees.length === 0 ? (
                 <tr>
                   <td
                     colSpan="13"
@@ -366,7 +412,7 @@ const EmployeeList = () => {
                   </td>
                 </tr>
               ) : (
-                employees.map((emp, i) => {
+                filteredEmployees.map((emp, i) => {
                   const name = getDisplayName(emp);
                   return (
                     <tr key={emp._id || i}>
