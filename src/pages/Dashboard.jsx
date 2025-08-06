@@ -1,10 +1,10 @@
-import React from 'react';
-import DashboardCard from '../components/DashboardCard';
-import CandidateList from '../components/CandidateList';
-import UpcomingInterviews from '../components/UpcomingInterviews';
-import ProfileCard from '../components/ProfileCard';
-import { useCandidateContext } from '../context/CandidateContext';
-import { useNavigate } from 'react-router-dom'; // ✅ Added
+import React from "react";
+import DashboardCard from "../components/DashboardCard";
+import CandidateList from "../components/CandidateList";
+import UpcomingInterviews from "../components/UpcomingInterviews";
+import ProfileCard from "../components/ProfileCard";
+import { useCandidateContext } from "../context/CandidateContext";
+import { useNavigate } from "react-router-dom"; // ✅ Added
 
 const Dashboard = () => {
   const { candidates } = useCandidateContext();
@@ -16,7 +16,6 @@ const Dashboard = () => {
 
   return (
     <div className="flex flex-col h-full gap-4 p-2">
-      
       {/* Top Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 flex-shrink-0">
         <DashboardCard
@@ -35,7 +34,7 @@ const Dashboard = () => {
           title="Salary Slip"
           bgColor="#3B82F6"
           textColor="#ffffff"
-          onClick={() => navigate("/salary-slips")} // ✅ Navigate to salary slips page
+          onClick={() => navigate("/salary-slips")}
         />
         <DashboardCard
           title="Workforce Management"
@@ -56,7 +55,6 @@ const Dashboard = () => {
 
       {/* Bottom Row */}
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_1.5fr_1.2fr] gap-4 flex-grow overflow-hidden max-h-[calc(100vh-180px)]">
-        
         <div className={`${boxClasses} bg-white`}>
           <div className="overflow-y-auto">
             <CandidateList />
@@ -69,10 +67,11 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className={`${boxClasses} bg-emerald-500 text-white items-center justify-center`}>
+        <div
+          className={`${boxClasses} bg-emerald-500 text-white items-center justify-center`}
+        >
           <ProfileCard />
         </div>
-
       </div>
     </div>
   );

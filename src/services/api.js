@@ -97,4 +97,24 @@ export const candidateAPI = {
   },
 };
 
+// Salary Summary APIs
+export const salarySummaryAPI = {
+  saveSalarySummary: async (employeeCode, month, salaryDetails) => {
+    const response = await api.post('/salarysummary', {
+      employeeCode,
+      month,
+      salaryDetails
+    });
+    return response.data;
+  },
+
+  getSalarySummary: async (employeeCode, month) => {
+    const response = await api.get('/salarysummary', {
+      params: { employeeCode, month }
+    });
+    return response.data;
+  },
+};
+
+
 export default api;
