@@ -79,7 +79,7 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
             Earned Extra Duty: {formatAmount(employee["Earn Extra Duty"])}
           </div>
           <div>
-            Earned Other Allow: {formatAmount(employee["Earn Other Allow"])}
+            Earned Allowances: {formatAmount(employee["Earn Other Allow"])}
           </div>
           {employee["Attendance Bonus"] !== undefined && (
             <div>
@@ -116,10 +116,7 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
           <div>Mode of Payment: {employee["Payment Mode"] ?? "NEFT"}</div>
           <div>Net Pay: {formatAmount(employee["Net Pay"])}</div>
           <div className="signature-box">Signature of Employee</div>
-          <div className="salary-note">
-            This is a computer-generated slip. Authorized signatory not
-            required.
-          </div>
+          <div className="salary-note">This is a computer-generated slip.</div>
         </div>
       </div>
       {/* Footer */}
