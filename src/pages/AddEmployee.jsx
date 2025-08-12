@@ -17,6 +17,7 @@ const AddEmployee = ({
       designation: "",
       department: "",
       dateOfJoining: "",
+      agency: "",
       salary: {
         basic: "",
         hra: "",
@@ -152,6 +153,15 @@ const AddEmployee = ({
           name="professionalDetails.department"
           placeholder="Department"
           value={formData.professionalDetails.department}
+          onChange={handleChange}
+          className="border p-2 rounded w-full"
+        />
+
+        <input
+          type="text"
+          name="professionalDetails.agency"
+          placeholder="Agency Name"
+          value={formData.professionalDetails.agency}
           onChange={handleChange}
           className="border p-2 rounded w-full"
         />

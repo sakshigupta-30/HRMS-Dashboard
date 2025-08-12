@@ -23,6 +23,7 @@ const EmployeeList = () => {
   // New states for search and location filtering
   const [searchText, setSearchText] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
+  const [agencyFilter, setAgencyFilter] = useState("");
 
   const showMessage = (msg) => {
     setMessage(msg);
@@ -156,10 +157,12 @@ const EmployeeList = () => {
             personalDetails: {
               firstName: firstName || "",
               lastName: lastName || "",
+              phone: String(row["phone"] || "").trim(),
             },
             professionalDetails: {
               designation: String(row["designation"] || "").trim(),
               location,
+              agency:String(row["agency"] || "").trim(),
               availableFrom: availableFromDate || null,
               salary: {
                 basic: parseFloat(row["basic"]) || 0,
@@ -242,6 +245,9 @@ const EmployeeList = () => {
   const getLocation = (emp) =>
     emp.client?.location || emp.clientLocation || "N/A";
 
+  const getAgency = (emp) =>
+    emp.professionalDetails?.agency || emp.agency || "N/A";
+
   const getJoinDate = (emp) => {
     const date =
       emp.professionalDetails?.availableFrom || emp.joiningDate || emp.doj;
@@ -256,17 +262,29 @@ const EmployeeList = () => {
       )
     )
   );
+  // Compute unique locations from employees for filter dropdown
+  const uniqueAgencies = Array.from(
+    new Set(
+      employees.map(
+        (emp) => emp.professionalDetails?.agency || emp.agency || "Unknown"
+      )
+    )
+  );
 
-  // Filtering employees based on search and location filter
-  const filteredEmployees = employees.filter((emp) => {
-    const name = getDisplayName(emp).toLowerCase();
-    const location = getLocation(emp);
-    const matchesName = name.includes(searchText.toLowerCase());
-    const matchesLocation =
-      locationFilter === "" || location === locationFilter;
-    return matchesName && matchesLocation;
-  });
+// Filtering employees based on search, location, and optional agency filter
+const filteredEmployees = employees.filter((emp) => {
+  const name = getDisplayName(emp).toLowerCase();
+  const location = getLocation(emp)?.toLowerCase();
+  const agency = getAgency(emp)?.toLowerCase();
 
+  const matchesName = name.includes(searchText.toLowerCase());
+  const matchesLocation =
+    !locationFilter || location === locationFilter.toLowerCase();
+  const matchesAgency =
+    !agencyFilter || agency === agencyFilter.toLowerCase();
+
+  return matchesName && matchesLocation && matchesAgency;
+});
   if (loading) return <div className="p-8">Loading employees...</div>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
@@ -328,6 +346,18 @@ const EmployeeList = () => {
             </option>
           ))}
         </select>
+        <select
+          value={agencyFilter}
+          onChange={(e) => setAgencyFilter(e.target.value)}
+          className="p-2 rounded border border-gray-300 focus:outline-blue-400 max-w-xs"
+        >
+          <option value="">All Agencies</option>
+          {uniqueAgencies.map((loc) => (
+            <option key={loc} value={loc}>
+              {loc}
+            </option>
+          ))}
+        </select>
       </div>
 
       {uploadProgress.total > 0 && (
@@ -370,7 +400,13 @@ const EmployeeList = () => {
                   Employee
                 </th>
                 <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
+                  Phone
+                </th>
+                <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
                   Designation
+                </th>
+                <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
+                  Agency
                 </th>
                 <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
                   Location
@@ -445,7 +481,13 @@ const EmployeeList = () => {
                         </div>
                       </td>
                       <td className="p-4 whitespace-nowrap">
+                        {emp.personalDetails?.phone}
+                      </td>
+                      <td className="p-4 whitespace-nowrap">
                         {getDesignation(emp)}
+                      </td>
+                      <td className="p-4 whitespace-nowrap">
+                        {getAgency(emp)}
                       </td>
                       <td className="p-4 whitespace-nowrap">
                         {getLocation(emp)}

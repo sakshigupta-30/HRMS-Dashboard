@@ -1,6 +1,12 @@
 import axios from 'axios';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://hrms-backend-50gj.onrender.com/api';
+let API_BASE_URL;
+if (window.location.hostname === "localhost") {
+  API_BASE_URL = "http://localhost:5000/api";
+} else if (window.location.hostname === "your-prod-domain.com") {
+  API_BASE_URL = "https://hrms-backend-50gj.onrender.com/api";
+} else {
+  API_BASE_URL = `https://${window.location.hostname}/api`;
+}
 console.log('API Base URL:', API_BASE_URL);
 
 const api = axios.create({
