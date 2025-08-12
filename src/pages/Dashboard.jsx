@@ -7,11 +7,8 @@ import { useCandidateContext } from "../context/CandidateContext";
 import { useNavigate } from "react-router-dom"; // ✅ Added
 
 const Dashboard = () => {
-  const { candidates } = useCandidateContext();
-  const navigate = useNavigate(); // ✅ Navigation hook
-
-  const candidateCount = candidates?.length || 0;
-
+  const navigate = useNavigate();
+  const { candidates, candidateCount } = useCandidateContext();
   const boxClasses = "rounded-xl p-4 shadow-md flex flex-col overflow-hidden";
 
   return (
