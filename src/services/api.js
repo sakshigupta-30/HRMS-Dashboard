@@ -117,4 +117,4 @@ export const salarySummaryAPI = {
 };
 
 
-export default api;
+export default api; 

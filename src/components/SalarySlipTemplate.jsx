@@ -124,7 +124,7 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
         <div className="footer-item">
           Gross: {formatAmount(employee["Earned Gross Pay"])}
         </div>
-        <div className="footer-item">
+        <div className="footer-item-deductions">
           Total Deduction: {formatAmount(employee["Total Deductions"])}
         </div>
         <div className="footer-net-salary">

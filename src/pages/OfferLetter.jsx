@@ -7,7 +7,6 @@ const COMPANY_NAME = "Raymoon Services Private Limited";
 
 function numberToWords(num) {
   if (typeof num !== "number" || isNaN(num)) return "N/A";
-
   if (num === 0) return "zero";
 
   const a = [
@@ -110,7 +109,7 @@ const OfferLetterTemplate = React.forwardRef(({ candidate }, ref) => {
         fontSize: "15px",
       }}
     >
-      {/* Header - Centered */}
+      {/* Header */}
       <div style={{ marginBottom: "20px" }}>
         <img
           src={logo}
@@ -185,6 +184,7 @@ const OfferLetter = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [searchTerm, setSearchTerm] = useState(""); // Search input state
   const templateRef = useRef();
 
   const fetchEmployees = async () => {
@@ -244,6 +244,18 @@ const OfferLetter = () => {
   if (loading) return <div>Loading employees...</div>;
   if (error) return <div className="text-red-600">{error}</div>;
 
+  // Filtering logic
+  const filteredEmployees = employees.filter((emp) => {
+    const code = emp.code?.toLowerCase() || "";
+    const fullName = `${emp.personalDetails?.firstName || ""} ${
+      emp.personalDetails?.lastName || ""
+    }`.toLowerCase();
+    return (
+      code.includes(searchTerm.toLowerCase()) ||
+      fullName.includes(searchTerm.toLowerCase())
+    );
+  });
+
   return (
     <div
       style={{
@@ -264,18 +276,43 @@ const OfferLetter = () => {
           border: "1px solid #eaeaea",
         }}
       >
-        <h2
+        {/* Title + Search Bar */}
+        <div
           style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
             marginBottom: "28px",
-            fontSize: "1.55rem",
-            fontWeight: 700,
-            color: "#222",
-            letterSpacing: ".01em",
           }}
         >
-          Generate Offer Letters
-        </h2>
-        {employees.length === 0 ? (
+          <h2
+            style={{
+              fontSize: "1.55rem",
+              fontWeight: 700,
+              color: "#222",
+              letterSpacing: ".01em",
+              margin: 0,
+            }}
+          >
+            Generate Offer Letters
+          </h2>
+          <input
+            type="text"
+            placeholder="Search by Name or Code..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              padding: "8px 14px",
+              borderRadius: "6px",
+              border: "1px solid #ccc",
+              fontSize: "0.95rem",
+              width: "240px",
+              outline: "none",
+            }}
+          />
+        </div>
+
+        {filteredEmployees.length === 0 ? (
           <div style={{ color: "#888", textAlign: "center", padding: "32px" }}>
             No employee candidates found.
           </div>
@@ -293,58 +330,14 @@ const OfferLetter = () => {
             >
               <thead>
                 <tr style={{ background: "#f0f4fa" }}>
-                  <th
-                    style={{
-                      padding: "16px",
-                      borderBottom: "2px solid #ececec",
-                      fontWeight: 600,
-                      fontSize: "1rem",
-                      color: "#3d68b3",
-                      textAlign: "left",
-                    }}
-                  >
-                    Code
-                  </th>
-                  <th
-                    style={{
-                      padding: "16px",
-                      borderBottom: "2px solid #ececec",
-                      fontWeight: 600,
-                      fontSize: "1rem",
-                      color: "#3d68b3",
-                      textAlign: "left",
-                    }}
-                  >
-                    Name
-                  </th>
-                  <th
-                    style={{
-                      padding: "16px",
-                      borderBottom: "2px solid #ececec",
-                      fontWeight: 600,
-                      fontSize: "1rem",
-                      color: "#3d68b3",
-                      textAlign: "left",
-                    }}
-                  >
-                    Designation
-                  </th>
-                  <th
-                    style={{
-                      padding: "16px",
-                      borderBottom: "2px solid #ececec",
-                      fontWeight: 600,
-                      fontSize: "1rem",
-                      color: "#3d68b3",
-                      textAlign: "center",
-                    }}
-                  >
-                    Actions
-                  </th>
+                  <th style={thStyle}>Code</th>
+                  <th style={thStyle}>Name</th>
+                  <th style={thStyle}>Designation</th>
+                  <th style={{ ...thStyle, textAlign: "center" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {employees.map((emp, idx) => {
+                {filteredEmployees.map((emp, idx) => {
                   const fullName = `${emp.personalDetails?.firstName || ""} ${
                     emp.personalDetails?.lastName || ""
                   }`.trim();
@@ -372,19 +365,7 @@ const OfferLetter = () => {
                       <td style={{ padding: "16px", textAlign: "center" }}>
                         <button
                           onClick={() => handleGenerateOfferLetter(emp)}
-                          style={{
-                            background:
-                              "linear-gradient(90deg, #3972fa, #54afff)",
-                            color: "#fff",
-                            padding: "9px 28px",
-                            fontSize: "1rem",
-                            fontWeight: 500,
-                            border: "none",
-                            borderRadius: "6px",
-                            boxShadow: "0 2px 10px #54aef750",
-                            cursor: "pointer",
-                            transition: "background 0.2s, box-shadow 0.2s",
-                          }}
+                          style={buttonStyle}
                           onMouseOver={(e) => {
                             e.currentTarget.style.background =
                               "linear-gradient(90deg,#2453cc,#54afff)";
@@ -404,6 +385,7 @@ const OfferLetter = () => {
             </table>
           </div>
         )}
+
         {/* Hidden Printable Template */}
         <div
           style={{
@@ -423,6 +405,29 @@ const OfferLetter = () => {
       </div>
     </div>
   );
+};
+
+// Common styles
+const thStyle = {
+  padding: "16px",
+  borderBottom: "2px solid #ececec",
+  fontWeight: 600,
+  fontSize: "1rem",
+  color: "#3d68b3",
+  textAlign: "left",
+};
+
+const buttonStyle = {
+  background: "linear-gradient(90deg, #3972fa, #54afff)",
+  color: "#fff",
+  padding: "9px 28px",
+  fontSize: "1rem",
+  fontWeight: 500,
+  border: "none",
+  borderRadius: "6px",
+  boxShadow: "0 2px 10px #54aef750",
+  cursor: "pointer",
+  transition: "background 0.2s, box-shadow 0.2s",
 };
 
 export default OfferLetter;
