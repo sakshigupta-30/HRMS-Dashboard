@@ -79,7 +79,7 @@ const AddEmployee = ({
       onSuccess();
       onClose();
     } catch (err) {
-      setError("Failed to add employee. Please try again.");
+      setError(err?.response?.data?.error||"Failed to add employee. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);

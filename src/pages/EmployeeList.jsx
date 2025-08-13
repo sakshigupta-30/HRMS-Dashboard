@@ -266,7 +266,7 @@ const EmployeeList = () => {
   const uniqueAgencies = Array.from(
     new Set(
       employees.map(
-        (emp) => emp.professionalDetails?.agency || emp.agency || "Unknown"
+        (emp) =>   emp.professionalDetails?.agency && emp.professionalDetails?.agency ||"N/A"
       )
     )
   );
