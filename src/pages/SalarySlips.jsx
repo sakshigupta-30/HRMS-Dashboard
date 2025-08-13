@@ -81,19 +81,17 @@ const SalarySlips = () => {
     localStorage.setItem("salarySlips-selectedMonth", selectedMonth);
     localStorage.setItem("salarySlips-selectedYear", String(selectedYear));
 
-    const saved = localStorage.getItem(`salarySlips-${monthKey}`);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        // stored structure: array of summaries (merged attendance+wages)
-        setSummaryData(parsed || []);
-      } catch {
-        setSummaryData([]);
-      }
-    } else {
-      // If no saved data for this month, clear summaryData (user can upload)
+    const fetchSalarySummaries = async () => {
+    try {
+      const summaries = await salarySummaryAPI.getSalarySummaries(monthKey);
+      setSummaryData(summaries || []);
+    } catch (err) {
+      console.warn("Failed to fetch salary summaries from backend", err);
       setSummaryData([]);
     }
+  };
+
+  fetchSalarySummaries();
   }, [selectedMonth, selectedYear]);
 
   const fetchEmployees = async () => {

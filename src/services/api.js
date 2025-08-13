@@ -119,6 +119,12 @@ export const salarySummaryAPI = {
     });
     return response.data;
   },
+   getSalarySummaries: async (month) => {
+    const response = await api.get('/salarysummary/all', {
+      params: { month }
+    });
+    return response.data;
+  },
 };
 
 
