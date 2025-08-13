@@ -162,7 +162,7 @@ const EmployeeList = () => {
             professionalDetails: {
               designation: String(row["designation"] || "").trim(),
               location,
-              agency:String(row["agency"] || "").trim(),
+              agency: String(row["agency"] || "").trim(),
               availableFrom: availableFromDate || null,
               salary: {
                 basic: parseFloat(row["basic"]) || 0,
@@ -212,11 +212,32 @@ const EmployeeList = () => {
       showMessage("❌ Failed to delete employee");
     }
   };
+  const getExcelFile = () => {
+    // Prepare data for Excel
+    const exportData = filteredEmployees.map((emp) => ({
+      Code: emp.code || "",
+      Name: getDisplayName(emp),
+      Phone: emp.personalDetails?.phone || "",
+      Designation: getDesignation(emp),
+      Agency: getAgency(emp),
+      Location: getLocation(emp),
+      "Join Date": getJoinDate(emp),
+      Basic: emp.professionalDetails?.salary?.basic ?? "",
+      HRA: emp.professionalDetails?.salary?.hra ?? "",
+      Retention: emp.professionalDetails?.salary?.retention ?? "",
+      Allowances: emp.professionalDetails?.salary?.otherAllowances ?? "",
+      Salary: emp.professionalDetails?.salary?.actualSalary ?? "",
+      Status: emp.status || "",
+    }));
 
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Employees");
+    XLSX.writeFile(wb, "employees.xlsx");
+  }
   const getDisplayName = (emp) =>
-    `${emp.personalDetails?.firstName || ""} ${
-      emp.personalDetails?.lastName || ""
-    }`.trim() || "Unknown";
+    `${emp.personalDetails?.firstName || ""} ${emp.personalDetails?.lastName || ""
+      }`.trim() || "Unknown";
 
   const getInitials = (name) =>
     name
@@ -266,25 +287,25 @@ const EmployeeList = () => {
   const uniqueAgencies = Array.from(
     new Set(
       employees.map(
-        (emp) =>   emp.professionalDetails?.agency && emp.professionalDetails?.agency ||"N/A"
+        (emp) => emp.professionalDetails?.agency && emp.professionalDetails?.agency || "N/A"
       )
     )
   );
 
-// Filtering employees based on search, location, and optional agency filter
-const filteredEmployees = employees.filter((emp) => {
-  const name = getDisplayName(emp).toLowerCase();
-  const location = getLocation(emp)?.toLowerCase();
-  const agency = getAgency(emp)?.toLowerCase();
+  // Filtering employees based on search, location, and optional agency filter
+  const filteredEmployees = employees.filter((emp) => {
+    const name = getDisplayName(emp).toLowerCase();
+    const location = getLocation(emp)?.toLowerCase();
+    const agency = getAgency(emp)?.toLowerCase();
 
-  const matchesName = name.includes(searchText.toLowerCase());
-  const matchesLocation =
-    !locationFilter || location === locationFilter.toLowerCase();
-  const matchesAgency =
-    !agencyFilter || agency === agencyFilter.toLowerCase();
+    const matchesName = name.includes(searchText.toLowerCase());
+    const matchesLocation =
+      !locationFilter || location === locationFilter.toLowerCase();
+    const matchesAgency =
+      !agencyFilter || agency === agencyFilter.toLowerCase();
 
-  return matchesName && matchesLocation && matchesAgency;
-});
+    return matchesName && matchesLocation && matchesAgency;
+  });
   if (loading) return <div className="p-8">Loading employees...</div>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
@@ -300,6 +321,12 @@ const filteredEmployees = employees.filter((emp) => {
             onClick={() => navigate("/add-employee")}
           >
             + Add Employee
+          </button>
+          <button
+            className="bg-yellow-500 text-white font-medium py-2 px-4 rounded-md hover:bg-yellow-600 text-sm"
+            onClick={getExcelFile}
+          >
+            ⬇️ Download Excel
           </button>
           <button
             className="bg-blue-500 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-600 text-sm"
@@ -554,11 +581,10 @@ const filteredEmployees = employees.filter((emp) => {
           <button
             key={i}
             onClick={() => setPage(i + 1)}
-            className={`px-3 py-1 rounded ${
-              page === i + 1
+            className={`px-3 py-1 rounded ${page === i + 1
                 ? "bg-blue-600 text-white"
                 : "bg-gray-200 text-gray-800"
-            } hover:bg-gray-300`}
+              } hover:bg-gray-300`}
           >
             {i + 1}
           </button>
