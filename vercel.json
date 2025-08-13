@@ -3,11 +3,11 @@
     { "source": "/(.*)", "destination": "/" }
   ],
   "env": {
-    "VITE_API_URL": "https://hrms-backend-50gj.onrender.com/api"
+    "VITE_API_URL": "https://hrms-backend-tawny.vercel.app/api"
   },
   "build": {
     "env": {
-      "VITE_API_URL": "https://hrms-backend-50gj.onrender.com/api"
+      "VITE_API_URL": "https://hrms-backend-tawny.vercel.app/api"
     }
   }
 }

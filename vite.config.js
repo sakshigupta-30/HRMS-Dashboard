@@ -7,7 +7,7 @@ export default defineConfig({
     historyApiFallback: true, // ✅ Keep this for React Router
     proxy: {
       '/api': {
-        target: 'https://hrms-backend-50gj.onrender.com',
+        target: 'https://hrms-backend-tawny.vercel.app/',
         changeOrigin: true,
         secure: true,
         timeout: 60000,

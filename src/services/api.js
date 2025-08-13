@@ -4,7 +4,7 @@ if (window.location.hostname === "localhost") {
   API_BASE_URL = "http://localhost:5000/api"
 } 
 else {
-  API_BASE_URL = "https://hrms-backend-50gj.onrender.com/api";
+  API_BASE_URL = "https://hrms-backend-tawny.vercel.app/api";
 }
 console.log('API Base URL:', API_BASE_URL);
 
