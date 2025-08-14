@@ -6,7 +6,7 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
   // Helper
   const formatAmount = (val) =>
     isNaN(val) || val === null ? "₹0" : `₹${Math.round(val)}`;
-  const monthString = employee["Month"];
+  const monthString = employee.month;
 
   const formattedMonthYear = monthString
     ? new Date(monthString + "-01").toLocaleString("en-US", {
