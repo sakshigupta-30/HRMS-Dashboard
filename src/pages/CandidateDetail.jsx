@@ -3,6 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { candidateAPI } from '../services/api';
 import { salarySummaryAPI } from '../services/api';
 import axios from 'axios';
+import SalarySlipTemplate from "../components/SalarySlipTemplate";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { months } from "./SalarySlips"; // or define months array locally if not exported
 // Reusable object for status badge styles
 const statusStyles = {
   Applied: 'bg-blue-100 text-blue-800',
@@ -33,7 +37,8 @@ const CandidateDetail = () => {
   const [selectedSlip, setSelectedSlip] = useState(null);
   const [selectedSlipMonth, setSelectedSlipMonth] = useState('');
   const [selectedSlipYear, setSelectedSlipYear] = useState(new Date().getFullYear());
-
+const [selectedEmployee, setSelectedEmployee] = useState(null);
+const templateRef = useRef();
   useEffect(() => {
     if (candidate?.code) {
       fetchSalarySlips(candidate.code);
@@ -66,36 +71,46 @@ const CandidateDetail = () => {
     }
   };
 
-  const handleDownloadSlip = async (slip) => {
-    try {
-      const res = await axios.get(
-        `https://hrms-backend-tawny.vercel.app/api/salarylip/pdf?phone=${candidate.personalDetails.phone}&employeeCode=${candidate.code}&month=${slip.month.slice(5, 7)}&year=${slip.month.slice(0, 4)}`,
-        { responseType: "blob" }
-      );
+  const generatePDF = (salaryData) => {
+  // Find the month and year for this slip
+  const slipMonth = salaryData.month
+    ? months[parseInt(salaryData.month.split("-")[1], 10) - 1]
+    : "";
+  const slipYear = salaryData.month
+    ? salaryData.month.split("-")[0]
+    : "";
 
-      const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
-      const link = document.createElement("a");
-      link.href = url;
+  setSelectedEmployee(salaryData);
 
-      // backend से filename parse करने का तरीका
-      const contentDisposition = res.headers["content-disposition"];
-      let fileName = "salary-slip.pdf";
-      if (contentDisposition) {
-        const match = contentDisposition.match(/filename="?([^"]+)"?/);
-        if (match && match[1]) {
-          fileName = decodeURIComponent(match[1]);
-        }
-      }
-
-      link.setAttribute("download", fileName);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Error downloading PDF:", err);
+  setTimeout(() => {
+    const element = templateRef.current;
+    if (!element) {
+      setSelectedEmployee(null);
+      return;
     }
-  };
+
+    html2canvas(element, { scale: 2, useCORS: true })
+      .then((canvas) => {
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+        const fileName = `${salaryData["Employee Code"] || salaryData.code || "EMP"
+          }_${salaryData.Name || salaryData.name || ""
+          }_${slipMonth}_${slipYear}_SalarySlip.pdf`;
+
+        pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+        pdf.save(fileName);
+      })
+      .catch((err) => {
+        console.error("Failed to generate PDF:", err);
+      })
+      .finally(() => {
+        setSelectedEmployee(null);
+      });
+  }, 300);
+};
   const handleStatusUpdate = async (newStatus) => {
     try {
       await candidateAPI.updateCandidate(id, { ...candidate, status: newStatus });
@@ -316,15 +331,7 @@ const CandidateDetail = () => {
                   </select>
                   <button
                     className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
-                    onClick={() => {
-                      const slip = salarySlips.find(
-                        s =>
-                          s.month === selectedSlipMonth &&
-                          String(s.month).startsWith(String(selectedSlipYear))
-                      );
-                      if (slip) handleDownloadSlip(slip);
-                      else alert('No salary slip for selected month/year');
-                    }}
+                    onClick={() => generatePDF({ ...slip.salaryDetails, ...slip, "Employee Code": slip.employeeCode })}
                   >
                     Download Selected
                   </button>
