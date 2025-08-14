@@ -6,6 +6,14 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
   // Helper
   const formatAmount = (val) =>
     isNaN(val) || val === null ? "₹0" : `₹${Math.round(val)}`;
+  const monthString = employee["Month"];
+
+  const formattedMonthYear = monthString
+    ? new Date(monthString + "-01").toLocaleString("en-US", {
+      month: "long",
+      year: "numeric",
+    })
+    : "N/A";
 
   return (
     <div ref={ref} className="salary-container">
@@ -30,7 +38,7 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
       <div className="salary-title-row">
         <div className="salary-title-text">Salary Slip</div>
         <div className="salary-subtitle-text">
-          Salary / Wages Advice for the Month: March 2024
+          Salary / Wages Advice for the Month: {formattedMonthYear}
         </div>
       </div>
       {/* Employee Info */}
