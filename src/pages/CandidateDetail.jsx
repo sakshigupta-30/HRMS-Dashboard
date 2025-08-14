@@ -67,7 +67,7 @@ const CandidateDetail = () => {
   const handleDownloadSlip = (slip) => {
     // You can use your backend PDF endpoint or open a new tab
     window.open(
-      `http://localhost:5000/api/salarylip/pdf?phone=${candidate.personalDetails.phone}&employeeCode=${candidate.code}&month=${slip.month.slice(5, 7)}&year=${slip.month.slice(0, 4)}`,
+      `https://hrms-backend-tawny.vercel.app/api/salarylip/pdf?phone=${candidate.personalDetails.phone}&employeeCode=${candidate.code}&month=${slip.month.slice(5, 7)}&year=${slip.month.slice(0, 4)}`,
       '_blank'
     );
   };
