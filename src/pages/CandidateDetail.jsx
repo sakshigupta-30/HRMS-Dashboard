@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { candidateAPI } from '../services/api';
 import { salarySummaryAPI } from '../services/api';
+import axios from 'axios';
 // Reusable object for status badge styles
 const statusStyles = {
   Applied: 'bg-blue-100 text-blue-800',
@@ -64,12 +65,36 @@ const CandidateDetail = () => {
       setLoading(false);
     }
   };
-  const handleDownloadSlip = (slip) => {
-    // You can use your backend PDF endpoint or open a new tab
-    window.open(
-      `https://hrms-backend-tawny.vercel.app/api/salarylip/pdf?phone=${candidate.personalDetails.phone}&employeeCode=${candidate.code}&month=${slip.month.slice(5, 7)}&year=${slip.month.slice(0, 4)}`,
-      '_blank'
-    );
+
+  const handleDownloadSlip = async (slip) => {
+    try {
+      const res = await axios.get(
+        `https://hrms-backend-tawny.vercel.app/api/salarylip/pdf?phone=${candidate.personalDetails.phone}&employeeCode=${candidate.code}&month=${slip.month.slice(5, 7)}&year=${slip.month.slice(0, 4)}`,
+        { responseType: "blob" }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+      const link = document.createElement("a");
+      link.href = url;
+
+      // backend से filename parse करने का तरीका
+      const contentDisposition = res.headers["content-disposition"];
+      let fileName = "salary-slip.pdf";
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (match && match[1]) {
+          fileName = decodeURIComponent(match[1]);
+        }
+      }
+
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Error downloading PDF:", err);
+    }
   };
   const handleStatusUpdate = async (newStatus) => {
     try {
