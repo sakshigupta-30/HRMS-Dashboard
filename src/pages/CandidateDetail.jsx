@@ -6,7 +6,21 @@ import axios from 'axios';
 import SalarySlipTemplate from "../components/SalarySlipTemplate";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { months } from "./SalarySlips"; // or define months array locally if not exported
+import { useRef } from 'react';
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+]; // or define months array locally if not exported
 // Reusable object for status badge styles
 const statusStyles = {
   Applied: 'bg-blue-100 text-blue-800',
@@ -37,8 +51,8 @@ const CandidateDetail = () => {
   const [selectedSlip, setSelectedSlip] = useState(null);
   const [selectedSlipMonth, setSelectedSlipMonth] = useState('');
   const [selectedSlipYear, setSelectedSlipYear] = useState(new Date().getFullYear());
-const [selectedEmployee, setSelectedEmployee] = useState(null);
-const templateRef = useRef();
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const templateRef = useRef();
   useEffect(() => {
     if (candidate?.code) {
       fetchSalarySlips(candidate.code);
@@ -72,45 +86,44 @@ const templateRef = useRef();
   };
 
   const generatePDF = (salaryData) => {
-  // Find the month and year for this slip
-  const slipMonth = salaryData.month
-    ? months[parseInt(salaryData.month.split("-")[1], 10) - 1]
-    : "";
-  const slipYear = salaryData.month
-    ? salaryData.month.split("-")[0]
-    : "";
+    // Find the month and year for this slip
+    const slipMonth = salaryData.month
+      ? months[parseInt(salaryData.month.split("-")[1], 10) - 1]
+      : "";
+    const slipYear = salaryData.month
+      ? salaryData.month.split("-")[0]
+      : "";
 
-  setSelectedEmployee(salaryData);
-
-  setTimeout(() => {
-    const element = templateRef.current;
-    if (!element) {
-      setSelectedEmployee(null);
-      return;
-    }
-
-    html2canvas(element, { scale: 2, useCORS: true })
-      .then((canvas) => {
-        const imgData = canvas.toDataURL("image/png");
-        const pdf = new jsPDF("p", "mm", "a4");
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-        const fileName = `${salaryData["Employee Code"] || salaryData.code || "EMP"
-          }_${salaryData.Name || salaryData.name || ""
-          }_${slipMonth}_${slipYear}_SalarySlip.pdf`;
-
-        pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-        pdf.save(fileName);
-      })
-      .catch((err) => {
-        console.error("Failed to generate PDF:", err);
-      })
-      .finally(() => {
+    setSelectedEmployee(salaryData);
+    setTimeout(() => {
+      const element = templateRef.current;
+      if (!element) {
         setSelectedEmployee(null);
-      });
-  }, 300);
-};
+        return;
+      }
+
+      html2canvas(element, { scale: 2, useCORS: true })
+        .then((canvas) => {
+          const imgData = canvas.toDataURL("image/png");
+          const pdf = new jsPDF("p", "mm", "a4");
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+          const fileName = `${salaryData["Employee Code"] || salaryData.code || "EMP"
+            }_${salaryData.Name || salaryData.name || ""
+            }_${slipMonth}_${slipYear}_SalarySlip.pdf`;
+
+          pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+          pdf.save(fileName);
+        })
+        .catch((err) => {
+          console.error("Failed to generate PDF:", err);
+        })
+        .finally(() => {
+          setSelectedEmployee(null);
+        });
+    }, 300);
+  };
   const handleStatusUpdate = async (newStatus) => {
     try {
       await candidateAPI.updateCandidate(id, { ...candidate, status: newStatus });
@@ -288,7 +301,7 @@ const templateRef = useRef();
                         <button
                           key={slip.month}
                           className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
-                          onClick={() => handleDownloadSlip(slip)}
+                          onClick={() => generatePDF({ ...slip.salaryDetails, ...slip, "Employee Code": slip.employeeCode })}
                         >
                           {formatted}
                         </button>
@@ -339,6 +352,21 @@ const templateRef = useRef();
               </>
             )}
           </div>
+          <div
+            style={{
+              position: "fixed",
+              left: "-9999px",
+              top: "-9999px",
+              zIndex: "-1",
+            }}
+          >
+            {selectedEmployee && (
+              <div ref={templateRef}>
+                <SalarySlipTemplate employee={selectedEmployee} />
+              </div>
+            )}
+          </div>
+
         </main>
       </div>
     </div>
