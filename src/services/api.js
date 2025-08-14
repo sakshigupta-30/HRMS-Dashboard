@@ -125,6 +125,12 @@ export const salarySummaryAPI = {
     });
     return response.data;
   },
+   getSalarySummariesByEmployee: async (employeeCode) => {
+    const response = await api.get('/salarysummary/candidate', {
+      params: { employeeCode }
+    });
+    return response.data;
+  },
 };
 
 

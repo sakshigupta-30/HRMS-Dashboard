@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { candidateAPI } from '../services/api';
-
+import { salarySummaryAPI } from '../services/api';
 // Reusable object for status badge styles
 const statusStyles = {
   Applied: 'bg-blue-100 text-blue-800',
@@ -28,7 +28,26 @@ const CandidateDetail = () => {
   const [candidate, setCandidate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [salarySlips, setSalarySlips] = useState([]);
+  const [selectedSlip, setSelectedSlip] = useState(null);
+  const [selectedSlipMonth, setSelectedSlipMonth] = useState('');
+  const [selectedSlipYear, setSelectedSlipYear] = useState(new Date().getFullYear());
 
+  useEffect(() => {
+    if (candidate?.code) {
+      fetchSalarySlips(candidate.code);
+    }
+  }, [candidate]);
+
+  const fetchSalarySlips = async (employeeCode) => {
+    try {
+      // Fetch all salary summaries for this employee
+      const data = await salarySummaryAPI.getSalarySummariesByEmployee(employeeCode);
+      setSalarySlips(data || []);
+    } catch (err) {
+      setSalarySlips([]);
+    }
+  };
   useEffect(() => {
     fetchCandidateDetails();
   }, [id]);
@@ -45,7 +64,13 @@ const CandidateDetail = () => {
       setLoading(false);
     }
   };
-
+  const handleDownloadSlip = (slip) => {
+    // You can use your backend PDF endpoint or open a new tab
+    window.open(
+      `http://localhost:5000/api/salarylip/pdf?phone=${candidate.personalDetails.phone}&employeeCode=${candidate.code}&month=${slip.month.slice(5, 7)}&year=${slip.month.slice(0, 4)}`,
+      '_blank'
+    );
+  };
   const handleStatusUpdate = async (newStatus) => {
     try {
       await candidateAPI.updateCandidate(id, { ...candidate, status: newStatus });
@@ -107,13 +132,13 @@ const CandidateDetail = () => {
               onChange={(e) => handleStatusUpdate(e.target.value)}
               className="p-2 border-2 border-gray-200 rounded-md bg-white text-sm focus:outline-none focus:border-blue-500"
             >
-                <option value="Applied">Applied</option>
-                <option value="Screening">Screening</option>
-                <option value="Interview">Interview</option>
-                <option value="Selected">Selected</option>
-                <option value="Rejected">Rejected</option>
-                <option value="On Hold">On Hold</option>
-                <option value="Draft">Draft</option>
+              <option value="Applied">Applied</option>
+              <option value="Screening">Screening</option>
+              <option value="Interview">Interview</option>
+              <option value="Selected">Selected</option>
+              <option value="Rejected">Rejected</option>
+              <option value="On Hold">On Hold</option>
+              <option value="Draft">Draft</option>
             </select>
           </div>
         </header>
@@ -131,7 +156,7 @@ const CandidateDetail = () => {
               <DetailItem label="Nationality">{candidate.personalDetails?.nationality}</DetailItem>
             </div>
           </div>
-          
+
           <div className="bg-white p-6 rounded-xl shadow-lg">
             <h3 className="text-xl font-semibold text-slate-800 mb-5 pb-2.5 border-b-2 border-slate-100">Address Information</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6">
@@ -144,26 +169,26 @@ const CandidateDetail = () => {
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-lg">
-             <h3 className="text-xl font-semibold text-slate-800 mb-5 pb-2.5 border-b-2 border-slate-100">Professional Information</h3>
-             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6">
-                <DetailItem label="Job Title">{candidate.professionalDetails?.designation}</DetailItem>
-                
-                <DetailItem label="Employment Type">{candidate.professionalDetails?.employmentType}</DetailItem>
-                <DetailItem label="Current Salary">{candidate.professionalDetails?.currentSalary?.toLocaleString()}</DetailItem>
-                <DetailItem label="Expected Salary">{candidate.professionalDetails?.expectedSalary?.toLocaleString()}</DetailItem>
-                <DetailItem label="Available From">{formatDate(candidate.professionalDetails?.availableFrom)}</DetailItem>
-                <div className="sm:col-span-2 lg:col-span-3">
-                    <DetailItem label="Skills">
-                        <div className="flex flex-wrap gap-2 mt-1">
-                            {candidate.professionalDetails?.skills?.length > 0 ? (
-                                candidate.professionalDetails.skills.map((skill, index) => (
-                                    <span key={index} className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white py-1 px-3 rounded-full text-xs font-medium">{skill}</span>
-                                ))
-                            ) : ( <span>No skills listed</span> )}
-                        </div>
-                    </DetailItem>
-                </div>
-             </div>
+            <h3 className="text-xl font-semibold text-slate-800 mb-5 pb-2.5 border-b-2 border-slate-100">Professional Information</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6">
+              <DetailItem label="Job Title">{candidate.professionalDetails?.designation}</DetailItem>
+
+              <DetailItem label="Employment Type">{candidate.professionalDetails?.employmentType}</DetailItem>
+              <DetailItem label="Current Salary">{candidate.professionalDetails?.currentSalary?.toLocaleString()}</DetailItem>
+              <DetailItem label="Expected Salary">{candidate.professionalDetails?.expectedSalary?.toLocaleString()}</DetailItem>
+              <DetailItem label="Available From">{formatDate(candidate.professionalDetails?.availableFrom)}</DetailItem>
+              <div className="sm:col-span-2 lg:col-span-3">
+                <DetailItem label="Skills">
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {candidate.professionalDetails?.skills?.length > 0 ? (
+                      candidate.professionalDetails.skills.map((skill, index) => (
+                        <span key={index} className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white py-1 px-3 rounded-full text-xs font-medium">{skill}</span>
+                      ))
+                    ) : (<span>No skills listed</span>)}
+                  </div>
+                </DetailItem>
+              </div>
+            </div>
           </div>
 
           {candidate.education?.length > 0 && (
@@ -195,6 +220,93 @@ const CandidateDetail = () => {
               </div>
             </div>
           )}
+          <div className="bg-white p-6 rounded-xl shadow-lg">
+            <h3 className="text-xl font-semibold text-slate-800 mb-5 pb-2.5 border-b-2 border-slate-100">
+              Salary Slips
+            </h3>
+            {salarySlips.length === 0 ? (
+              <div className="text-gray-500">No salary slips found for this employee.</div>
+            ) : (
+              <>
+                <div className="mb-4 flex flex-wrap gap-2">
+                  {salarySlips.slice()
+                    .sort((a, b) => {
+                      const [yearA, monthA] = a.month.split('-').map(Number);
+                      const [yearB, monthB] = b.month.split('-').map(Number);
+                      return yearA - yearB || monthA - monthB; // compare year first, then month
+                    })
+                    .slice(-6) // last 6 months
+                    .reverse()
+                    .map((slip) => {
+                      const date = new Date(`${slip.month}-01`);
+                      const formatted = date.toLocaleString("en-US", {
+                        month: "short", // "Jan", "Feb", etc.
+                        year: "numeric" // "2025"
+                      });
+
+                      return (
+                        <button
+                          key={slip.month}
+                          className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
+                          onClick={() => handleDownloadSlip(slip)}
+                        >
+                          {formatted}
+                        </button>
+                      );
+                    })}
+                </div>
+
+                {/* Month/Year Picker */}
+                <div className="flex gap-2 items-center mb-2">
+                  <select
+                    value={selectedSlipMonth}
+                    onChange={e => setSelectedSlipMonth(e.target.value)}
+                    className="border p-2 rounded"
+                  >
+                    <option value="">Select Month</option>
+                    {Array.from(new Set(salarySlips.map(s => s.month)))
+                      .sort((a, b) => new Date(`${a}-01`) - new Date(`${b}-01`)) // sort months
+                      .map(month => {
+                        const date = new Date(`${month}-01`);
+                        const monthName = date.toLocaleString("en-US", { month: "long" }); // "Aug"
+                        return (
+                          <option key={month} value={month}>
+                            {monthName}
+                          </option>
+                        );
+                      })}
+
+                  </select>
+                  <select
+                    value={selectedSlipYear}
+                    onChange={e => setSelectedSlipYear(Number(e.target.value))}
+                    className="border p-2 rounded"
+                  >
+                    {Array.from({ length: 6 }, (_, i) => {
+                      const year = new Date().getFullYear() - 3 + i;
+                      return (
+                        <option key={year} value={year}>{year}</option>
+                      );
+                    })}
+                  </select>
+                  <button
+                    className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
+                    onClick={() => {
+                      const slip = salarySlips.find(
+                        s =>
+                          s.month === selectedSlipMonth &&
+                          String(s.month).startsWith(String(selectedSlipYear))
+                      );
+                      if (slip) handleDownloadSlip(slip);
+                      else alert('No salary slip for selected month/year');
+                    }}
+                  >
+                    Download Selected
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </main>
       </div>
     </div>
