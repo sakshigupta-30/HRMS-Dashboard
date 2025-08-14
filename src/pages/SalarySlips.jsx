@@ -81,17 +81,23 @@ const SalarySlips = () => {
     localStorage.setItem("salarySlips-selectedMonth", selectedMonth);
     localStorage.setItem("salarySlips-selectedYear", String(selectedYear));
 
+    // After fetching from API
     const fetchSalarySummaries = async () => {
-    try {
-      const summaries = await salarySummaryAPI.getSalarySummaries(monthKey);
-      setSummaryData(summaries || []);
-    } catch (err) {
-      console.warn("Failed to fetch salary summaries from backend", err);
-      setSummaryData([]);
-    }
-  };
-
-  fetchSalarySummaries();
+      try {
+        const summaries = await salarySummaryAPI.getSalarySummaries(monthKey);
+        // Flatten salaryDetails into the root object for each summary
+        const flatSummaries = (summaries || []).map(s =>
+          s.salaryDetails
+            ? { ...s.salaryDetails, "Employee Code": s.employeeCode }
+            : s
+        );
+        setSummaryData(flatSummaries);
+      } catch (err) {
+        console.warn("Failed to fetch salary summaries from backend", err);
+        setSummaryData([]);
+      }
+    };
+    fetchSalarySummaries();
   }, [selectedMonth, selectedYear]);
 
   const fetchEmployees = async () => {
@@ -363,11 +369,9 @@ const SalarySlips = () => {
 
           pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
 
-          const fileName = `${
-            employeeSummary["Employee Code"] || employeeSummary.code || "EMP"
-          }_${
-            employeeSummary.Name || employeeSummary.name || ""
-          }_${selectedMonth}_${selectedYear}_SalarySlip.pdf`;
+          const fileName = `${employeeSummary["Employee Code"] || employeeSummary.code || "EMP"
+            }_${employeeSummary.Name || employeeSummary.name || ""
+            }_${selectedMonth}_${selectedYear}_SalarySlip.pdf`;
 
           pdf.save(fileName);
         })
@@ -392,13 +396,12 @@ const SalarySlips = () => {
         (emp.personalDetails?.firstName &&
           s.Name &&
           s.Name.toLowerCase() ===
-            `${emp.personalDetails.firstName} ${
-              emp.personalDetails.lastName || ""
+          `${emp.personalDetails.firstName} ${emp.personalDetails.lastName || ""
             }`
-              .trim()
-              .toLowerCase())
+            .trim()
+            .toLowerCase())
     );
-  };
+  }; 
 
   if (loadingEmployees) return <div>Loading employees...</div>;
 
@@ -479,8 +482,7 @@ const SalarySlips = () => {
               .filter((emp) => {
                 const empCode = emp.code || emp["Employee Code"] || "";
                 const empName = emp.personalDetails?.firstName
-                  ? `${emp.personalDetails.firstName} ${
-                      emp.personalDetails.lastName || ""
+                  ? `${emp.personalDetails.firstName} ${emp.personalDetails.lastName || ""
                     }`.trim()
                   : emp.Name || "";
 
@@ -493,8 +495,7 @@ const SalarySlips = () => {
                 const salaryData = getSalaryDataForEmployee(emp);
                 const empCode = emp.code || emp["Employee Code"] || "N/A";
                 const empName = emp.personalDetails?.firstName
-                  ? `${emp.personalDetails.firstName} ${
-                      emp.personalDetails.lastName || ""
+                  ? `${emp.personalDetails.firstName} ${emp.personalDetails.lastName || ""
                     }`.trim()
                   : emp.Name || "N/A";
                 const designation =
