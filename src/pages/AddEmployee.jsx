@@ -1,261 +1,263 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import CandidateDetails from "../components/AddCandidates/CandidateDetails";
+import AddressSection from "../components/AddCandidates/AddressSection";
+import ProfessionalDetails from "../components/AddCandidates/ProfessionalDetails";
+import EducationSection from "../components/AddCandidates/EducationSection";
+import ExperienceSection from "../components/AddCandidates/ExperienceSection";
+import SalarySection from "../components/AddCandidates/SalarySection";
 import axios from "axios";
 import "./AddEmployee.css";
+import { candidateAPI } from "../services/api";
 
 const AddEmployee = ({
-  onSuccess = () => {},
+  onSuccess = () => { },
   onClose = () => window.history.back(),
 }) => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
   const [formData, setFormData] = useState({
     personalDetails: {
       firstName: "",
       lastName: "",
-      gender: "",
+      email: "",
       phone: "",
+      dateOfBirth: "",
+      gender: "",
+      nationality: "Indian",
+      uanNumber: "",
+      officialEmail: "",
+      aadhaarNumber: "",
+      panNumber: "",
+    },
+    address: {
+      present: {
+        address1: "",
+        address2: "",
+        city: "",
+        postalCode: "",
+        country: "",
+        state: "",
+      },
+      permanent: {
+        address1: "",
+        address2: "",
+        city: "",
+        postalCode: "",
+        country: "",
+        state: "",
+      },
+      sameAsPresent: false,
     },
     professionalDetails: {
       designation: "",
       department: "",
-      dateOfJoining: "",
+      experience: "",
+      location: "",
+      sourceOfHire: "",
+      title: "",
+      skillSet: "",
+      currentSalary: "",
+      highestQualification: "",
+      additionalInformation: "",
+      tentativeJoiningDate: "",
       agency: "",
-      salary: {
-        basic: "",
-        hra: "",
-        retention: "",
-        otherAllowances: "",
-        actualSalary: "",
-      },
+      dateOfJoining: "",
     },
+    salary: {
+      basic: "",
+      hra: "",
+      retention: "",
+      otherAllowances: "",
+      actualSalary: "",
+    },
+    education: [
+      {
+        schoolName: "",
+        degree: "",
+        fieldOfStudy: "",
+        dateOfCompletion: "",
+        additionalNotes: "",
+      },
+    ],
+    experience: [
+      {
+        occupation: "",
+        company: "",
+        summary: "",
+        duration: "",
+        currentlyWorkHere: false,
+      },
+    ],
     client: {
       name: "",
       location: "",
     },
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  // Deep update of nested formData based on dot notation keys in name attribute
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => {
-      const keys = name.split(".");
-      let nested = { ...prev };
-      let current = nested;
-      for (let i = 0; i < keys.length - 1; i++) {
-        current[keys[i]] = { ...current[keys[i]] };
-        current = current[keys[i]];
-      }
-      current[keys[keys.length - 1]] = value;
-      return nested;
-    });
+  const updateFormData = (section, data) => {
+    setFormData((prev) => ({
+      ...prev,
+      [section]: data,
+    }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+  const validateForm = () => {
+    const { personalDetails } = formData;
+    if (!personalDetails.firstName || !personalDetails.lastName || !personalDetails.email) {
+      setError("Please fill in required fields: First Name, Last Name, Email");
+      return false;
+    }
+    return true;
+  };
 
-    // Prepare payload exactly matching backend model
-    const newEmployee = {
+  const prepareDataForBackend = () => {
+    // Flatten and prepare the payload as per backend requirements
+    return {
       isEmployee: true,
       status: "Selected",
       client: formData.client,
       personalDetails: formData.personalDetails,
-      professionalDetails: formData.professionalDetails,
+      address: {
+        street: formData.address.present.address1 + " " + formData.address.present.address2,
+        city: formData.address.present.city,
+        state: formData.address.present.state,
+        country: formData.address.present.country,
+        zipCode: formData.address.present.postalCode,
+      },
+      professionalDetails: {
+        ...formData.professionalDetails,
+        salary: formData.salary,
+      },
+      education: formData.education,
+      experience: formData.experience,
     };
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    if (!validateForm()) return;
+    setLoading(true);
 
     try {
       const token = localStorage.getItem("token");
+      const payload = prepareDataForBackend();
       await axios.post(
         `${import.meta.env.VITE_API_URL}/candidates`,
-        newEmployee,
+        payload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
+      setSuccess("Employee added successfully!");
       onSuccess();
-      onClose();
+      setTimeout(() => {
+        onClose();
+      }, 1500);
     } catch (err) {
-      setError(err?.response?.data?.error||"Failed to add employee. Please try again.");
+      setError(err?.response?.data?.error || "Failed to add employee. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
+  const [aadhaarCheck, setAadhaarCheck] = useState({
+    checked: false,
+    loading: false,
+    error: "",
+    exists: false,
+  });
+
+  // Aadhaar check logic moved here
+  const handleAadhaarCheck = async (aadhaarNumber) => {
+    setAadhaarCheck({ ...aadhaarCheck, loading: true, error: "", exists: false });
+    try {
+      const res = await candidateAPI.checkAadhar(aadhaarNumber);
+      if (res.exists) {
+        setAadhaarCheck({
+          checked: true,
+          loading: false,
+          error: "Aadhaar already exists in the system.",
+          exists: true,
+        });
+      } else {
+        setAadhaarCheck({
+          checked: true,
+          loading: false,
+          error: "",
+          exists: false,
+        });
+      }
+    } catch (err) {
+      setAadhaarCheck({
+        checked: true,
+        loading: false,
+        error: "Error checking Aadhaar. Please try again.",
+        exists: false,
+      });
+    }
+  };
+
+  // Disable all fields except Aadhaar until Aadhaar is validated and unique
+  const fieldsDisabled = !aadhaarCheck.checked || aadhaarCheck.exists;
 
   return (
-    <div className="p-6 bg-white rounded-xl shadow-md max-w-md mx-auto mt-10">
-      <h2 className="text-xl font-semibold mb-4">Add Employee</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Personal Details */}
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            name="personalDetails.firstName"
-            placeholder="First Name"
-            value={formData.personalDetails.firstName}
-            onChange={handleChange}
-            required
-            className="border p-2 rounded"
-          />
-          <input
-            type="text"
-            name="personalDetails.lastName"
-            placeholder="Last Name"
-            value={formData.personalDetails.lastName}
-            onChange={handleChange}
-            required
-            className="border p-2 rounded"
-          />
+    <div className="add-employee-page">
+      <div className="form-section form-header-section">
+        <div className="form-header">
+          <h2>Add Employee</h2>
+          <button className="close-button" onClick={onClose}>&times;</button>
         </div>
+      </div>
 
-        <select
-          name="personalDetails.gender"
-          value={formData.personalDetails.gender}
-          onChange={handleChange}
-          required
-          className="border p-2 rounded w-full"
-        >
-          <option value="">Select Gender</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
-        </select>
+      {error && <div className="error-message">{error}</div>}
+      {success && <div className="success-message">{success}</div>}
 
-        <input
-          type="tel"
-          name="personalDetails.phone"
-          placeholder="Phone Number"
-          value={formData.personalDetails.phone}
-          onChange={handleChange}
-          className="border p-2 rounded w-full"
+      <form onSubmit={handleSubmit}>
+        <CandidateDetails
+          data={formData.personalDetails}
+          updateData={(data) => updateFormData("personalDetails", data)}
+          aadhaarCheck={aadhaarCheck}
+          handleAadhaarCheck={handleAadhaarCheck}
         />
-
-        {/* Professional Details */}
-        <select
-          name="professionalDetails.designation"
-          value={formData.professionalDetails.designation}
-          onChange={handleChange}
-          required
-          className="border p-2 rounded w-full"
-        >
-          <option value="">Select Designation</option>
-          <option value="Picker&Packar">Picker&Packar</option>
-          <option value="SG">SG</option>
-          <option value="HK">HK</option>
-        </select>
-
-        <input
-          type="text"
-          name="professionalDetails.department"
-          placeholder="Department"
-          value={formData.professionalDetails.department}
-          onChange={handleChange}
-          className="border p-2 rounded w-full"
+        <AddressSection
+          data={formData.address}
+          updateData={(data) => updateFormData("address", data)}
+          fieldsDisabled={fieldsDisabled}
         />
-
-        <input
-          type="text"
-          name="professionalDetails.agency"
-          placeholder="Agency Name"
-          value={formData.professionalDetails.agency}
-          onChange={handleChange}
-          className="border p-2 rounded w-full"
+        <ProfessionalDetails
+          data={formData.professionalDetails}
+          updateData={(data) => updateFormData("professionalDetails", data)}
+          fieldsDisabled={fieldsDisabled}
         />
-
-        <input
-          type="date"
-          name="professionalDetails.dateOfJoining"
-          value={formData.professionalDetails.dateOfJoining}
-          onChange={handleChange}
-          required
-          className="border p-2 rounded w-full"
+        <SalarySection
+          data={formData.salary}
+          updateData={(data) => updateFormData("salary", data)}
+          fieldsDisabled={fieldsDisabled}
         />
-
-        {/* Client Details */}
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            name="client.name"
-            placeholder="Client Name"
-            value={formData.client.name}
-            onChange={handleChange}
-            className="border p-2 rounded"
-          />
-          <input
-            type="text"
-            name="client.location"
-            placeholder="Client Location"
-            value={formData.client.location}
-            onChange={handleChange}
-            className="border p-2 rounded"
-          />
-        </div>
-
-        {/* Salary Details */}
-        <h3 className="text-lg font-medium mb-2 mt-4">Salary Details</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="number"
-            name="professionalDetails.salary.basic"
-            placeholder="Basic Salary"
-            value={formData.professionalDetails.salary.basic}
-            onChange={handleChange}
-            className="border p-2 rounded"
-          />
-          <input
-            type="number"
-            name="professionalDetails.salary.hra"
-            placeholder="HRA"
-            value={formData.professionalDetails.salary.hra}
-            onChange={handleChange}
-            className="border p-2 rounded"
-          />
-          <input
-            type="number"
-            name="professionalDetails.salary.retention"
-            placeholder="Retention"
-            value={formData.professionalDetails.salary.retention}
-            onChange={handleChange}
-            className="border p-2 rounded"
-          />
-          <input
-            type="number"
-            name="professionalDetails.salary.otherAllowances"
-            placeholder="Other Allowances"
-            value={formData.professionalDetails.salary.otherAllowances}
-            onChange={handleChange}
-            className="border p-2 rounded"
-          />
-          <input
-            type="number"
-            name="professionalDetails.salary.actualSalary"
-            placeholder="Actual Salary"
-            value={formData.professionalDetails.salary.actualSalary}
-            onChange={handleChange}
-            className="border p-2 rounded"
-          />
-        </div>
-
-        {error && <p className="text-red-500">{error}</p>}
-
-        <div className="flex justify-end gap-2 mt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-300 text-black rounded"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded"
-          >
+        <EducationSection
+          data={formData.education}
+          updateData={(data) => updateFormData("education", data)}
+          fieldsDisabled={fieldsDisabled}
+        />
+        <ExperienceSection
+          data={formData.experience}
+          updateData={(data) => updateFormData("experience", data)}
+          fieldsDisabled={fieldsDisabled}
+        />
+        <div className="form-footer">
+          <button type="submit" className="primary" disabled={loading}>
             {loading ? "Saving..." : "Save"}
+          </button>
+          <button type="button" className="secondary" onClick={onClose} disabled={loading}>
+            Cancel
           </button>
         </div>
       </form>

@@ -5,7 +5,7 @@ import { Country, State } from 'country-state-city';
 const labelClasses = "block font-medium mb-1 text-slate-800";
 const inputClasses = "w-full p-2 border border-slate-300 rounded-md bg-white text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors disabled:bg-slate-100 disabled:opacity-70 disabled:cursor-not-allowed";
 
-const AddressSection = ({ data, updateData }) => {
+const AddressSection = ({ data, updateData, fieldsDisabled }) => {
   // All your state and logic functions for country/state dropdowns and syncing addresses
   // remain exactly the same. No changes are needed there.
 
@@ -61,21 +61,21 @@ const AddressSection = ({ data, updateData }) => {
       {/* Present Address */}
       <h4 className="text-base font-semibold mt-6 mb-3 text-slate-800">Present Address</h4>
       <div className="flex flex-col gap-4">
-        <input name="address1" value={present.address1} onChange={handlePresentChange} placeholder="Address Line 1" className={inputClasses} />
-        <input name="address2" value={present.address2} onChange={handlePresentChange} placeholder="Address Line 2" className={inputClasses} />
+        <input disabled={fieldsDisabled} name="address1" value={present.address1} onChange={handlePresentChange} placeholder="Address Line 1" className={inputClasses} />
+        <input disabled={fieldsDisabled} name="address2" value={present.address2} onChange={handlePresentChange} placeholder="Address Line 2" className={inputClasses} />
         
         <div className="flex flex-col sm:flex-row gap-4">
-          <input name="city" value={present.city} onChange={handlePresentChange} placeholder="City" className={`${inputClasses} flex-1`} />
-          <input name="postalCode" value={present.postalCode} onChange={handlePresentChange} placeholder="Postal Code" className={`${inputClasses} flex-1`} />
+          <input disabled={fieldsDisabled} name="city" value={present.city} onChange={handlePresentChange} placeholder="City" className={`${inputClasses} flex-1`} />
+          <input disabled={fieldsDisabled} name="postalCode" value={present.postalCode} onChange={handlePresentChange} placeholder="Postal Code" className={`${inputClasses} flex-1`} />
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4">
-          <select name="country" value={present.country} onChange={handlePresentChange} className={`${inputClasses} flex-1`}>
+          <select disabled={fieldsDisabled} name="country" value={present.country} onChange={handlePresentChange} className={`${inputClasses} flex-1`}>
             <option value="">Select Country</option>
             {allCountries.map((c) => (<option key={c.isoCode} value={c.isoCode}>{c.name}</option>))}
           </select>
 
-          <select name="state" value={present.state} onChange={handlePresentChange} className={`${inputClasses} flex-1`}>
+          <select disabled={fieldsDisabled} name="state" value={present.state} onChange={handlePresentChange} className={`${inputClasses} flex-1`}>
             <option value="">Select State</option>
             {presentStatesList.map((s) => (<option key={s.isoCode} value={s.isoCode}>{s.name}</option>))}
           </select>
@@ -85,7 +85,7 @@ const AddressSection = ({ data, updateData }) => {
       {/* Checkbox */}
       <div className="my-6">
         <label htmlFor="sameAs" className="inline-flex items-center cursor-pointer text-slate-800">
-          <input
+          <input disabled={fieldsDisabled}
             type="checkbox"
             id="sameAs"
             checked={sameAsPresent}
@@ -99,20 +99,20 @@ const AddressSection = ({ data, updateData }) => {
       {/* Permanent Address */}
       <h4 className="text-base font-semibold mt-6 mb-3 text-slate-800">Permanent Address</h4>
       <div className="flex flex-col gap-4">
-        <input name="address1" value={permanent.address1} onChange={handlePermanentChange} placeholder="Address Line 1" className={inputClasses} disabled={sameAsPresent} />
-        <input name="address2" value={permanent.address2} onChange={handlePermanentChange} placeholder="Address Line 2" className={inputClasses} disabled={sameAsPresent} />
+        <input disabled={fieldsDisabled||sameAsPresent} name="address1" value={permanent.address1} onChange={handlePermanentChange} placeholder="Address Line 1" className={inputClasses} />
+        <input disabled={fieldsDisabled||sameAsPresent} name="address2" value={permanent.address2} onChange={handlePermanentChange} placeholder="Address Line 2" className={inputClasses} />
 
         <div className="flex flex-col sm:flex-row gap-4">
-          <input name="city" value={permanent.city} onChange={handlePermanentChange} placeholder="City" className={`${inputClasses} flex-1`} disabled={sameAsPresent} />
-          <input name="postalCode" value={permanent.postalCode} onChange={handlePermanentChange} placeholder="Postal Code" className={`${inputClasses} flex-1`} disabled={sameAsPresent} />
+          <input disabled={fieldsDisabled||sameAsPresent} name="city" value={permanent.city} onChange={handlePermanentChange} placeholder="City" className={`${inputClasses} flex-1`} />
+          <input disabled={fieldsDisabled||sameAsPresent} name="postalCode" value={permanent.postalCode} onChange={handlePermanentChange} placeholder="Postal Code" className={`${inputClasses} flex-1`} />
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4">
-          <select name="country" value={permanent.country} onChange={handlePermanentChange} className={`${inputClasses} flex-1`} disabled={sameAsPresent}>
+          <select name="country" value={permanent.country} onChange={handlePermanentChange} className={`${inputClasses} flex-1`} disabled={fieldsDisabled || sameAsPresent}>
             <option value="">Select Country</option>
             {allCountries.map((c) => (<option key={c.isoCode} value={c.isoCode}>{c.name}</option>))}
           </select>
-          <select name="state" value={permanent.state} onChange={handlePermanentChange} className={`${inputClasses} flex-1`} disabled={sameAsPresent}>
+          <select  name="state" value={permanent.state} onChange={handlePermanentChange} className={`${inputClasses} flex-1`} disabled={fieldsDisabled || sameAsPresent}>
             <option value="">Select State</option>
             {permanentStatesList.map((s) => (<option key={s.isoCode} value={s.isoCode}>{s.name}</option>))}
           </select>

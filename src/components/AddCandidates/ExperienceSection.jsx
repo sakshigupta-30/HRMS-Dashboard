@@ -2,7 +2,7 @@ import React from 'react';
 
 const tableInputClasses = "w-full p-2 border border-slate-300 rounded-md bg-white text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition";
 
-const ExperienceSection = ({ data, updateData }) => {
+const ExperienceSection = ({ data, updateData, fieldsDisabled }) => {
   const handleChange = (index, field, value) => {
     const newData = [...data];
     newData[index] = { ...newData[index], [field]: value };
@@ -42,19 +42,19 @@ const ExperienceSection = ({ data, updateData }) => {
               <tr key={index}>
                 {/* CHANGE 3: Removed borders from cells, added bg-slate-50 and rounded corners */}
                 <td className="p-2 align-top bg-slate-50 rounded-l-md">
-                  <input type="text" value={exp.occupation} onChange={(e) => handleChange(index, 'occupation', e.target.value)} className={tableInputClasses} />
+                  <input disabled={fieldsDisabled}type="text" value={exp.occupation} onChange={(e) => handleChange(index, 'occupation', e.target.value)} className={tableInputClasses} />
                 </td>
                 <td className="p-2 align-top bg-slate-50">
-                  <input type="text" value={exp.company} onChange={(e) => handleChange(index, 'company', e.target.value)} className={tableInputClasses} />
+                  <input disabled={fieldsDisabled}type="text" value={exp.company} onChange={(e) => handleChange(index, 'company', e.target.value)} className={tableInputClasses} />
                 </td>
                 <td className="p-2 align-top bg-slate-50">
-                  <textarea value={exp.summary} onChange={(e) => handleChange(index, 'summary', e.target.value)} className={tableInputClasses} rows="1" />
+                  <textarea disabled={fieldsDisabled} value={exp.summary} onChange={(e) => handleChange(index, 'summary', e.target.value)} className={tableInputClasses} rows="1" />
                 </td>
                 <td className="p-2 align-top bg-slate-50">
-                  <input type="text" value={exp.duration} onChange={(e) => handleChange(index, 'duration', e.target.value)} className={tableInputClasses} />
+                  <input disabled={fieldsDisabled}type="text" value={exp.duration} onChange={(e) => handleChange(index, 'duration', e.target.value)} className={tableInputClasses} />
                 </td>
                 <td className="p-2 align-top bg-slate-50 rounded-r-md">
-                  <select value={exp.currentlyWorkHere ? 'yes' : 'no'} onChange={(e) => handleChange(index, 'currentlyWorkHere', e.target.value === 'yes')} className={tableInputClasses}>
+                  <select disabled={fieldsDisabled} value={exp.currentlyWorkHere ? 'yes' : 'no'} onChange={(e) => handleChange(index, 'currentlyWorkHere', e.target.value === 'yes')} className={tableInputClasses}>
                     <option value="no">No</option>
                     <option value="yes">Yes</option>
                   </select>
@@ -64,7 +64,8 @@ const ExperienceSection = ({ data, updateData }) => {
           </tbody>
         </table>
       </div>
-      <button 
+      <button
+        type='button'
         className="bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-semibold cursor-pointer hover:bg-blue-700 transition-colors"
         onClick={addRow}
       >

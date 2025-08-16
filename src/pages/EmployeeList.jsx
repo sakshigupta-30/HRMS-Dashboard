@@ -24,7 +24,7 @@ const EmployeeList = () => {
   const [searchText, setSearchText] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [agencyFilter, setAgencyFilter] = useState("");
-
+  const [statusFilter, setStatusFilter] = useState("");
   const showMessage = (msg) => {
     setMessage(msg);
     setTimeout(() => setMessage(""), 3000);
@@ -297,14 +297,20 @@ const EmployeeList = () => {
     const name = getDisplayName(emp).toLowerCase();
     const location = getLocation(emp)?.toLowerCase();
     const agency = getAgency(emp)?.toLowerCase();
+    const status = (emp.status || "").toLowerCase();
 
     const matchesName = name.includes(searchText.toLowerCase());
     const matchesLocation =
       !locationFilter || location === locationFilter.toLowerCase();
     const matchesAgency =
       !agencyFilter || agency === agencyFilter.toLowerCase();
+    const matchesStatus =
+      !statusFilter ||
+      (statusFilter === "active"
+        ? status === "selected" || status === "active"
+        : status === "inactive");
 
-    return matchesName && matchesLocation && matchesAgency;
+    return matchesStatus && matchesName && matchesLocation && matchesAgency;
   });
   if (loading) return <div className="p-8">Loading employees...</div>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
@@ -353,18 +359,18 @@ const EmployeeList = () => {
       </div>
 
       {/* Search and Location Filters */}
-      <div className="flex flex-wrap gap-4 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6">
         <input
           type="text"
           placeholder="Search by name..."
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          className="p-2 rounded border border-gray-300 focus:outline-blue-400 flex-grow max-w-xs"
+          className="p-2 rounded border border-gray-300 focus:outline-blue-400 flex-grow max-w-[17rem]"
         />
         <select
           value={locationFilter}
           onChange={(e) => setLocationFilter(e.target.value)}
-          className="p-2 rounded border border-gray-300 focus:outline-blue-400 max-w-xs"
+          className="p-2 rounded border border-gray-300 focus:outline-blue-400 max-w-[17rem]"
         >
           <option value="">All Locations</option>
           {uniqueLocations.map((loc) => (
@@ -376,7 +382,7 @@ const EmployeeList = () => {
         <select
           value={agencyFilter}
           onChange={(e) => setAgencyFilter(e.target.value)}
-          className="p-2 rounded border border-gray-300 focus:outline-blue-400 max-w-xs"
+          className="p-2 rounded border border-gray-300 focus:outline-blue-400 max-w-[17rem]"
         >
           <option value="">All Agencies</option>
           {uniqueAgencies.map((loc) => (
@@ -384,6 +390,15 @@ const EmployeeList = () => {
               {loc}
             </option>
           ))}
+        </select>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="p-2 rounded border border-gray-300 focus:outline-blue-400 max-w-[17rem]"
+        >
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
         </select>
       </div>
 
@@ -582,8 +597,8 @@ const EmployeeList = () => {
             key={i}
             onClick={() => setPage(i + 1)}
             className={`px-3 py-1 rounded ${page === i + 1
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-800"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200 text-gray-800"
               } hover:bg-gray-300`}
           >
             {i + 1}

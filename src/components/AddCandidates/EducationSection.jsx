@@ -2,7 +2,7 @@ import React from 'react';
 
 const tableInputClasses = "w-full p-2 border border-slate-300 rounded-md bg-white text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition";
 
-const EducationSection = ({ data, updateData }) => {
+const EducationSection = ({ data, updateData, fieldsDisabled }) => {
   const handleChange = (index, field, value) => {
     const newData = [...data];
     newData[index] = { ...newData[index], [field]: value };
@@ -42,19 +42,19 @@ const EducationSection = ({ data, updateData }) => {
               <tr key={index}>
                 {/* CHANGE 3: Removed borders from cells, added bg-slate-50 and rounded corners */}
                 <td className="p-2 align-top bg-slate-50 rounded-l-md">
-                  <input type="text" value={edu.schoolName} onChange={(e) => handleChange(index, 'schoolName', e.target.value)} className={tableInputClasses} />
+                  <input disabled={fieldsDisabled}type="text" value={edu.schoolName} onChange={(e) => handleChange(index, 'schoolName', e.target.value)} className={tableInputClasses} />
                 </td>
                 <td className="p-2 align-top bg-slate-50">
-                  <input type="text" value={edu.degree} onChange={(e) => handleChange(index, 'degree', e.target.value)} className={tableInputClasses} />
+                  <input disabled={fieldsDisabled}type="text" value={edu.degree} onChange={(e) => handleChange(index, 'degree', e.target.value)} className={tableInputClasses} />
                 </td>
                 <td className="p-2 align-top bg-slate-50">
-                  <input type="text" value={edu.fieldOfStudy} onChange={(e) => handleChange(index, 'fieldOfStudy', e.target.value)} className={tableInputClasses} />
+                  <input disabled={fieldsDisabled}type="text" value={edu.fieldOfStudy} onChange={(e) => handleChange(index, 'fieldOfStudy', e.target.value)} className={tableInputClasses} />
                 </td>
                 <td className="p-2 align-top bg-slate-50">
-                  <input type="text" value={edu.dateOfCompletion} onChange={(e) => handleChange(index, 'dateOfCompletion', e.target.value)} className={tableInputClasses} />
+                  <input disabled={fieldsDisabled}type="text" value={edu.dateOfCompletion} onChange={(e) => handleChange(index, 'dateOfCompletion', e.target.value)} className={tableInputClasses} />
                 </td>
                 <td className="p-2 align-top bg-slate-50 rounded-r-md">
-                  <textarea value={edu.additionalNotes} onChange={(e) => handleChange(index, 'additionalNotes', e.target.value)} className={tableInputClasses} rows="1" />
+                  <textarea disabled={fieldsDisabled} value={edu.additionalNotes} onChange={(e) => handleChange(index, 'additionalNotes', e.target.value)} className={tableInputClasses} rows="1" />
                 </td>
               </tr>
             ))}
@@ -62,6 +62,7 @@ const EducationSection = ({ data, updateData }) => {
         </table>
       </div>
       <button 
+      type='button'
         className="bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-semibold cursor-pointer hover:bg-blue-700 transition-colors"
         onClick={addRow}
       >

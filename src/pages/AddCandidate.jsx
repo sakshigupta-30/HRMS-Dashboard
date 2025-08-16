@@ -212,7 +212,45 @@ const AddCandidate = () => {
       setLoading(false);
     }
   };
+const [aadhaarCheck, setAadhaarCheck] = useState({
+    checked: false,
+    loading: false,
+    error: "",
+    exists: false,
+  });
 
+  // Aadhaar check logic moved here
+  const handleAadhaarCheck = async (aadhaarNumber) => {
+    setAadhaarCheck({ ...aadhaarCheck, loading: true, error: "", exists: false });
+    try {
+      const res = await candidateAPI.checkAadhar(aadhaarNumber);
+      if (res.exists) {
+        setAadhaarCheck({
+          checked: true,
+          loading: false,
+          error: "Aadhaar already exists in the system.",
+          exists: true,
+        });
+      } else {
+        setAadhaarCheck({
+          checked: true,
+          loading: false,
+          error: "",
+          exists: false,
+        });
+      }
+    } catch (err) {
+      setAadhaarCheck({
+        checked: true,
+        loading: false,
+        error: "Error checking Aadhaar. Please try again.",
+        exists: false,
+      });
+    }
+  };
+
+  // Disable all fields except Aadhaar until Aadhaar is validated and unique
+  const fieldsDisabled = !aadhaarCheck.checked || aadhaarCheck.exists;
   return (
     <div className="add-candidate-page">
       <div className="form-section form-header-section">
@@ -228,22 +266,28 @@ const AddCandidate = () => {
       <CandidateDetails
         data={formData.personalDetails}
         updateData={(data) => updateFormData('personalDetails', data)}
+        aadhaarCheck={aadhaarCheck}
+          handleAadhaarCheck={handleAadhaarCheck}
       />
       <AddressSection
         data={formData.address}
         updateData={(data) => updateFormData('address', data)}
+        fieldsDisabled={fieldsDisabled}
       />
       <ProfessionalDetails
         data={formData.professionalDetails}
         updateData={(data) => updateFormData('professionalDetails', data)}
+        fieldsDisabled={fieldsDisabled}
       />
       <EducationSection
         data={formData.education}
         updateData={(data) => updateFormData('education', data)}
+        fieldsDisabled={fieldsDisabled}
       />
       <ExperienceSection
         data={formData.experience}
         updateData={(data) => updateFormData('experience', data)}
+        fieldsDisabled={fieldsDisabled}
       />
 
       <div className="form-footer">

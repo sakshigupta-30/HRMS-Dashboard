@@ -82,6 +82,11 @@ export const candidateAPI = {
     return response.data;
   },
 
+  checkAadhar: async (aadharNo) => {
+    const response = await api.get(`/candidates/check-aadhar/${aadharNo}`);
+    return response.data;
+  },
+
   deleteCandidate: async (id) => {
     try {
       const response = await api.delete(`/candidates/${id}`);

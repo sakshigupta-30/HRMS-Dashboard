@@ -3,7 +3,7 @@ import React from 'react';
 const labelClasses = "block font-medium mb-1.5 text-sm";
 const inputClasses = "w-full py-2 px-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none";
 
-const ProfessionalDetails = ({ data, updateData }) => {
+const ProfessionalDetails = ({ data, updateData, fieldsDisabled }) => {
   const handleChange = (field, value) => {
     updateData({
       ...data,
@@ -20,7 +20,7 @@ const ProfessionalDetails = ({ data, updateData }) => {
 
         <div>
           <label className={labelClasses}>Experience</label>
-          <input 
+          <input disabled={fieldsDisabled}
             type="text" 
             className={inputClasses}
             value={data.experience}
@@ -30,7 +30,7 @@ const ProfessionalDetails = ({ data, updateData }) => {
 
         <div>
           <label className={labelClasses}>Location</label>
-          <input 
+          <input disabled={fieldsDisabled}
             type="text" 
             className={inputClasses}
             value={data.location}
@@ -41,7 +41,7 @@ const ProfessionalDetails = ({ data, updateData }) => {
 
         <div>
           <label className={labelClasses}>Source of Hire</label>
-          <input 
+          <input disabled={fieldsDisabled}
             type="text" 
             className={inputClasses}
             value={data.sourceOfHire}
@@ -57,6 +57,7 @@ const ProfessionalDetails = ({ data, updateData }) => {
             <label key={role} className="flex items-center gap-2.5 font-normal text-sm text-gray-800 cursor-pointer">
               <input
                 type="radio"
+                disabled={fieldsDisabled}
                 name="designation"
                 value={role}
                 checked={data.designation === role}
@@ -73,6 +74,7 @@ const ProfessionalDetails = ({ data, updateData }) => {
         <div>
           <label className={labelClasses}>Skill Set</label>
           <textarea 
+          disabled={fieldsDisabled}
             rows="2" 
             className={inputClasses}
             value={data.skillSet}
@@ -82,7 +84,7 @@ const ProfessionalDetails = ({ data, updateData }) => {
 
         <div>
           <label className={labelClasses}>Current Salary</label>
-          <input 
+          <input disabled={fieldsDisabled}
             type="text" 
             className={inputClasses}
             value={data.currentSalary}
@@ -92,7 +94,7 @@ const ProfessionalDetails = ({ data, updateData }) => {
 
         <div>
           <label className={labelClasses}>Highest Qualification</label>
-          <input 
+          <input disabled={fieldsDisabled}
             type="text" 
             className={inputClasses}
             value={data.highestQualification}
@@ -103,6 +105,7 @@ const ProfessionalDetails = ({ data, updateData }) => {
         <div className="md:col-span-2">
           <label className={labelClasses}>Additional Information</label>
           <textarea 
+          disabled={fieldsDisabled}
             rows="2" 
             className={inputClasses}
             value={data.additionalInformation}
@@ -123,7 +126,7 @@ const ProfessionalDetails = ({ data, updateData }) => {
 
         <div>
           <label className={labelClasses}>Tentative Joining Date</label>
-          <input 
+          <input disabled={fieldsDisabled}
             type="date" 
             className={inputClasses}
             value={data.tentativeJoiningDate}
