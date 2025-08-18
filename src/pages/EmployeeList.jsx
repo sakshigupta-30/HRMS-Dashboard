@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { candidateAPI } from "../services/api";
+import { AdvancePayAPI, candidateAPI } from "../services/api";
 import * as XLSX from "xlsx";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-
+import AdvancedPaymentModal from "../components/AdvancePaymentModal";
 dayjs.extend(customParseFormat);
 
 const ITEMS_PER_PAGE = 20;
@@ -25,6 +25,8 @@ const EmployeeList = () => {
   const [locationFilter, setLocationFilter] = useState("");
   const [agencyFilter, setAgencyFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedWorker, setSelectedWorker] = useState(null);
   const showMessage = (msg) => {
     setMessage(msg);
     setTimeout(() => setMessage(""), 3000);
@@ -66,7 +68,17 @@ const EmployeeList = () => {
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
-
+  const handleCreatePayment = async (paymentData) => {
+    // Replace with your actual API call
+   try {
+    console.log("Creating advance payment:", paymentData);
+     await AdvancePayAPI.saveAdvancePayment(paymentData);
+     alert("Advance payment created successfully!");
+   }catch(e){
+    console.error("Failed to create advance payment:", e);
+   }
+    // Optionally show a message or refresh data
+  };
   const isSelected = (id) => selectedIds.includes(id);
 
   const handleDeleteSelected = async () => {
@@ -567,6 +579,15 @@ const EmployeeList = () => {
                             View
                           </button>
                           <button
+                            onClick={() => {
+                              setSelectedWorker(emp);
+                              setShowPaymentModal(true);
+                            }}
+                            className="bg-purple-500 text-white py-1.5 px-2.5 text-xs rounded-md hover:bg-purple-600"
+                          >
+                            Advanced Payment
+                          </button>
+                          <button
                             onClick={() => handleDeleteEmployee(emp._id, name)}
                             className="bg-red-500 text-white py-1.5 px-2.5 text-xs rounded-md hover:bg-red-600"
                           >
@@ -580,6 +601,14 @@ const EmployeeList = () => {
               )}
             </tbody>
           </table>
+          {showPaymentModal && selectedWorker && (
+            <AdvancedPaymentModal
+              open={showPaymentModal}
+              onClose={() => setShowPaymentModal(false)}
+              worker={selectedWorker}
+              onSubmit={handleCreatePayment}
+            />
+          )}
         </div>
       </div>
 

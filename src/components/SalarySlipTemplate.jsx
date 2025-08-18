@@ -1,9 +1,27 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useEffect } from "react";
 import "./SalarySlipTemplate.css";
 import logoImage from "../assets/logo.png";
+import { salarySummaryAPI } from "../services/api";
 
 const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
   // Helper
+  const [advanced, setAdvanced] = React.useState(0);
+  const getAdvancedAmount = async(amount) => {
+    try{
+      const data = await salarySummaryAPI.getSalarySummary(employee["Employee Code"], employee.month);
+      if (data && data.advancedPayment) { 
+        setAdvanced(data.advancedPayment.amount);
+      }
+    }
+    catch(e){
+      console.error("Error fetching advanced amount:", e);
+    }
+  }
+  useEffect(() => {
+    if (employee && employee["Employee Code"]) {
+      getAdvancedAmount(employee["Employee Code"]);
+    }
+  }, [employee]);
   const formatAmount = (val) =>
     isNaN(val) || val === null ? "₹0" : `₹${Math.round(val)}`;
   const monthString = employee.month;
@@ -107,8 +125,11 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
           <div>
             Other Deductions: {formatAmount(employee["Other Deductions"] ?? 0)}
           </div>
+          <div>
+            Advanced Payment: {formatAmount(advanced ?? 0)}
+          </div>
           <strong>
-            Total Deduction: {formatAmount(employee["Total Deductions"])}
+            Total Deduction: {formatAmount(Number(employee["Total Deductions"])+Number(advanced))}
           </strong>
         </div>
         {/* Column 4 – Attendance */}
@@ -133,10 +154,10 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
           Gross: {formatAmount(employee["Earned Gross Pay"])}
         </div>
         <div className="footer-item-deductions">
-          Total Deduction: {formatAmount(employee["Total Deductions"])}
+          Total Deduction: {formatAmount(Number(employee["Total Deductions"])+Number(advanced))}
         </div>
         <div className="footer-net-salary">
-          Net Salary: {formatAmount(employee["Net Pay"])}
+          Net Salary: {formatAmount(Number(employee["Net Pay"]+Number(advanced)))}
         </div>
       </div>
     </div>

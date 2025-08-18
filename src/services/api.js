@@ -137,6 +137,36 @@ export const salarySummaryAPI = {
     return response.data;
   },
 };
+export const AdvancePayAPI = {
+  saveAdvancePayment: async ({employeeCode, month, year, amount, comments}) => {
+    console.log('Saving advance payment:', {employeeCode, month, year, amount, comments});
+    const response = await api.post('/advance-pay', {
+      employeeCode,
+      month,
+      year, amount, comments
+    });
+    return response.data;
+  },
+
+  getSalarySummary: async (employeeCode, month) => {
+    const response = await api.get('/salarysummary', {
+      params: { employeeCode, month }
+    });
+    return response.data;
+  },
+   getSalarySummaries: async (month) => {
+    const response = await api.get('/salarysummary/all', {
+      params: { month }
+    });
+    return response.data;
+  },
+   getSalarySummariesByEmployee: async (employeeCode) => {
+    const response = await api.get('/salarysummary/candidate', {
+      params: { employeeCode }
+    });
+    return response.data;
+  },
+};
 
 
 export default api; 
