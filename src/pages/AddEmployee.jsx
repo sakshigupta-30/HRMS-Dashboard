@@ -9,6 +9,8 @@ import SalarySection from "../components/AddCandidates/SalarySection";
 import axios from "axios";
 import "./AddEmployee.css";
 import { candidateAPI } from "../services/api";
+import { BankDetailsSection } from "../components/AddCandidates/BankSection";
+import { ClientSection } from "../components/AddCandidates/ClientSection";
 
 const AddEmployee = ({
   onSuccess = () => { },
@@ -236,6 +238,17 @@ const AddEmployee = ({
           data={formData.professionalDetails}
           updateData={(data) => updateFormData("professionalDetails", data)}
           fieldsDisabled={fieldsDisabled}
+        />
+        <BankDetailsSection
+          data={formData}
+          updateData={(data) => updateFormData("bankDetails", data)}
+          fieldsDisabled={false}
+        />
+
+        <ClientSection
+          data={formData}
+          updateData={(data) => updateFormData("clientDetails", data)}
+          fieldsDisabled={false}
         />
         <SalarySection
           data={formData.salary}

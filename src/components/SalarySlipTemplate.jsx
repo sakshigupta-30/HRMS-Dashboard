@@ -54,7 +54,9 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
       </div>
       {/* Title */}
       <div className="salary-title-row">
-        <div className="salary-title-text">Salary Slip</div>
+        <h1>FORM XIX</h1>
+        <h3>|See Rule (78)(1)(b)|</h3>
+        <div className="salary-title-text">Wage Slip</div>
         <div className="salary-subtitle-text">
           Salary / Wages Advice for the Month: {formattedMonthYear}
         </div>

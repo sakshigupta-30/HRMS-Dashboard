@@ -399,7 +399,28 @@ const OfferLetter = () => {
             <OfferLetterTemplate
               ref={templateRef}
               candidate={selectedCandidate}
-            />
+  candidateName={`${selectedCandidate.personalDetails?.firstName || ""} ${selectedCandidate.personalDetails?.lastName || ""}`.trim()}
+  position={selectedCandidate.professionalDetails?.designation || ""}
+  dateOfAppointment={
+    selectedCandidate.professionalDetails?.availableFrom
+      ? new Date(selectedCandidate.professionalDetails.availableFrom).toLocaleDateString("en-IN")
+      : ""
+  }
+  initialPosting={selectedCandidate.client?.location || "RAYMOON II Gurugram"}
+  monthlyNTH={selectedCandidate.professionalDetails?.salary?.actualSalary?.toLocaleString("en-IN") || ""}
+  location={selectedCandidate.client?.location || "Raymoon Service Pvt Ltd (Gurgaon)"}
+  dateOfJoining={
+    selectedCandidate.professionalDetails?.availableFrom
+      ? new Date(selectedCandidate.professionalDetails.availableFrom).toLocaleDateString("en-IN")
+      : ""
+  }
+  designation={selectedCandidate.professionalDetails?.designation || ""}
+  terms={{
+    revenueTarget: "7X",
+    incentivePercent: "5%",
+  }}
+/>
+
           )}
         </div>
       </div>

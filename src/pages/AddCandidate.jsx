@@ -8,6 +8,8 @@ import EducationSection from '../components/AddCandidates/EducationSection';
 import ExperienceSection from '../components/AddCandidates/ExperienceSection';
 import { candidateAPI } from '../services/api';
 import { useCandidateContext } from '../context/CandidateContext';
+import { BankDetailsSection } from '../components/AddCandidates/BankSection';
+import { ClientSection } from '../components/AddCandidates/ClientSection';
 
 const AddCandidate = () => {
   const navigate = useNavigate();
@@ -131,40 +133,40 @@ const AddCandidate = () => {
       },
       education: isDraft
         ? formData.education.map(edu => ({
-            degree: getValue(edu.degree),
-            institution: getValue(edu.schoolName),
-            fieldOfStudy: getValue(edu.fieldOfStudy),
-            startDate: '',
-            endDate: getValue(edu.dateOfCompletion),
-            grade: '',
-            isCompleted: false
-          }))
+          degree: getValue(edu.degree),
+          institution: getValue(edu.schoolName),
+          fieldOfStudy: getValue(edu.fieldOfStudy),
+          startDate: '',
+          endDate: getValue(edu.dateOfCompletion),
+          grade: '',
+          isCompleted: false
+        }))
         : formData.education.filter(edu => edu.schoolName || edu.degree).map(edu => ({
-            degree: edu.degree || '',
-            institution: edu.schoolName || '',
-            fieldOfStudy: edu.fieldOfStudy || '',
-            startDate: '',
-            endDate: edu.dateOfCompletion || '',
-            grade: '',
-            isCompleted: true
-          })),
+          degree: edu.degree || '',
+          institution: edu.schoolName || '',
+          fieldOfStudy: edu.fieldOfStudy || '',
+          startDate: '',
+          endDate: edu.dateOfCompletion || '',
+          grade: '',
+          isCompleted: true
+        })),
       experience: isDraft
         ? formData.experience.map(exp => ({
-            company: getValue(exp.company),
-            position: getValue(exp.occupation),
-            startDate: '',
-            endDate: '',
-            isCurrentJob: exp.currentlyWorkHere || false,
-            description: getValue(exp.summary)
-          }))
+          company: getValue(exp.company),
+          position: getValue(exp.occupation),
+          startDate: '',
+          endDate: '',
+          isCurrentJob: exp.currentlyWorkHere || false,
+          description: getValue(exp.summary)
+        }))
         : formData.experience.filter(exp => exp.company || exp.occupation).map(exp => ({
-            company: exp.company || '',
-            position: exp.occupation || '',
-            startDate: '',
-            endDate: '',
-            isCurrentJob: exp.currentlyWorkHere || false,
-            description: exp.summary || ''
-          })),
+          company: exp.company || '',
+          position: exp.occupation || '',
+          startDate: '',
+          endDate: '',
+          isCurrentJob: exp.currentlyWorkHere || false,
+          description: exp.summary || ''
+        })),
       status: isDraft ? 'Draft' : 'Applied'
     };
 
@@ -212,7 +214,7 @@ const AddCandidate = () => {
       setLoading(false);
     }
   };
-const [aadhaarCheck, setAadhaarCheck] = useState({
+  const [aadhaarCheck, setAadhaarCheck] = useState({
     checked: false,
     loading: false,
     error: "",
@@ -267,7 +269,7 @@ const [aadhaarCheck, setAadhaarCheck] = useState({
         data={formData.personalDetails}
         updateData={(data) => updateFormData('personalDetails', data)}
         aadhaarCheck={aadhaarCheck}
-          handleAadhaarCheck={handleAadhaarCheck}
+        handleAadhaarCheck={handleAadhaarCheck}
       />
       <AddressSection
         data={formData.address}
@@ -278,6 +280,17 @@ const [aadhaarCheck, setAadhaarCheck] = useState({
         data={formData.professionalDetails}
         updateData={(data) => updateFormData('professionalDetails', data)}
         fieldsDisabled={fieldsDisabled}
+      />
+      <BankDetailsSection
+        data={formData}
+        updateData={(data) => updateFormData("bankDetails", data)}
+        fieldsDisabled={false}
+      />
+
+      <ClientSection
+        data={formData}
+        updateData={(data) => updateFormData("clientDetails", data)}
+        fieldsDisabled={false}
       />
       <EducationSection
         data={formData.education}

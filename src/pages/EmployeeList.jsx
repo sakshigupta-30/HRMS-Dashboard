@@ -189,7 +189,7 @@ const EmployeeList = () => {
             },
             code: generatedCode,
             role: "Employee",
-            status: "Selected",
+            status: "Active",
             isEmployee: true,
           };
 
@@ -231,7 +231,7 @@ const EmployeeList = () => {
       Name: getDisplayName(emp),
       Phone: emp.personalDetails?.phone || "",
       Designation: getDesignation(emp),
-      Agency: getAgency(emp),
+      Client: getClient(emp),
       Location: getLocation(emp),
       "Join Date": getJoinDate(emp),
       Basic: emp.professionalDetails?.salary?.basic ?? "",
@@ -278,8 +278,8 @@ const EmployeeList = () => {
   const getLocation = (emp) =>
     emp.client?.location || emp.clientLocation || "N/A";
 
-  const getAgency = (emp) =>
-    emp.professionalDetails?.agency || emp.agency || "N/A";
+  const getClient = (emp) =>
+    emp.client?.name || emp.agency || "N/A";
 
   const getJoinDate = (emp) => {
     const date =
@@ -299,7 +299,7 @@ const EmployeeList = () => {
   const uniqueAgencies = Array.from(
     new Set(
       employees.map(
-        (emp) => emp.professionalDetails?.agency && emp.professionalDetails?.agency || "N/A"
+        (emp) => emp.client?.name && emp.client?.name || "N/A"
       )
     )
   );
@@ -308,7 +308,7 @@ const EmployeeList = () => {
   const filteredEmployees = employees.filter((emp) => {
     const name = getDisplayName(emp).toLowerCase();
     const location = getLocation(emp)?.toLowerCase();
-    const agency = getAgency(emp)?.toLowerCase();
+    const agency = getClient(emp)?.toLowerCase();
     const status = (emp.status || "").toLowerCase();
 
     const matchesName = name.includes(searchText.toLowerCase());
@@ -460,7 +460,7 @@ const EmployeeList = () => {
                   Designation
                 </th>
                 <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
-                  Agency
+                  Client
                 </th>
                 <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
                   Location
@@ -541,7 +541,7 @@ const EmployeeList = () => {
                         {getDesignation(emp)}
                       </td>
                       <td className="p-4 whitespace-nowrap">
-                        {getAgency(emp)}
+                        {getClient(emp)}
                       </td>
                       <td className="p-4 whitespace-nowrap">
                         {getLocation(emp)}
@@ -567,7 +567,7 @@ const EmployeeList = () => {
                       </td>
                       <td className="p-4 whitespace-nowrap">
                         <span className="inline-block py-1.5 px-3 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                          {emp.status || "N/A"}
+                          {emp.status==="Selected"||emp.status==="Active"?"Active":'Inactive' || "N/A"}
                         </span>
                       </td>
                       <td className="p-4 whitespace-nowrap">

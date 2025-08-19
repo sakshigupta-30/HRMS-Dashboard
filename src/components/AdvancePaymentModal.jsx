@@ -67,6 +67,7 @@ const AdvancedPaymentModal = ({ open, onClose, worker, onSubmit }) => {
                 month: `${year}-${month}`,
                 amount: Number(amount),
                 comments,
+                worker:worker._id
             });
             onClose();
         } catch (err) {

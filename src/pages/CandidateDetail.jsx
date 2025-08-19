@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { candidateAPI } from '../services/api';
+import { AdvancePayAPI, candidateAPI } from '../services/api';
 import { salarySummaryAPI } from '../services/api';
 import axios from 'axios';
 import SalarySlipTemplate from "../components/SalarySlipTemplate";
@@ -55,7 +55,22 @@ const CandidateDetail = () => {
   const templateRef = useRef();
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState(null);
+  const [advancePayments, setAdvancePayments] = useState([]);
 
+  const fetchAdvancePayments = async (employeeCode) => {
+    try {
+      const data = await AdvancePayAPI.getByEmployeeCode(employeeCode);
+      setAdvancePayments(data || []);
+    } catch (err) {
+      setAdvancePayments([]);
+    }
+  };
+
+  useEffect(() => {
+    if (candidate?.code) {
+      fetchAdvancePayments(candidate.code); // fetch advances too
+    }
+  }, [candidate]);
   // ...existing useEffect...
 
   const startEdit = () => {
@@ -190,6 +205,10 @@ const CandidateDetail = () => {
     }, 300);
   };
   const handleStatusUpdate = async (newStatus) => {
+    if (newStatus === "Active") {
+      alert("You can't mark an inactive candidate as active!");
+      return;
+    }
     try {
       await candidateAPI.updateCandidate(id, { ...candidate, status: newStatus });
       setCandidate(prev => ({ ...prev, status: newStatus }));
@@ -246,17 +265,13 @@ const CandidateDetail = () => {
           </div>
           <div className="flex items-center justify-center">
             <select
-              value={candidate.status}
+              value={candidate.status === "Selected" || candidate.status === "Active" ? "Active" : "Inactive"}
               onChange={(e) => handleStatusUpdate(e.target.value)}
               className="p-2 border-2 border-gray-200 rounded-md bg-white text-sm focus:outline-none focus:border-blue-500"
             >
-              <option value="Applied">Applied</option>
-              <option value="Screening">Screening</option>
-              <option value="Interview">Interview</option>
-              <option value="Selected">Selected</option>
-              <option value="Rejected">Rejected</option>
-              <option value="On Hold">On Hold</option>
-              <option value="Draft">Draft</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">In-Active</option>
+
             </select>
           </div>
           <div className="flex items-start gap-x-2 p-2 pb-6">
@@ -639,6 +654,46 @@ const CandidateDetail = () => {
               </div>
             </div>
           )}
+           <div className="bg-white p-6 rounded-xl shadow-lg">
+                  <h3 className="text-xl font-semibold text-slate-800 mb-5 pb-2.5 border-b-2 border-slate-100">
+                    Advanced Payments
+                  </h3>
+                  {advancePayments.length === 0 ? (
+                    <div className="text-gray-500">No advance payments found for this employee.</div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full border border-gray-200">
+                        <thead className="bg-slate-100 text-left">
+                          <tr>
+                            <th className="px-4 py-2 border-b text-sm font-medium text-gray-600">Date</th>
+                            <th className="px-4 py-2 border-b text-sm font-medium text-gray-600">Month</th>
+                            <th className="px-4 py-2 border-b text-sm font-medium text-gray-600">Amount</th>
+                            <th className="px-4 py-2 border-b text-sm font-medium text-gray-600">Remarks</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {advancePayments.map((payment, index) => (
+                            <tr key={index} className="hover:bg-slate-50">
+                              <td className="px-4 py-2 border-b text-sm text-gray-700">
+                                {new Date(payment.createdAt).toLocaleDateString()}
+                              </td>
+                              <td className="px-4 py-2 border-b text-sm text-gray-700">
+                                {payment.month.toLocaleString()}
+                              </td>
+                              <td className="px-4 py-2 border-b text-sm text-gray-700">
+                                ₹{payment.amount.toLocaleString()}
+                              </td>
+                              <td className="px-4 py-2 border-b text-sm text-gray-700">
+                                {payment.comments || "—"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
           <div className="bg-white p-6 rounded-xl shadow-lg">
             <h3 className="text-xl font-semibold text-slate-800 mb-5 pb-2.5 border-b-2 border-slate-100">
               Salary Slips
@@ -674,7 +729,7 @@ const CandidateDetail = () => {
                       );
                     })}
                 </div>
-
+               
                 {/* Month/Year Picker */}
                 <div className="flex gap-2 items-center mb-2">
                   <select
