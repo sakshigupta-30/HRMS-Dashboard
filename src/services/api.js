@@ -137,6 +137,49 @@ export const salarySummaryAPI = {
     return response.data;
   },
 };
+export async function sendSalarySlip({ phone, employeeCode, month, year }) {
+  try {
+    const response = await axios.get("/salary-slip/email", {
+      params: { phone, employeeCode, month, year },
+    });
+
+    return {
+      success: true,
+      message: response.data.message,
+      fileName: response.data.fileName,
+    };
+  } catch (error) {
+    console.log(error)
+    return {
+      success: false,
+      message: error.response?.data?.error || "Failed to send salary slip",
+    };
+  }
+}
+ export const OtherDeductionAPI = {
+  saveOtherDeductions: async ({employeeCode,worker, month, year, amount, comments}) => {
+    // console.log('Saving advance payment:', {employeeCode, month, year, amount, comments});
+    const response = await api.post('/other-deductions', {
+      employeeCode,
+      month,
+      year, amount, comments, 
+      worker
+    });
+    return response.data;
+  },
+
+  getByEmployeeCode: async (employeeCode) => {
+    const response = await api.get('/other-deductions/all', {
+      params: { employeeCode}
+    });
+    return response.data;
+  },
+  getOtherDesuctionsByMonth: async (employeeCode, month) => {
+    const response = await api.get('/other-deductions/month', {
+      params: { employeeCode, month}
+    });
+    return response.data;
+  }}
 export const AdvancePayAPI = {
   saveAdvancePayment: async ({employeeCode,worker, month, year, amount, comments}) => {
     // console.log('Saving advance payment:', {employeeCode, month, year, amount, comments});
@@ -152,6 +195,12 @@ export const AdvancePayAPI = {
   getByEmployeeCode: async (employeeCode) => {
     const response = await api.get('/advance-pay/all', {
       params: { employeeCode}
+    });
+    return response.data;
+  },
+  getAdvancedByMonth: async (employeeCode, month) => {
+    const response = await api.get('/advance-pay/month', {
+      params: { employeeCode, month}
     });
     return response.data;
   },
@@ -173,6 +222,7 @@ export const AdvancePayAPI = {
     });
     return response.data;
   },
+ 
 };
 
 

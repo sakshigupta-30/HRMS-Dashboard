@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AdvancePayAPI, candidateAPI } from "../services/api";
+import { AdvancePayAPI, candidateAPI, OtherDeductionAPI } from "../services/api";
 import * as XLSX from "xlsx";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import AdvancedPaymentModal from "../components/AdvancePaymentModal";
+import axios from "axios";
+import OtherDeductionsModal from "../components/OtherDeductions";
 dayjs.extend(customParseFormat);
 
 const ITEMS_PER_PAGE = 20;
@@ -26,6 +28,7 @@ const EmployeeList = () => {
   const [agencyFilter, setAgencyFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showDeductionModal, setShowDeductionModal] = useState(false);
   const [selectedWorker, setSelectedWorker] = useState(null);
   const showMessage = (msg) => {
     setMessage(msg);
@@ -76,6 +79,16 @@ const EmployeeList = () => {
      alert("Advance payment created successfully!");
    }catch(e){
     console.error("Failed to create advance payment:", e);
+   }
+    // Optionally show a message or refresh data
+  };
+  const handleAddDeduction = async (paymentData) => {
+    // Replace with your actual API call
+   try {
+     await OtherDeductionAPI.saveOtherDeductions(paymentData);
+     alert("Added Other Deductions successfully!");
+   }catch(e){
+    console.error("Failed to Add Other Deductions:", e);
    }
     // Optionally show a message or refresh data
   };
@@ -486,7 +499,7 @@ const EmployeeList = () => {
                 <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
                   Status
                 </th>
-                <th className="p-4 text-left font-semibold text-gray-500 whitespace-nowrap">
+                <th className="p-4 text-center font-semibold text-gray-500 whitespace-nowrap">
                   Actions
                 </th>
               </tr>
@@ -572,6 +585,7 @@ const EmployeeList = () => {
                       </td>
                       <td className="p-4 whitespace-nowrap">
                         <div className="flex gap-2">
+                    {/* <button type='button' className="bg-blue-500 text-white py-1.5 px-2.5 text-xs rounded-md hover:bg-blue-600" onClick={()=>sendOfferLetter(emp.code)}>Send Offer letter</button> */}
                           <button
                             onClick={() => navigate(`/candidate/${emp._id}`)}
                             className="bg-blue-500 text-white py-1.5 px-2.5 text-xs rounded-md hover:bg-blue-600"
@@ -586,6 +600,15 @@ const EmployeeList = () => {
                             className="bg-purple-500 text-white py-1.5 px-2.5 text-xs rounded-md hover:bg-purple-600"
                           >
                             Advanced Payment
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedWorker(emp);
+                              setShowDeductionModal(true);
+                            }}
+                            className="bg-purple-500 text-white py-1.5 px-2.5 text-xs rounded-md hover:bg-purple-600"
+                          >
+                            Other Deduction
                           </button>
                           <button
                             onClick={() => handleDeleteEmployee(emp._id, name)}
@@ -607,6 +630,14 @@ const EmployeeList = () => {
               onClose={() => setShowPaymentModal(false)}
               worker={selectedWorker}
               onSubmit={handleCreatePayment}
+            />
+          )}
+          {showDeductionModal && selectedWorker && (
+            <OtherDeductionsModal
+              open={showDeductionModal}
+              onClose={() => setShowDeductionModal(false)}
+              worker={selectedWorker}
+              onSubmit={handleAddDeduction}
             />
           )}
         </div>

@@ -8,6 +8,7 @@ import {
   FaUserPlus,
   FaSignOutAlt,
   FaFileAlt,
+  FaListAlt,
 } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 
@@ -80,6 +81,16 @@ const Sidebar = () => {
             }
           >
             <FaUserTie /> Employees
+          </NavLink>
+          <NavLink
+            to="/salary-slips"
+            className={({ isActive }) =>
+              `${navLinkBaseClasses} ${
+                isActive ? navLinkActiveClasses : "hover:text-blue-500"
+              }`
+            }
+          >
+            <FaListAlt /> Salary Slips
           </NavLink>
           <NavLink
             to="/offer-letter"

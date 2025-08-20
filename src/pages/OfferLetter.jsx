@@ -203,7 +203,36 @@ const OfferLetter = () => {
       setLoading(false);
     }
   };
+async function downloadOfferLetter(code) {
+    const response = await fetch("http://localhost:5000/generate-offer-letter", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        employeeCode: code || selectedWorker?.code || selectedWorker?._id,
+      }),
+    });
 
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "OfferLetter.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+async function sendOfferLetter(code) {
+    try{
+      const {data} = await axios.post("http://localhost:5000/send-offer-letter", {
+        employeeCode: code || selectedWorker?.code || selectedWorker?._id,
+    });
+
+    alert(data.message);
+    }catch(e){
+      console.log(e)
+      alert(e?.response?.data?.message)
+    }
+  }
   useEffect(() => {
     fetchEmployees();
   }, []);
@@ -362,7 +391,8 @@ const OfferLetter = () => {
                       <td style={{ padding: "16px" }}>
                         {emp.professionalDetails?.designation || "N/A"}
                       </td>
-                      <td style={{ padding: "16px", textAlign: "center" }}>
+                      <td style={{ padding: "16px", textAlign: "center", gap:2 }}>
+                        <div className="flex justify-center gap-2">
                         <button
                           onClick={() => handleGenerateOfferLetter(emp)}
                           style={buttonStyle}
@@ -377,6 +407,21 @@ const OfferLetter = () => {
                         >
                           Generate Offer Letter
                         </button>
+                        <button
+                          onClick={() => sendOfferLetter(emp.code)}
+                          style={buttonStyle}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.background =
+                              "linear-gradient(90deg,#2453cc,#54afff)";
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.background =
+                              "linear-gradient(90deg, #3972fa, #54afff)";
+                          }}
+                        >
+                          Send Offer Letter
+                        </button>
+                        </div>
                       </td>
                     </tr>
                   );

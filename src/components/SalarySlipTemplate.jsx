@@ -3,25 +3,9 @@ import "./SalarySlipTemplate.css";
 import logoImage from "../assets/logo.png";
 import { salarySummaryAPI } from "../services/api";
 
-const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
+const SalarySlipTemplate = forwardRef(({ employee, advanced, otherDeductions }, ref) => {
   // Helper
-  const [advanced, setAdvanced] = React.useState(0);
-  const getAdvancedAmount = async(amount) => {
-    try{
-      const data = await salarySummaryAPI.getSalarySummary(employee["Employee Code"], employee.month);
-      if (data && data.advancedPayment) { 
-        setAdvanced(data.advancedPayment.amount);
-      }
-    }
-    catch(e){
-      console.error("Error fetching advanced amount:", e);
-    }
-  }
-  useEffect(() => {
-    if (employee && employee["Employee Code"]) {
-      getAdvancedAmount(employee["Employee Code"]);
-    }
-  }, [employee]);
+  
   const formatAmount = (val) =>
     isNaN(val) || val === null ? "₹0" : `₹${Math.round(val)}`;
   const monthString = employee.month;
@@ -125,13 +109,13 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
           <div>ESI (0.75%): {formatAmount(employee["Emp ESI"])}</div>
           <div>LWF: {formatAmount(employee["LWF"])}</div>
           <div>
-            Other Deductions: {formatAmount(employee["Other Deductions"] ?? 0)}
+            Other Deductions: {formatAmount(otherDeductions ?? 0)}
           </div>
           <div>
-            Advanced Payment: {formatAmount(advanced ?? 0)}
+            Advanced Paid: {formatAmount(advanced ?? 0)}
           </div>
           <strong>
-            Total Deduction: {formatAmount(Number(employee["Total Deductions"])+Number(advanced))}
+            Total Deduction: {formatAmount(Number(employee["Total Deductions"])+Number(advanced)+Number(otherDeductions))}
           </strong>
         </div>
         {/* Column 4 – Attendance */}
@@ -145,7 +129,7 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
         <div className="main-grid-column">
           <strong>Payment & Signature</strong>
           <div>Mode of Payment: {employee["Payment Mode"] ?? "NEFT"}</div>
-          <div>Net Pay: {formatAmount(employee["Net Pay"])}</div>
+          <div>Net Pay: {formatAmount(Number(employee["Net Pay"]-Number(advanced)-Number(otherDeductions)))}</div>
           <div className="signature-box">Signature of Employee</div>
           <div className="salary-note">This is a computer-generated slip.</div>
         </div>
@@ -159,7 +143,7 @@ const SalarySlipTemplate = forwardRef(({ employee }, ref) => {
           Total Deduction: {formatAmount(Number(employee["Total Deductions"])+Number(advanced))}
         </div>
         <div className="footer-net-salary">
-          Net Salary: {formatAmount(Number(employee["Net Pay"]+Number(advanced)))}
+          Net Salary: {formatAmount(Number(employee["Net Pay"]-Number(advanced)-Number(otherDeductions)))}
         </div>
       </div>
     </div>

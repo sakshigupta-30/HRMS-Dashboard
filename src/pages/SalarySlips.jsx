@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 import SalarySlipTemplate from "../components/SalarySlipTemplate";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { candidateAPI, salarySummaryAPI } from "../services/api";
+import { AdvancePayAPI, candidateAPI, OtherDeductionAPI, salarySummaryAPI, sendSalarySlip } from "../services/api";
 
 const SalarySlips = () => {
   const [summaryData, setSummaryData] = useState([]); // parsed salary summaries for selected month
@@ -80,7 +80,7 @@ const SalarySlips = () => {
     // persist selection so refresh restores it
     localStorage.setItem("salarySlips-selectedMonth", selectedMonth);
     localStorage.setItem("salarySlips-selectedYear", String(selectedYear));
-
+    console.log("Fetching salary summaries for month:", monthKey);
     // After fetching from API
     const fetchSalarySummaries = async () => {
       try {
@@ -326,6 +326,23 @@ const SalarySlips = () => {
       setExcelUploaded(false);
     }
   };
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState("");
+
+  const handleSendSlip = async (employeeSummary) => {
+    setLoading(true);
+    setSelectedEmployee(employeeSummary);
+    console.log(employeeSummary);
+    console.log("Here")
+    const result = await sendSalarySlip({
+      employeeCode: employeeSummary["Employee Code"], // or phone
+      month: selectedMonth,
+      year: selectedYear,
+    });
+    alert(result.message)
+    setStatus(result.message);
+    setLoading(false);
+  };
 
   const handleBulkUpload = (e) => {
     const file = e.target.files[0];
@@ -341,14 +358,35 @@ const SalarySlips = () => {
     };
     reader.readAsArrayBuffer(file);
   };
-
+  const [advanced, setAdvanced] = React.useState(0);
+  const [otherDeductions, setOtherDeductions] = React.useState(0);
+  const getAdvancedAmount = async (code,month) => {
+    try {
+      const data = await AdvancePayAPI.getAdvancedByMonth(code, month);
+        setAdvanced(data.amount||0);
+    }
+    catch (e) {
+      console.error("Error fetching advanced amount:", e);
+    }
+  }
+  const getOtherDeductions = async (code,month) => {
+    try {
+      const data = await OtherDeductionAPI.getOtherDesuctionsByMonth(code, month);
+        setOtherDeductions(data.amount||0);
+    }
+    catch (e) {
+      console.error("Error fetching other deductions amount:", e);
+    }
+  }
   // Use the same approach you had: render hidden SalarySlipTemplate with selectedEmployee ref and then capture with html2canvas
-  const generatePDF = (employeeSummary) => {
+  const generatePDF = async(employeeSummary) => {
     if (!selectedMonth || !selectedYear) {
       alert("Please select month and year before generating PDF");
       return;
     }
-
+    const month = getMonthKey(selectedYear, selectedMonth);
+    await getAdvancedAmount(employeeSummary["Employee Code"],month);
+    await getOtherDeductions(employeeSummary["Employee Code"],month);
     // selectedEmployee is the parsed summary object (not the API employee object)
     setSelectedEmployee(employeeSummary);
 
@@ -401,7 +439,7 @@ const SalarySlips = () => {
             .trim()
             .toLowerCase())
     );
-  }; 
+  };
 
   if (loadingEmployees) return <div>Loading employees...</div>;
 
@@ -513,12 +551,21 @@ const SalarySlips = () => {
                     <td className="p-2">{designation}</td>
                     <td className="p-2">
                       {salaryData ? (
-                        <button
-                          onClick={() => generatePDF(salaryData)}
-                          className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
-                        >
-                          Download Slip
-                        </button>
+                        <div className="flex gap-2 ">
+                          <button
+                            onClick={() => generatePDF(salaryData)}
+                            className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
+                          >
+                            Download Slip
+                          </button>
+                          <button
+                            onClick={() => handleSendSlip(salaryData)}
+                            className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
+                            disabled={loading&& selectedEmployee["Employee Code"] === emp.code }
+                          >
+                            {loading && selectedEmployee["Employee Code"] === emp.code ? "Sending..." : "Send Salary Slip"}
+                          </button>
+                        </div>
                       ) : (
                         <button
                           disabled
@@ -550,7 +597,7 @@ const SalarySlips = () => {
         >
           {selectedEmployee && (
             <div ref={templateRef}>
-              <SalarySlipTemplate employee={selectedEmployee} />
+              <SalarySlipTemplate employee={selectedEmployee} advanced={advanced} otherDeductions={otherDeductions}/>
             </div>
           )}
         </div>
