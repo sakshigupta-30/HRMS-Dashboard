@@ -139,7 +139,7 @@ export const salarySummaryAPI = {
 };
 export async function sendSalarySlip({ phone, employeeCode, month, year }) {
   try {
-    const response = await axios.get("/salary-slip/email", {
+    const response = await api.get("/salary-slip/email", {
       params: { phone, employeeCode, month, year },
     });
 
