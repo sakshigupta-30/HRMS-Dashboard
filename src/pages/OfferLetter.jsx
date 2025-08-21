@@ -204,7 +204,7 @@ const OfferLetter = () => {
     }
   };
 async function downloadOfferLetter(code) {
-    const response = await fetch("http://localhost:5000/generate-offer-letter", {
+    const response = await fetch("https://hrms-backend-tawny.vercel.app/generate-offer-letter", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -223,7 +223,7 @@ async function downloadOfferLetter(code) {
   }
 async function sendOfferLetter(code) {
     try{
-      const {data} = await axios.post("http://localhost:5000/send-offer-letter", {
+      const {data} = await axios.post("hhttps://hrms-backend-tawny.vercel.app/send-offer-letter", {
         employeeCode: code || selectedWorker?.code || selectedWorker?._id,
     });
 
