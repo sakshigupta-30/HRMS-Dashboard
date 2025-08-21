@@ -228,7 +228,7 @@ const OfferLetter = () => {
   }
   async function sendOfferLetter(code) {
     try {
-      const { data } = await axios.post("hhttps://hrms-backend-tawny.vercel.app/send-offer-letter", {
+      const { data } = await axios.post("https://hrms-backend-tawny.vercel.app/send-offer-letter", {
         employeeCode: code || selectedWorker?.code || selectedWorker?._id,
       });
 
