@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { candidateAPI } from "../services/api";
 import html2pdf from "html2pdf.js";
 import logo from "../assets/logo.png"; // ✅ Correct logo import (must be in /assets)
+import axios from "axios";
 
 const COMPANY_NAME = "Raymoon Services Private Limited";
 
@@ -84,8 +85,8 @@ const OfferLetterTemplate = React.forwardRef(({ candidate }, ref) => {
   const ctcInWords = numberToWords(ctc);
   const joiningDate = candidate.professionalDetails?.availableFrom
     ? new Date(candidate.professionalDetails.availableFrom).toLocaleDateString(
-        "en-IN"
-      )
+      "en-IN"
+    )
     : "[joining date]";
   const location = candidate.client?.location || "[work location]";
   const currentDate = new Date().toLocaleDateString("en-IN");
@@ -203,32 +204,36 @@ const OfferLetter = () => {
       setLoading(false);
     }
   };
-async function downloadOfferLetter(code) {
-    const response = await fetch("https://hrms-backend-tawny.vercel.app/generate-offer-letter", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        employeeCode: code,
-      }),
-    });
+  async function downloadOfferLetter(code) {
+    try {
+      const response = await fetch("https://hrms-backend-tawny.vercel.app/generate-offer-letter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          employeeCode: code,
+        }),
+      });
 
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "OfferLetter.pdf";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "OfferLetter.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (e) {
+      console.log(e)
+    }
   }
-async function sendOfferLetter(code) {
-    try{
-      const {data} = await axios.post("hhttps://hrms-backend-tawny.vercel.app/send-offer-letter", {
+  async function sendOfferLetter(code) {
+    try {
+      const { data } = await axios.post("hhttps://hrms-backend-tawny.vercel.app/send-offer-letter", {
         employeeCode: code || selectedWorker?.code || selectedWorker?._id,
-    });
+      });
 
-    alert(data.message);
-    }catch(e){
+      alert(data.message);
+    } catch (e) {
       console.log(e)
       alert(e?.response?.data?.message)
     }
@@ -246,9 +251,8 @@ async function sendOfferLetter(code) {
 
       const opt = {
         margin: 0.3,
-        filename: `Offer_Letter_${
-          candidate.personalDetails?.firstName || "candidate"
-        }.pdf`,
+        filename: `Offer_Letter_${candidate.personalDetails?.firstName || "candidate"
+          }.pdf`,
         image: { type: "jpeg", quality: 1 },
         html2canvas: {
           scale: 2,
@@ -276,9 +280,8 @@ async function sendOfferLetter(code) {
   // Filtering logic
   const filteredEmployees = employees.filter((emp) => {
     const code = emp.code?.toLowerCase() || "";
-    const fullName = `${emp.personalDetails?.firstName || ""} ${
-      emp.personalDetails?.lastName || ""
-    }`.toLowerCase();
+    const fullName = `${emp.personalDetails?.firstName || ""} ${emp.personalDetails?.lastName || ""
+      }`.toLowerCase();
     return (
       code.includes(searchTerm.toLowerCase()) ||
       fullName.includes(searchTerm.toLowerCase())
@@ -367,9 +370,8 @@ async function sendOfferLetter(code) {
               </thead>
               <tbody>
                 {filteredEmployees.map((emp, idx) => {
-                  const fullName = `${emp.personalDetails?.firstName || ""} ${
-                    emp.personalDetails?.lastName || ""
-                  }`.trim();
+                  const fullName = `${emp.personalDetails?.firstName || ""} ${emp.personalDetails?.lastName || ""
+                    }`.trim();
                   return (
                     <tr
                       key={emp._id}
@@ -391,50 +393,50 @@ async function sendOfferLetter(code) {
                       <td style={{ padding: "16px" }}>
                         {emp.professionalDetails?.designation || "N/A"}
                       </td>
-                      <td style={{ padding: "16px", textAlign: "center", gap:2 }}>
+                      <td style={{ padding: "16px", textAlign: "center", gap: 2 }}>
                         <div className="flex justify-center gap-2">
-                        <button
-                          onClick={() => handleGenerateOfferLetter(emp)}
-                          style={buttonStyle}
-                          onMouseOver={(e) => {
-                            e.currentTarget.style.background =
-                              "linear-gradient(90deg,#2453cc,#54afff)";
-                          }}
-                          onMouseOut={(e) => {
-                            e.currentTarget.style.background =
-                              "linear-gradient(90deg, #3972fa, #54afff)";
-                          }}
-                        >
-                          Generate Offer Letter
-                        </button>
-                        <button
-                          onClick={() => downloadOfferLetter(emp.code)}
-                          style={buttonStyle}
-                          onMouseOver={(e) => {
-                            e.currentTarget.style.background =
-                              "linear-gradient(90deg,#2453cc,#54afff)";
-                          }}
-                          onMouseOut={(e) => {
-                            e.currentTarget.style.background =
-                              "linear-gradient(90deg, #3972fa, #54afff)";
-                          }}
-                        >
-                          Swiggy Offer Letter
-                        </button>
-                        <button
-                          onClick={() => sendOfferLetter(emp.code)}
-                          style={buttonStyle}
-                          onMouseOver={(e) => {
-                            e.currentTarget.style.background =
-                              "linear-gradient(90deg,#2453cc,#54afff)";
-                          }}
-                          onMouseOut={(e) => {
-                            e.currentTarget.style.background =
-                              "linear-gradient(90deg, #3972fa, #54afff)";
-                          }}
-                        >
-                          Send Offer Letter
-                        </button>
+                          <button
+                            onClick={() => handleGenerateOfferLetter(emp)}
+                            style={buttonStyle}
+                            onMouseOver={(e) => {
+                              e.currentTarget.style.background =
+                                "linear-gradient(90deg,#2453cc,#54afff)";
+                            }}
+                            onMouseOut={(e) => {
+                              e.currentTarget.style.background =
+                                "linear-gradient(90deg, #3972fa, #54afff)";
+                            }}
+                          >
+                            Generate Offer Letter
+                          </button>
+                          <button
+                            onClick={() => downloadOfferLetter(emp.code)}
+                            style={buttonStyle}
+                            onMouseOver={(e) => {
+                              e.currentTarget.style.background =
+                                "linear-gradient(90deg,#2453cc,#54afff)";
+                            }}
+                            onMouseOut={(e) => {
+                              e.currentTarget.style.background =
+                                "linear-gradient(90deg, #3972fa, #54afff)";
+                            }}
+                          >
+                            Swiggy Offer Letter
+                          </button>
+                          <button
+                            onClick={() => sendOfferLetter(emp.code)}
+                            style={buttonStyle}
+                            onMouseOver={(e) => {
+                              e.currentTarget.style.background =
+                                "linear-gradient(90deg,#2453cc,#54afff)";
+                            }}
+                            onMouseOut={(e) => {
+                              e.currentTarget.style.background =
+                                "linear-gradient(90deg, #3972fa, #54afff)";
+                            }}
+                          >
+                            Send Offer Letter
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -458,27 +460,27 @@ async function sendOfferLetter(code) {
             <OfferLetterTemplate
               ref={templateRef}
               candidate={selectedCandidate}
-  candidateName={`${selectedCandidate.personalDetails?.firstName || ""} ${selectedCandidate.personalDetails?.lastName || ""}`.trim()}
-  position={selectedCandidate.professionalDetails?.designation || ""}
-  dateOfAppointment={
-    selectedCandidate.professionalDetails?.availableFrom
-      ? new Date(selectedCandidate.professionalDetails.availableFrom).toLocaleDateString("en-IN")
-      : ""
-  }
-  initialPosting={selectedCandidate.client?.location || "RAYMOON II Gurugram"}
-  monthlyNTH={selectedCandidate.professionalDetails?.salary?.actualSalary?.toLocaleString("en-IN") || ""}
-  location={selectedCandidate.client?.location || "Raymoon Service Pvt Ltd (Gurgaon)"}
-  dateOfJoining={
-    selectedCandidate.professionalDetails?.availableFrom
-      ? new Date(selectedCandidate.professionalDetails.availableFrom).toLocaleDateString("en-IN")
-      : ""
-  }
-  designation={selectedCandidate.professionalDetails?.designation || ""}
-  terms={{
-    revenueTarget: "7X",
-    incentivePercent: "5%",
-  }}
-/>
+              candidateName={`${selectedCandidate.personalDetails?.firstName || ""} ${selectedCandidate.personalDetails?.lastName || ""}`.trim()}
+              position={selectedCandidate.professionalDetails?.designation || ""}
+              dateOfAppointment={
+                selectedCandidate.professionalDetails?.availableFrom
+                  ? new Date(selectedCandidate.professionalDetails.availableFrom).toLocaleDateString("en-IN")
+                  : ""
+              }
+              initialPosting={selectedCandidate.client?.location || "RAYMOON II Gurugram"}
+              monthlyNTH={selectedCandidate.professionalDetails?.salary?.actualSalary?.toLocaleString("en-IN") || ""}
+              location={selectedCandidate.client?.location || "Raymoon Service Pvt Ltd (Gurgaon)"}
+              dateOfJoining={
+                selectedCandidate.professionalDetails?.availableFrom
+                  ? new Date(selectedCandidate.professionalDetails.availableFrom).toLocaleDateString("en-IN")
+                  : ""
+              }
+              designation={selectedCandidate.professionalDetails?.designation || ""}
+              terms={{
+                revenueTarget: "7X",
+                incentivePercent: "5%",
+              }}
+            />
 
           )}
         </div>
