@@ -208,7 +208,7 @@ async function downloadOfferLetter(code) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        employeeCode: code || selectedWorker?.code || selectedWorker?._id,
+        employeeCode: code,
       }),
     });
 
@@ -406,6 +406,20 @@ async function sendOfferLetter(code) {
                           }}
                         >
                           Generate Offer Letter
+                        </button>
+                        <button
+                          onClick={() => downloadOfferLetter(emp.code)}
+                          style={buttonStyle}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.background =
+                              "linear-gradient(90deg,#2453cc,#54afff)";
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.background =
+                              "linear-gradient(90deg, #3972fa, #54afff)";
+                          }}
+                        >
+                          Swiggy Offer Letter
                         </button>
                         <button
                           onClick={() => sendOfferLetter(emp.code)}

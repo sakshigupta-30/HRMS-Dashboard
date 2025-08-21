@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AdvancePayAPI, candidateAPI } from '../services/api';
+import { AdvancePayAPI, candidateAPI, OtherDeductionAPI } from '../services/api';
 import { salarySummaryAPI } from '../services/api';
 import axios from 'axios';
 import SalarySlipTemplate from "../components/SalarySlipTemplate";
@@ -56,6 +56,7 @@ const CandidateDetail = () => {
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState(null);
   const [advancePayments, setAdvancePayments] = useState([]);
+  const [otherDeductions, setOtherDeductions] = useState([]);
 
   const fetchAdvancePayments = async (employeeCode) => {
     try {
@@ -65,10 +66,19 @@ const CandidateDetail = () => {
       setAdvancePayments([]);
     }
   };
+  const fetchOtherDeductions = async (employeeCode) => {
+    try {
+      const data = await OtherDeductionAPI.getByEmployeeCode(employeeCode);
+      setOtherDeductions(data || []);
+    } catch (err) {
+      setOtherDeductions([]);
+    }
+  };
 
   useEffect(() => {
     if (candidate?.code) {
       fetchAdvancePayments(candidate.code); // fetch advances too
+      fetchOtherDeductions(candidate.code); // fetch advances too
     }
   }, [candidate]);
   // ...existing useEffect...
@@ -673,6 +683,45 @@ const CandidateDetail = () => {
                         </thead>
                         <tbody>
                           {advancePayments.map((payment, index) => (
+                            <tr key={index} className="hover:bg-slate-50">
+                              <td className="px-4 py-2 border-b text-sm text-gray-700">
+                                {new Date(payment.createdAt).toLocaleDateString()}
+                              </td>
+                              <td className="px-4 py-2 border-b text-sm text-gray-700">
+                                {payment.month.toLocaleString()}
+                              </td>
+                              <td className="px-4 py-2 border-b text-sm text-gray-700">
+                                ₹{payment.amount.toLocaleString()}
+                              </td>
+                              <td className="px-4 py-2 border-b text-sm text-gray-700">
+                                {payment.comments || "—"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+           <div className="bg-white p-6 rounded-xl shadow-lg">
+                  <h3 className="text-xl font-semibold text-slate-800 mb-5 pb-2.5 border-b-2 border-slate-100">
+                    Other Deductions
+                  </h3>
+                  {otherDeductions.length === 0 ? (
+                    <div className="text-gray-500">No Other Deductions found for this employee.</div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full border border-gray-200">
+                        <thead className="bg-slate-100 text-left">
+                          <tr>
+                            <th className="px-4 py-2 border-b text-sm font-medium text-gray-600">Date</th>
+                            <th className="px-4 py-2 border-b text-sm font-medium text-gray-600">Month</th>
+                            <th className="px-4 py-2 border-b text-sm font-medium text-gray-600">Amount</th>
+                            <th className="px-4 py-2 border-b text-sm font-medium text-gray-600">Remarks</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {otherDeductions.map((payment, index) => (
                             <tr key={index} className="hover:bg-slate-50">
                               <td className="px-4 py-2 border-b text-sm text-gray-700">
                                 {new Date(payment.createdAt).toLocaleDateString()}
