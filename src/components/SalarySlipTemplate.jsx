@@ -50,7 +50,7 @@ const SalarySlipTemplate = forwardRef(({ employee, advanced, otherDeductions }, 
         <div className="salary-emp-column">
           <div>Emp Code: {employee["Employee Code"]}</div>
           <div>Emp Name: {employee.Name}</div>
-          <div>F/H Name: -</div>
+          <div>F/H Name: ${employee.fatherName}</div>
         </div>
         <div className="salary-emp-column">
           <div>Designation: {employee.Designation}</div>

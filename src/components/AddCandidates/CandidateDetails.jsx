@@ -137,6 +137,19 @@ const CandidateDetails = ({ data, updateData, aadhaarCheck, handleAadhaarCheck }
             disabled={fieldsDisabled}
           />
         </div>
+        {/* Last Name */}
+        <div>
+          <label className={labelClasses}>
+            Father/Husband Name <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            className={inputClasses}
+            value={data.fatherName}
+            onChange={(e) => handleChange('fatherName', e.target.value)}
+            disabled={fieldsDisabled}
+          />
+        </div>
         {/* Phone */}
         <div>
           <label className={labelClasses}>

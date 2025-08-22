@@ -265,6 +265,9 @@ const CandidateDetail = () => {
               <h1 className="text-3xl font-bold text-slate-800">
                 {candidate.personalDetails?.firstName} {candidate.personalDetails?.lastName}
               </h1>
+              {/* <h1 className="text-3xl font-bold text-slate-800">
+                {candidate.personalDetails?.fatherName ? `(F/H: ${candidate.personalDetails?.fatherName})` : ''}
+              </h1> */}
               <p className="text-gray-500 mt-1 mb-2">
                 {candidate.professionalDetails?.designation || 'No title specified'}
               </p>
@@ -335,6 +338,15 @@ const CandidateDetail = () => {
                       placeholder="Last Name"
                     />
                   </DetailItem>
+                  <DetailItem label="F/H Name">
+                    <input
+                      type="text"
+                      className="border p-2 rounded w-full"
+                      value={editData.personalDetails.fatherName}
+                      onChange={e => handleEditChange('personalDetails', 'fatherName', e.target.value)}
+                      placeholder="Father/Husband Name"
+                    />
+                  </DetailItem>
                   <DetailItem label="Email">
                     <input
                       type="email"
@@ -382,6 +394,7 @@ const CandidateDetail = () => {
                 </>
               ) : (<>
                 <DetailItem label="Full Name">{candidate.personalDetails?.firstName} {candidate.personalDetails?.lastName}</DetailItem>
+                <DetailItem label="F/H Name">{candidate.personalDetails?.fatherName}</DetailItem>
                 <DetailItem label="Email">{candidate.personalDetails?.email}</DetailItem>
                 <DetailItem label="Phone">{candidate.personalDetails?.phone}</DetailItem>
                 <DetailItem label="Date of Birth">{formatDate(candidate.personalDetails?.dateOfBirth)}</DetailItem>
